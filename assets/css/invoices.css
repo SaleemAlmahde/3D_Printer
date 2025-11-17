@@ -1,0 +1,1236 @@
+@import url("nav.css");
+
+#invoicesSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+#invoicesSection h2 {
+    text-align: center;
+    font-weight: bolder;
+    font-size: 45px;
+    margin-bottom: 50px;
+}
+
+#invoices {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  gap: 30px;
+}
+
+.invoice-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 30px;
+  background: #f3f5f7;
+  justify-content: center;
+}
+
+.invoice-card {
+  background: linear-gradient(135deg, #07ae91, #049277);
+  color: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 380px;
+  padding: 25px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s, box-shadow 0.3s;
+  font-size: 1rem; /* زيادة الخط الأساسي */
+}
+
+.invoice-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.invoice-header h4 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.invoice-header .invoice-date {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.invoice-info p {
+  margin: 8px 0;
+  font-size: 1rem;
+}
+
+.invoice-products ul {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+}
+
+/* #searchInput{
+      width: 100%;
+    padding: 10px 40px 10px 15px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+} */
+
+.product-item {
+  /* استخدم grid لثبات أعمدة الاسم / اللون / الكمية / السعر */
+  display: grid;
+  grid-template-columns: 1fr 36px 64px 120px; /* name | color | qty | price */
+  gap: 8px;
+  background: rgba(255,255,255,0.2);
+  padding: 8px 12px;
+  margin-bottom: 7px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  /* allow multi-line names to align at the top of the row */
+  align-items: start;
+}
+
+.product-item span {
+  font-size: 1rem;
+  color: #fff;
+}
+
+/* اسم المنتج قد يظهر على سطرين مع ellipsis عند الطول الزائد */
+.product-item .product-name {
+  /* clamp to two lines with ellipsis (WebKit/Blink + fallback behaviors) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* allow normal wrapping and break long words if needed */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.2em; /* keep compact spacing for two lines */
+  max-height: 2.4em; /* prevent a single item from growing too tall */
+}
+
+/* نقطة اللون */
+.product-item .product-color {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* ضبط مواضع الكمية والسعر لسهولة القراءة */
+.product-item .product-qty {
+  text-align: center;
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.product-item .product-price {
+  text-align: left;
+  color: #fff;
+  font-weight: bold;
+}
+
+.invoice-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.invoice-footer .total {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.btn-view {
+  background: #fff;
+  color: #049277;
+  border: none;
+  border-radius: 25px;
+  padding: 7px 15px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.btn-view:hover {
+  background: #e0f7f2;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .invoice-card {
+    width: 100%;
+    padding: 20px;
+    font-size: 0.95rem;
+  }
+}
+
+/* زر إضافة فاتورة */
+.add-invoice-btn {
+  background: #049277;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s;
+  display: block;
+  margin: 25px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-invoice-btn:hover {
+  background: #07ae91;
+}
+
+/* خلفية شفافة خلف المودال */
+#newInvoiceOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  /* start hidden and ignore pointer events until activated */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* when invoice overlay is active (modal open) */
+#newInvoiceOverlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* نافذة المودال */
+#newInvoiceModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #07ae91, #049277);
+  color: white;
+  width: 400px;
+  padding: 25px 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  z-index: 1001;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* عند الإخفاء */
+.hidden {
+  display: none;
+}
+
+/* محتوى المودال */
+.modal-content h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  border-bottom: 2px solid rgba(255,255,255,0.3);
+  padding-bottom: 10px;
+}
+
+/* زر الإغلاق */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.2s, color 0.3s;
+}
+
+.close-btn:hover {
+  transform: scale(1.2);
+  color: #ffcccc;
+}
+
+/* زر الحذف في رأس المودال (يظهر عند التعديل) */
+.delete-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #ff5252;
+  background: none;
+  border: none;
+  padding: 6px;
+  transition: transform 0.15s, color 0.15s;
+}
+.delete-btn:hover {
+  transform: scale(1.15);
+  color: #ff0000;
+}
+
+/* مدخلات النموذج */
+#invoiceForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#invoiceForm input {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+#invoiceForm input:focus {
+  box-shadow: 0 0 0 3px rgba(9,196,164,0.5);
+  transform: translateY(-2px);
+}
+
+/* حقل الملاحظات */
+#invoiceForm textarea {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  resize: vertical;
+}
+
+/* قسم حالة الدفع */
+.payment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payment-section select,
+.payment-section input[type="number"] {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.95);
+  font-size: 1rem;
+}
+
+/* نستخدم .hidden كما في بقية الملفات لإخفاء حقل المبلغ المدفوع */
+.payment-section .hidden {
+  display: none !important;
+}
+
+/* تنسيق خاص لحقل الملاحظات ليكون السطر عنوان على اليمين والحقل يأخذ باقي العرض (RTL) */
+.form-group.notes {
+  display: flex;
+  flex-direction: column; /* label فوق الحقل */
+  gap: 8px;
+}
+.form-group.notes label {
+  text-align: right; /* العنوان في الجهة اليمنى */
+  color: #fff; /* يتناسب مع خلفية المودال الخضراء */
+  font-weight: 600;
+  margin: 0; /* وضع طبيعي فوق الحقل */
+}
+.form-group.notes textarea {
+  width: 100%;
+  min-height: 72px;
+  max-height: 220px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+@media (max-width: 500px) {
+  .form-group.notes { flex-direction: column; }
+  .form-group.notes label { text-align: right; }
+}
+
+/* زر الحفظ */
+.save-invoice-btn {
+  margin-top: 10px;
+  background: #fff;
+  color: #049277;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.save-invoice-btn:hover {
+  background: #e0f7f2;
+  transform: translateY(-2px);
+}
+
+/* متجاوب للشاشات الصغيرة */
+@media (max-width: 500px) {
+  #newInvoiceModal {
+    width: 90%;
+    padding: 20px;
+  }
+}
+
+/* تصحيح عرض المودال والـ overlay عند الإخفاء */
+#newInvoiceModal.hidden,
+#newInvoiceOverlay.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== Overlay للشيت ===== */
+#productSheetOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#productSheetOverlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ===== تأكيد الحذف المخصص ===== */
+#confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 4000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+#confirmOverlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#confirmModal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4100;
+  max-width: 420px;
+  width: 90%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  color: #333;
+  padding: 18px;
+  text-align: center;
+}
+#confirmModal.hidden { display: none; }
+
+.confirm-modal-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+.confirm-modal-content p {
+  margin: 8px 0 14px 0;
+  color: #444;
+}
+.confirm-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.confirm-buttons .btn-cancel,
+.confirm-buttons .btn-confirm {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+.confirm-buttons .btn-cancel {
+  background: #eee;
+  color: #333;
+}
+.confirm-buttons .btn-confirm {
+  background: #d9534f; /* red */
+  color: #fff;
+}
+.confirm-buttons .btn-confirm:hover { background: #c9302c; }
+
+/* ===== Bottom Sheet ===== */
+.bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -100%;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -6px 15px rgba(0, 0, 0, 0.3);
+  transition: bottom 0.3s ease;
+  z-index: 3000;
+  padding: 20px;
+  max-height: 65vh;
+  /* ensure sheet opens with a useful visible height even when content is short */
+  min-height: 48vh;
+  overflow-y: auto;
+}
+.bottom-sheet.active {
+  bottom: 0;
+}
+
+/* ===== محتوى الشيت ===== */
+.bottom-sheet-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.bottom-sheet h3 {
+  margin: 0;
+  text-align: center;
+  font-size: 20px;
+  color: #333;
+}
+
+/* ===== custom select ===== */
+.custom-select {
+  position: relative;
+}
+.custom-select input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.custom-select input:focus {
+  border-color: #4caf50;
+}
+
+/* ===== القائمة المنسدلة ===== */
+.dropdown-list {
+  position: absolute;
+  top: 105%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+}
+.dropdown-list.hidden {
+  display: none;
+}
+
+/* ===== عناصر القائمة ===== */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dropdown-item:hover {
+  background: #f3f3f3;
+}
+.dropdown-item img {
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+/* ===== الكمية ===== */
+#productQuantity {
+  width: 100%;
+  padding: 10px 0px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* ===== الأزرار ===== */
+.bottom-sheet-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.bottom-sheet-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.bottom-sheet-buttons button:first-child {
+  background: #ddd;
+  color: #333;
+  margin-right: 10px;
+}
+.bottom-sheet-buttons button:last-child {
+  background: #4caf50;
+  color: white;
+}
+.bottom-sheet-buttons button:last-child:hover {
+  background: #43a047;
+}
+
+/* ===== تصميمات جديدة للألوان والمنتجات ===== */
+
+/* شبكة الألوان */
+.color-selector {
+  margin: 15px 0;
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.color-selector h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 10px;
+  padding: 5px;
+}
+
+.color-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.color-option.selected {
+  border: 3px solid #4CAF50;
+  transform: scale(1.1);
+}
+
+/* نقاط الألوان في قائمة المنتجات */
+.color-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.color-dot.more-colors {
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+}
+
+/* تحسين مظهر المنتج المحدد */
+.selected-product {
+  background: #f8f8f8;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.selected-product:hover {
+  transform: translateX(-5px);
+}
+
+.selected-product .product-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.selected-product .product-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.selected-product .product-qty {
+  color: #666;
+  background: #eee;
+  padding: 3px 8px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+.selected-product .product-price {
+  color: #2196F3;
+  font-weight: bold;
+}
+
+.selected-product .selected-color {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.selected-product .remove-product {
+  background: none;
+  border: none;
+  color: #ff5252;
+  cursor: pointer;
+  padding: 5px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.selected-product .remove-product:hover {
+  opacity: 1;
+}
+
+/* تحسين قائمة المنتجات في الشيت */
+.dropdown-item {
+  border-bottom: 1px solid #eee;
+  padding: 15px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item .product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.dropdown-item .product-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.dropdown-item .product-price {
+  color: #2196F3;
+  font-size: 0.9em;
+}
+
+.dropdown-item .product-desc {
+  color: #666;
+  font-size: 0.85em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* تحسين مظهر الإجماليات */
+.form-group.totals {
+  background: #f8f8f8;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.total-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.total-item label {
+  color: #666;
+}
+
+.total-item span {
+  font-weight: bold;
+  color: #2196F3;
+}
+
+/* تحسينات التفاعلية */
+.custom-select input {
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.custom-select input:focus {
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+/* تحسين مظهر حقل الكمية */
+#productQuantity {
+  font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#productQuantity:focus {
+  border-color: #2196F3;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+/* رسائل التنبيه */
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* تحسين تصميم حقول الاختيار */
+.form-group select,
+#openProductsSheet {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: left 1rem center;
+  background-size: 1em;
+  padding-left: 3rem;
+}
+
+.form-group select:hover,
+#openProductsSheet:hover {
+  background-color: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-group select:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+/* زر إضافة منتج */
+#openProductsSheet {
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+  border: none;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#openProductsSheet:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+#openProductsSheet:before {
+  content: '+';
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+/* تحسين عرض المنتجات المختارة */
+.product-select-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.product-select-header label {
+  font-size: 1.1rem;
+  color: white;
+  font-weight: 500;
+}
+
+/* تحسين تأثير اختيار اللون */
+.color-option {
+  position: relative;
+  overflow: hidden;
+}
+
+.color-option:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.color-option:active:after {
+  width: 120%;
+  height: 120%;
+  opacity: 0;
+}
+
+.color-option.selected {
+  transform: scale(1.25);
+  /* borderColor will be set inline by JS to match the chosen color; fallback to green */
+  border: 3px solid #4CAF50;
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.25);
+}
+
+.color-option.selected:before {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 1.2em;
+  z-index: 1;
+}
+
+/* شريط الحقول داخل مودال الشحن: نجعلها مثل بقية الحقول في النموذج (مسافات متساوية).
+   نطبّق خاصية العرض فقط عندما الحاوية ليست مخفية (.hidden) حتى لا تتغلب تحديدات الـ id على .hidden */
+#shippingFields:not(.hidden),
+#localFields:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* نفس المسافات مثل باقي الحقول في النموذج */
+}
+
+#shippingFields input,
+#localFields input {
+  margin: 0; /* إزالة أي هوامش افتراضية */
+}
+
+/* منع تمدد مودال الإضافة عند إضافة منتجات كثيرة: تمنع الصفحة من أن تصبح طويلة وتضيف سكرول داخلي */
+#newInvoiceModal {
+  max-height: 90vh; /* لا يتجاوز 90% من ارتفاع الشاشة */
+  overflow-y: auto; /* سكرول داخلي عند الحاجة */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* قائمة المنتجات المختارة داخل المودال سيكون لها سكرول مستقل */
+#selectedProductsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px; /* يمكن تعديل هذا الرقم حسب التصميم */
+  overflow-y: auto;
+  padding-right: 6px; /* مساحة للـ scrollbar في RTL */
+}
+
+/* تحسين ظهور السكربار بشكل بسيط (اختياري) */
+#selectedProductsList::-webkit-scrollbar {
+  width: 8px;
+}
+#selectedProductsList::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 6px;
+}
+
+.hidden-payment{
+  display: none !important;
+}
+
+.btn-view {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.btn-view.visible-btn {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.invoice-products {
+  transition: all 0.3s ease;
+  max-height: 500px;
+  overflow: hidden;
+}
+.invoice-products.hidden {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-toggle-products {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 6px;
+  transition: transform 0.2s ease;
+  color: white;
+}
+.btn-toggle-products:hover {
+  transform: scale(1.2);
+}
+
+.invoice-products-toggle{
+  display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.invoice-hr{
+      width: 280px;
+    height: 2px;
+    color: white;
+    background-color: white;
+    border: none;
+}
+
+.invoice-logo{
+  width: 150px;
+  height: 150px;
+}
+
+.invoice-contacts-logo{
+  display: flex;
+  justify-content: space-between;
+}
+
+/* #invoice-code-tools{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#invoice-code-tools button{
+      background: orange;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.3s;
+    display: block;
+    margin: 25px auto;
+}
+
+#invoice-code-tools input{
+    width: 380px;
+    padding: 12px;
+    border: 2px solid black;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: black;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    margin-top: 15px;
+  background: #07ae91;
+  cursor: text;
+}
+
+.hidden-code-input{
+  display: none !important;
+} */
+
+/* الحاوية الرئيسية */
+#invoice-code-tools {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+/* زر فتح حقل الكود */
+.add-invoice-btn-code {
+  background: #ff6f3c; /* لون مميز عن زر إضافة فاتورة يدوياً */
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.add-invoice-btn-code:hover {
+  background: #ff854f;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* حقل إدخال الكود */
+#invoiceCodeInputModal {
+  margin-top: 15px;
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: #f0f3f5; /* خلفية فاتحة مريحة */
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+/* عند عرض الحقل */
+#invoiceCodeInputModal.show {
+  opacity: 1;
+  max-height: 200px; /* أو أي ارتفاع مناسب */
+}
+
+/* حقل الإدخال */
+#invoiceCodeInputModal input {
+  width: 350px;
+  padding: 12px;
+  border: 2px solid #ff6f3c; /* إطار بلون الزر */
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-size: 1rem;
+  outline: none;
+  margin-bottom: 10px;
+}
+
+/* زر الاستيراد داخل الحقل */
+#invoiceCodeInputModal button {
+  background: #ff6f3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  align-self: center;
+}
+
+#invoiceCodeInputModal button:hover {
+  background: #ff854f;
+  transform: scale(1.05);
+}
+
+.search-container input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.search-container i {
+    position: absolute;
+    right: 15px;
+    font-size: 18px;
+    color: #049277;
+}
+
+.search-container {
+    position: relative;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.search-container i {
+    position: absolute;
+    right: 15px;
+    font-size: 18px;
+    color: #049277;
+}
+
+#scrollTopBtn.show {
+    display: flex;
+}
+
+#scrollTopBtn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 1000;
+    background-color: #049277;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s 
+ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}

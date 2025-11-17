@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Printer - الفواتير</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.min.css" />
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/normalize.css">
+    <link rel="stylesheet" href="assets/css/invoices.css">
+    
+    <!-- JavaScript Files -->
+    <script src="assets/java/data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="assets/java/invoiceCodec.js"></script>
+    <script src="assets/java/script2.js"></script>
+</head>
+<body>
+    <!-- Nav Section -->
+    <nav>
+        <div class="nav-logo">
+            <img src="assets/imgs/logo.jpg" alt="logo">
+            <h2>3D Printer</h2>
+        </div>
+
+        <div class="container">
+            <ul class="nav-menu">
+                <a href="index.html"><li>الصفحة الرئيسية</li></a>
+                <a href="invoices.html"><li>المنتجات</li></a>
+                <a href="cart.html"><li>حول</li></a>
+                <a href="stores.html"><li>تواصل معي</li></a>
+            </ul>
+        </div>
+    </nav>    
+
+    <section id="invoicesSection">
+    <div class="container">
+        <h2>الفواتير</h2>
+        <div class="search-container">
+    <input type="text" id="searchInput" placeholder="ابحث عن منتج..." onkeyup="searchInvoices()">
+    <i class="fa fa-search"></i>
+</div>
+        <div id="invoices"></div>
+    </div>
+</section>
+
+<!-- زر إضافة فاتورة -->
+<button id="addInvoiceBtn" class="add-invoice-btn" onclick="openNewInvoiceModel()">إضافة فاتورة</button>
+
+<!-- زر اضافة فاتورة عبر الكود -->
+<div id="invoice-code-tools">
+
+  <button class="add-invoice-btn-code" onclick="toggleInvoiceCodeInput()">اضف فاتورة عبر الكود</button>
+  <div id="invoiceCodeInputModal" class="hidden-code-input">
+  <input id="pasteInvoiceCodeInput" placeholder="ألصق كود الفاتورة هنا"></input>
+    <button onclick="onPasteCode()">استيراد الكود (يفتح المودال أو يحفظ)</button>
+</div>
+</div>
+
+<!-- Modal -->
+    <div id="newInvoiceOverlay" class="hidden" onclick="closeModal()"></div>
+
+    <div id="newInvoiceModal" class="hidden">
+        <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <button id="deleteInvoiceBtn" class="delete-btn hidden" type="button" onclick="showDeleteConfirm()">
+          <i class="fa fa-trash"></i>
+        </button>
+    <h2>إضافة فاتورة جديدة</h2>
+    <form id="invoiceForm">
+      <input type="text" id="buyerName" placeholder="اسم المشتري" required>
+      <input type="text" id="buyerPhone" placeholder="رقم الهاتف" required>
+      <input type="text" id="buyerProvince" placeholder="المحافظة" required>
+  <!-- حقل تاريخ التسليم (اختياري) -->
+  <input type="date" id="deliveryDate" placeholder="تاريخ التسليم">
+      
+      <!-- طريقة التسليم -->
+      <div class="form-group">
+        <label>طريقة التسليم:</label>
+        <select id="deliveryType" onchange="toggleShippingFields()" required>
+          <option value="">-- اختر طريقة التسليم --</option>
+          <option value="local">ضمن حمص</option>
+          <option value="shipping">شحن</option>
+        </select>
+      </div>
+
+      <!-- حقول الشحن (تظهر عند اختيار الشحن) -->
+      <div id="shippingFields" class="hidden">
+        <!-- حقلان عند اختيار الشحن: شركة الشحن + معلومات الشحن -->
+        <input type="text" id="shippingCompany" placeholder="شركة الشحن">
+        <input type="text" id="shippingInfo" placeholder="معلومات الشحن">
+      </div>
+
+      <!-- حقل الموقع (يظهر عند اختيار ضمن حمص) -->
+      <div id="localFields" class="hidden">
+        <input type="text" id="localShippingInfo" placeholder="الموقع ضمن حمص">
+      </div>
+
+      <!-- 🧾 حقل اختيار المنتجات -->
+      <div class="form-group product-select">
+        <div class="product-select-header">
+          <label>المنتجات:</label>
+          <button type="button" id="openProductsSheet" onclick="openAddProductSheet()">إضافة منتج +</button>
+        </div>
+
+        <!-- قائمة المنتجات المختارة -->
+        <div id="selectedProductsList"></div>
+      </div>
+
+        <!-- حالة الدفع والمبلغ المدفوع (اختياري) -->
+        <div class="form-group payment-section">
+          <label>حالة الدفع:</label>
+          <select id="paymentStatus" onchange="togglePaymentFields()">
+            <option value="unpaid">لم يدفع</option>
+            <option value="paid-full">دُفع كامل</option>
+            <option value="paid-partial">دُفع جزئي</option>
+          </select>
+          <input type="number" id="paymentAmountPaid" class="hidden" placeholder="أدخل المبلغ المدفوع (ل.س)" min="0">
+        </div>
+
+        <!-- حقل الملاحظات (نص حر، قد يكون فارغًا) - يظهر بجانب العنوان ليتناسب مع بقية الحقول -->
+        <div class="form-group notes">
+          <label>ملاحظات (اختياري):</label>
+          <textarea id="invoiceNotes" placeholder="أي ملاحظات إضافية تظهر في الفاتورة" rows="3"></textarea>
+        </div>
+
+      <!-- إظهار الإجمالي بشكل آلي -->
+      <div class="form-group totals">
+        <div class="total-item">
+          <label>الإجمالي (ل.س):</label>
+          <span id="totalSYP">0</span>
+        </div>
+        <div class="total-item">
+          <label>الإجمالي ($):</label>
+          <span id="totalUSD">0</span>
+        </div>
+      </div>
+
+      <button type="button" class="save-invoice-btn" onclick="saveInvoice()">حفظ الفاتورة</button>
+    </form>
+  </div>
+    </div>
+
+<!-- Overlay للشيت -->
+<div id="productSheetOverlay" class="hidden" onclick="closeAddProductSheet()"></div>
+
+<!-- تأكيد الحذف المخصص -->
+<div id="confirmOverlay" class="hidden" onclick="cancelDelete()"></div>
+<div id="confirmModal" class="hidden">
+  <div class="confirm-modal-content">
+    <h3>تأكيد الحذف</h3>
+    <p id="confirmModalMessage">هل أنت متأكد من حذف هذه الفاتورة؟</p>
+    <div class="confirm-buttons">
+      <button type="button" class="btn-cancel" onclick="cancelDelete()">إلغاء</button>
+      <button type="button" class="btn-confirm" onclick="confirmDelete()">تأكيد الحذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Sheet -->
+<div class="bottom-sheet" id="addProductSheet">
+  <div class="bottom-sheet-content">
+    <h3>إضافة منتج</h3>
+
+    <!-- 🔹 حقل البحث والاختيار في نفس المربع -->
+    <div class="custom-select">
+      <input
+        type="text"
+        id="productInput"
+        placeholder="ابحث أو اختر منتج..."
+        readonly
+        onclick="toggleProductList()"
+      >
+      <div class="dropdown-list hidden" id="productDropdown">
+        <!-- سيتم تعبئة المنتجات من localStorage لاحقًا -->
+        <div class="dropdown-item">
+          <img src="https://via.placeholder.com/40" alt="صورة">
+          <span>Printer 3D - 1,200,000 ل.س</span>
+        </div>
+        <div class="dropdown-item">
+          <img src="https://via.placeholder.com/40" alt="صورة">
+          <span>Filament PLA - 300,000 ل.س</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- الكمية -->
+    <input type="number" id="productQuantity" placeholder="الكمية" min="1">
+
+    <!-- الأزرار -->
+    <div class="bottom-sheet-buttons">
+      <button type="button" onclick="closeAddProductSheet()">إلغاء</button>
+      <button type="button" onclick="confirmAddProduct()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+   <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
+
+    <script src="assets/java/script2.js"></script>
+
+</body>
+</html>

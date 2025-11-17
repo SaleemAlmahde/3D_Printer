@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Printer - نقاط البيع</title>
+    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.min.css" />
+    
+    <link rel="stylesheet" href="assets/css/normalize.css">
+    <link rel="stylesheet" href="assets/css/stores.css"> 
+    
+    <script src="assets/java/data.js"></script>
+    <script src="assets/java/script4.js"></script>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">
+            <img src="assets/imgs/logo.jpg" alt="logo">
+            <h2>3D Printer</h2>
+        </div>
+
+        <div class="container">
+            <ul class="nav-menu">
+                <a href="index.html"><li>الصفحة الرئيسية</li></a>
+                <a href="invoices.html"><li>المنتجات</li></a>
+                <a href="cart.html"><li>حول</li></a>
+                <a href="stores.html"><li>تواصل معي</li></a>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="storesSection">
+        <div class="container">
+            <div class="top-stores">
+            <h2>نقاط البيع والمتاجر</h2>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" id="storeSearchInput" placeholder="ابحث عن اسم متجر أو رقم هاتف..." onkeyup="searchStores()">
+                <i class="fa fa-search"></i>
+            </div>
+
+            <div id="storesContainer">
+                </div>
+        </div>
+    </section>
+
+    <button id="addStoreBtn" class="add-invoice-btn" onclick="openStoreModal()">إضافة متجر جديد</button>
+
+    <div id="newStoreOverlay" class="hidden" onclick="closeStoreModal()"></div>
+
+    <div id="newStoreModal" class="hidden-store">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeStoreModal()">&times;</span>
+            <button id="deleteStoreBtn" class="delete-btn hidden" type="button" onclick="showStoreDeleteConfirm()">
+                <i class="fa fa-trash"></i>
+            </button>
+            <h2>إضافة / تعديل متجر</h2>
+            <form id="storeForm" data-editing-id="">
+                <input type="hidden" id="storeIdInput" name="storeId">
+
+                <input type="text" id="storeName" placeholder="اسم صاحب المحل / المتجر" required>
+                <input type="text" id="storePhone" placeholder="رقم هاتف المتجر" required>
+                <input type="text" id="storeLocation" placeholder="موقع المحل / المحافظة" required>
+
+                <button type="button" class="save-invoice-btn" onclick="saveStore()">حفظ المتجر</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="storeConfirmOverlay" class="hidden" onclick="cancelStoreDelete()"></div>
+    <div id="storeConfirmModal" class="hidden">
+      <div class="confirm-modal-content">
+        <h3>تأكيد حذف المتجر</h3>
+        <p id="storeConfirmModalMessage">هل أنت متأكد من حذف هذا المتجر؟ (لن يتم حذف فواتيره المرتبطة)</p>
+        <div class="confirm-buttons">
+          <button type="button" class="btn-cancel" onclick="cancelStoreDelete()">إلغاء</button>
+          <button type="button" class="btn-confirm" onclick="confirmStoreDelete()">تأكيد الحذف</button>
+        </div>
+      </div>
+    </div>
+
+    <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
+
+</body>
+</html>

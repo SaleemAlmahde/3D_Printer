@@ -1,0 +1,237 @@
+@import url("nav.css");
+
+#storesSection{
+        display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.top-stores h2 {
+    text-align: center;
+    font-weight: bolder;
+    font-size: 45px;
+}
+
+.top-stores {
+    margin-bottom: 50px;
+}
+
+.search-container {
+    position: relative;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+#storeSearchInput {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.search-container i {
+    position: absolute;
+    right: 15px;
+    font-size: 18px;
+    color: #049277;
+}
+
+.hidden-store {
+    display: none;
+}
+
+#scrollTopBtn.show {
+    display: flex;
+}
+
+#scrollTopBtn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 1000;
+    background-color: rgb(4, 146, 119);
+    color: white;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 10px;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+/* stores.css - النسخة المعدلة لضمان التفاف النص وإخفاء الإجراءات */
+
+/* ------------------------------------------------ */
+/* الأنماط الهيكلية الأساسية (مُعاد استخدامها) */
+/* ------------------------------------------------ */
+/* (هنا توضع الأنماط الخاصة بـ body, container, nav, إلخ...) */
+
+.hidden {
+    display: none !important;
+}
+
+/* ------------------------------------------------ */
+/* أنماط حاوية المتاجر (Grid Container) */
+/* ------------------------------------------------ */
+#storesContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* أفضل للاستجابة */
+    margin-top: 20px;
+    gap: 20px;
+}
+
+/* ------------------------------------------------ */
+/* أنماط كارت المتجر (Store Card) */
+/* ------------------------------------------------ */
+.store-card {
+        width: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--main-color);
+    border-radius: 25px;
+    color: white;
+    
+    position: relative; /* ضروري للأوفرلاي */
+    overflow: hidden; /* ضروري للأوفرلاي */
+    cursor: pointer;
+}
+
+.store-card h3 {
+    margin-bottom: 10px;
+}
+
+/* ------------------------------------------------ */
+/* 🌟 التعديل الحاسم لضمان التفاف النص 🌟 */
+/* ------------------------------------------------ */
+.bottom-store-card {
+    /* تم تغيير هذا لضمان أن العناصر الداخلية يمكن أن تأخذ 100% من العرض */
+    display: block; 
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box; /* لضمان أن padding لا يضيف عرضاً زائداً */
+}
+
+.store-details {
+    /* يجب أن يكون العرض 100% داخل العنصر الأبوي الجديد */
+    width: 100%;
+}
+
+.store-details p {
+    margin: 6px 0;
+    font-size: 16px;
+    line-height: 1.4;
+    
+    /* 💡 الخصائص التي تضمن التفاف النص */
+    white-space: normal;
+    overflow-wrap: break-word; /* البديل الأحدث لـ word-wrap */
+    word-break: break-word; /* لضمان الالتفاف في جميع المتصفحات */
+        padding: 5px;
+            border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.store-details i {
+        margin-left: 5px;
+}
+
+/* ------------------------------------------------ */
+/* أنماط المديونية (Debt Info) */
+/* ------------------------------------------------ */
+.store-debt-info {
+    margin-top: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.debt-due {
+    color: #ffcccc; /* لون فاتح للأحمر داخل الكارد الداكن */
+}
+
+.debt-clear {
+    color: #ccffcc; /* لون فاتح للأخضر داخل الكارد الداكن */
+}
+
+
+/* ------------------------------------------------ */
+/* أنماط أوفرلاي الإجراءات (Actions Overlay) */
+/* ------------------------------------------------ */
+.store-actions-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95); 
+    border-radius: 25px;
+    z-index: 10; 
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.store-actions-overlay.hidden {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none; 
+}
+
+.close-overlay-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    font-weight: 300;
+    line-height: 1;
+}
+
+/* أنماط أزرار الإجراءات داخل الأوفرلاي */
+.store-actions-overlay .action-btn {
+    width: 85%;
+    padding: 12px 25px;
+    margin: 0; /* تم إزالة الهامش من الأزرار الأصلية */
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: background-color 0.3s ease;
+}
+
+/* ------------------------------------------------ */
+/* تنظيف الأنماط غير المستخدمة */
+/* ------------------------------------------------ */
+
+/* الأنماط التالية لم تعد ضرورية لوجود store-actions-overlay */
+.store-actions, .store-actions button {
+    /* قم بإزالة هذه الأنماط أو التأكد من أنها لا تؤثر على الأوفرلاي */
+    display: none; /* أو قم بإزالتها تماماً */
+}
