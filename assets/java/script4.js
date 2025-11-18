@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     storeForm = document.getElementById('storeForm');
     deleteStoreBtn = document.getElementById('deleteStoreBtn');
 
+    storeOverlay.addEventListener('click', closeStoreModal);
+
     // 2. التحقق وبدء عرض المتاجر
     if (document.getElementById('storesContainer')) {
         renderStores();
@@ -177,7 +179,7 @@ function renderStores() {
             </div>
             
             <div class="store-actions-overlay hidden" data-store-id="${store.id}" 
-                 onclick="event.stopPropagation()">
+                 onclick="event.stopPropagation(); hideStoreActions(${store.id})">
                 
                 <button class="close-overlay-btn" onclick="hideStoreActions(${store.id})">&times;</button>
 
