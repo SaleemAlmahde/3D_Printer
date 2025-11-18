@@ -464,7 +464,7 @@ function showSlides(sliderContainer, index) {
     }
     
     slider.currentIndex = currentIndex;
-    slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+    slider.style.transform = `translateX(${currentIndex * 33.333}%)`;
     updateDots(sliderContainer);
 }
 
