@@ -254,11 +254,19 @@ function resetForm() {
     if (notesEl) notesEl.value = '';
 }
 
-function openNewInvoiceModel() {
+/**
+ * فتح مودال الفاتورة لإضافة أو تعديل، مع دعم الاختيار المسبق للمتجر.
+ * @param {number | null} targetStoreId - معرّف المتجر الذي يجب اختياره مسبقًا عند الإضافة.
+ */
+
+function openNewInvoiceModel(targetStoreId=null) {
     // إعادة تعيين النموذج فقط إذا كنا نضيف فاتورة جديدة
     if (!document.getElementById("invoiceForm").dataset.editingId) {
         resetForm();
     }
+
+    // 2. 💡 استدعاء populateStoreSelect هنا
+    populateStoreSelect(targetStoreId);
 
     // فتح المودال
   const modal = document.getElementById("newInvoiceModal");
@@ -407,6 +415,13 @@ function editInvoice(id) {
     const notesEl = document.getElementById('invoiceNotes');
     if (notesEl) notesEl.value = invoice.notes || '';
 
+    // 💡 الجديد: تعبئة قائمة المتجر يدوياً (للتأكد من الاختيار الصحيح عند الفتح)
+    const storeSelectEl = document.getElementById("linkedStores");
+    if (storeSelectEl) {
+        // إذا كان هناك posId في الفاتورة، نقوم بتعيينه كقيمة للـ Select
+        storeSelectEl.value = invoice.posId ? String(invoice.posId) : ""; 
+    }
+
     // تخزين المعرف داخل الفورم
     document.getElementById("invoiceForm").dataset.editingId = id;
 
@@ -415,7 +430,7 @@ function editInvoice(id) {
   if (delBtn) delBtn.classList.remove('hidden');
 
     // فتح المودال
-    openNewInvoiceModel();
+    openNewInvoiceModel(invoice.posId || null);
 }
 
 // تحديث: استخدام حوار تأكيد مخصص بدلاً من confirm/alert الافتراضي
@@ -491,6 +506,14 @@ function saveInvoice() {
   const buyerPhone = document.getElementById("buyerPhone").value;
   const buyerProvince = document.getElementById("buyerProvince").value;
   const deliveryType = document.getElementById("deliveryType").value;
+
+  // 💡 التعديل #1: قراءة ID المتجر المختار من الـ Select
+    const linkedStoresSelect = document.getElementById('linkedStores');
+    let posId = null; // القيمة الافتراضية تكون null (بدون متجر)
+    // إذا تم اختيار قيمة (وهي store ID)، نحولها لرقم
+    if (linkedStoresSelect && linkedStoresSelect.value !== "") {
+        posId = parseInt(linkedStoresSelect.value);
+    }
   
   // معلومات الشحن: شركة الشحن + معلومات الشحن
   let shippingCompany = '';
@@ -592,7 +615,6 @@ function saveInvoice() {
         phone: buyerPhone,
         city: buyerProvince,
         shipping: deliveryType === "shipping",
-        // نحتفظ الآن بحقلَي شركة الشحن ومعلومات الشحن
         shippingCompany,
         shippingInfo,
         shippingDate,
@@ -600,7 +622,8 @@ function saveInvoice() {
         totalSYP:safeTotalSYP,
         totalUSD:safeTotalUSD,
         payment: paymentObj,
-        notes
+        notes,
+        posId: posId
       };
     }
   } else {
@@ -633,7 +656,8 @@ function saveInvoice() {
       totalSYP:safeTotalSYP,
       totalUSD:safeTotalUSD,
       payment: paymentObjNew,
-      notes: notesNew
+      notes: notesNew,
+      posId: posId
     };
 
   invoices.push(newInvoice);
@@ -1173,3 +1197,164 @@ window.addEventListener("scroll", () => {
         scrollBtn.classList.add("hide");
         setTimeout(() => scrollBtn.classList.remove("hide"), 300);
     }})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// دالة جلب المتاجر (تستخدم في صفحة الفواتير)
+function getStores() {
+    try {
+        const stores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
+        // يمكنك إبقاء هذا السطر للتصحيح إذا أردت:
+        // console.log('🔍 جلب المتاجر من localStorage:', stores);
+        return stores;
+    } catch (error) {
+        console.error('❌ خطأ في جلب المتاجر:', error);
+        return [];
+    }
+}
+
+
+    // ----------------------------------------------------------------------
+// A. قراءة معاملات URL وتنفيذ الإجراء
+// ----------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (أي تهيئة سابقة لديك لصفحة الفواتير) ...
+    
+    // 💡 نقوم بفحص رابط URL لتحديد ما إذا كنا قادمين من صفحة المتاجر
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const storeId = urlParams.get('storeId');
+
+    // 1. تنفيذ إجراء 'ADD' (إضافة فاتورة جديدة لمتجر محدد)
+    if (action === 'add' && storeId) {
+        // نستخدم parseInt لتحويل القيمة إلى رقم لضمان التوافق
+        const targetStoreId = parseInt(storeId);
+        
+        // يجب أن تكون دالة openInvoiceModal() موجودة في هذا الملف
+        // (سنعدلها لتستقبل storeId في الخطوة التالية)
+        openNewInvoiceModel(targetStoreId);
+    }
+    
+    // 2. تنفيذ إجراء 'FILTER' (عرض فواتير متجر محدد)
+    else if (action === 'filter' && storeId) {
+        const targetStoreId = parseInt(storeId);
+        
+        // يجب أن تكون دالة renderInvoices() موجودة في هذا الملف
+        // (سنعدلها لتستقبل storeId في الخطوة التالية)
+        renderInvoices(targetStoreId); 
+        
+        // 💡 إظهار رسالة تفيد بأن القائمة مفلترة
+        alert(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`);
+    }
+    
+    // إذا لم يكن هناك معامل في الرابط، نعرض الفواتير بشكل طبيعي
+    else {
+        renderInvoices(); 
+    }
+});
+
+/**
+ * يقوم بملء قائمة الـ Select الخاصة بالمتاجر ببيانات المتاجر المخزنة.
+ * @param {number | null} preselectStoreId - معرّف المتجر الذي يجب اختياره تلقائياً.
+ */
+function populateStoreSelect(preselectStoreId = null) {
+    const storeSelect = document.getElementById('linkedStores');
+    if (!storeSelect) return;
+
+    // 💡 الجديد: تحديد ما إذا كنا في وضع التعديل بناءً على وجود editingId في النموذج
+    const form = document.getElementById("invoiceForm");
+    const isEditing = !!form.dataset.editingId; 
+
+    // 1. استرجاع المتاجر
+    const stores = getStores(); 
+
+    // 2. مسح الخيارات الحالية (عدا الخيار الافتراضي)
+    storeSelect.innerHTML = '<option value="">-- اختر المتجر --</option>';
+
+    if (stores.length === 0) {
+        // console.warn('⚠️ لا توجد متاجر في localStorage');
+        return;
+    }
+
+    // 3. تعبئة القائمة بالبيانات
+    stores.forEach(store => {
+        const option = document.createElement('option');
+        // نستخدم ID المتجر كقيمة (Value)
+        option.value = store.id; 
+        option.textContent = `${store.name} (${store.phone || store.location})`; // إضافة تفاصيل للتمييز
+        storeSelect.appendChild(option);
+    });
+
+    // 4. الاختيار المسبق (في حال القدوم من رابط المتجر أو وضع التعديل)
+    if (preselectStoreId) {
+        // نضمن تحويل الرقم إلى نص لمطابقة قيمة الـ Select
+        storeSelect.value = String(preselectStoreId);
+    }
+
+    // 5. 💡 التعديل الهام: تشغيل handleStoreSelection فقط إذا لم نكن في وضع التعديل (Add New)
+    // هذا يمنع تفريغ حقول المشتري المحملة من الفاتورة أثناء التعديل.
+    if (!isEditing) {
+        handleStoreSelection(storeSelect.value); 
+    }
+}
+
+/**
+ * تعالج تغيير قيمة قائمة المتاجر، وتقوم بتعبئة حقول المشتري ببيانات المتجر.
+ * @param {string | number} selectedId - معرّف المتجر المختار (أو سلسلة فارغة إذا كان "بدون متجر").
+ */
+function handleStoreSelection(selectedId) {
+    // 💡 الجديد: الحصول على حالة النموذج
+    const form = document.getElementById("invoiceForm");
+    const isEditing = !!form.dataset.editingId; 
+
+    // 💡 التعديل الهام: إذا كنا في وضع التعديل، نخرج مباشرة دون تغيير الحقول
+    // هذا يمنع تفريغ بيانات المشتري المحملة من الفاتورة الأصلية.
+    if (isEditing) {
+        return; 
+    }
+    
+    // الوصول إلى حقول المشتري
+    const nameInput = document.getElementById('buyerName');
+    const phoneInput = document.getElementById('buyerPhone');
+    const provinceInput = document.getElementById('buyerProvince');
+
+    // 1. تفريغ الحقول أولاً (يحدث فقط في وضع الإضافة الجديدة)
+    nameInput.value = '';
+    phoneInput.value = '';
+    provinceInput.value = '';
+
+    if (selectedId && selectedId !== "") {
+        const stores = getStores();
+        // ID المتجر يكون string من الـ HTML، يجب تحويله إلى رقم للمقارنة
+        const storeIdNum = parseInt(selectedId); 
+        
+        const selectedStore = stores.find(s => s.id === storeIdNum);
+
+        if (selectedStore) {
+            // 2. تعبئة الحقول ببيانات المتجر
+            nameInput.value = selectedStore.name;
+            phoneInput.value = selectedStore.phone;
+            provinceInput.value = selectedStore.location; // استخدمنا 'location' للمحافظة
+        }
+    }
+}

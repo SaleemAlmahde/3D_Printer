@@ -98,6 +98,14 @@
         <input type="text" id="localShippingInfo" placeholder="الموقع ضمن حمص">
       </div>
 
+      <!-- المتجر -->
+      <div class="form-group">
+        <label>المتجر:</label>
+        <select id="linkedStores" onchange="handleStoreSelection(this.value)">
+          <option value="">-- اختر المتجر --</option>
+        </select>
+      </div>
+
       <!-- 🧾 حقل اختيار المنتجات -->
       <div class="form-group product-select">
         <div class="product-select-header">
@@ -175,7 +183,7 @@
       >
       <div class="dropdown-list hidden" id="productDropdown">
         <!-- سيتم تعبئة المنتجات من localStorage لاحقًا -->
-        <div class="dropdown-item">
+        <!-- <div class="dropdown-item">
           <img src="https://via.placeholder.com/40" alt="صورة">
           <span>Printer 3D - 1,200,000 ل.س</span>
         </div>
@@ -183,7 +191,7 @@
           <img src="https://via.placeholder.com/40" alt="صورة">
           <span>Filament PLA - 300,000 ل.س</span>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <!-- الكمية -->

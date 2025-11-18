@@ -183,7 +183,7 @@ function renderStores() {
                 
                 <button class="close-overlay-btn" onclick="hideStoreActions(${store.id})">&times;</button>
 
-                <button class="action-btn add-invoice" onclick="openInvoiceForStore(${store.id}, '${store.name}', '${store.phone}', '${store.location}')">
+                <button class="action-btn add-invoice" onclick="openInvoiceForStore(${store.id})">
                     <i class="fa fa-plus-circle"></i> إضافة فاتورة
                 </button>
                 <button class="action-btn view-invoices" onclick="filterInvoicesByStore(${store.id})">
@@ -242,7 +242,6 @@ function confirmStoreDelete() {
     cancelStoreDelete();
     closeStoreModal();
     renderStores(); // إعادة عرض القائمة
-    alert("✅ تم حذف المتجر بنجاح. (ملاحظة: فواتيره المرتبطة لم تُحذف)");
 }
 
 // دالة البحث (مطلوبة من حقل البحث في HTML)
@@ -296,4 +295,53 @@ function hideStoreActions(storeId) {
         // نستخدم stopPropagation في HTML لمنع النقر على الأوفرلاي من إخفائه
         overlay.classList.add('hidden');
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------
+// 5. دوال الانتقال لصفحة الفواتير (إضافة/عرض)
+// ----------------------------------------------------------------------
+
+/**
+ * تجهز للانتقال إلى صفحة الفواتير لغرض إنشاء فاتورة جديدة مرتبطة بهذا المتجر.
+ * @param {number} storeId - معرّف المتجر.
+ */
+function openInvoiceForStore(storeId) {
+    // بناء رابط URL: action=add (لفتح المودال) و storeId (لتحديد المتجر)
+    const url = `invoices.html?action=add&storeId=${storeId}`;
+
+    // الانتقال إلى صفحة الفواتير
+    window.location.href = url;
+}
+
+/**
+ * تجهز للانتقال إلى صفحة الفواتير لغرض تصفية الفواتير وعرض فواتير هذا المتجر فقط.
+ * @param {number} storeId - معرّف المتجر.
+ */
+function filterInvoicesByStore(storeId) {
+    // بناء رابط URL: action=filter (لتطبيق الفلتر) و storeId (لتحديد المتجر)
+    const url = `invoices.html?action=filter&storeId=${storeId}`;
+
+    // الانتقال إلى صفحة الفواتير
+    window.location.href = url;
 }
