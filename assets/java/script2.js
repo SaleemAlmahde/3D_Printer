@@ -1,4 +1,3 @@
-// دالة حساب المجموع من المنتجات
 function calculateTotals(products) {
     if (!Array.isArray(products)) {
         console.error('calculateTotals: products is not an array', products);
@@ -723,7 +722,7 @@ function renderProductsList(searchQuery = '') {
   // إنشاء HTML للمنتجات
   const productsHTML = filteredProducts.map(product => `
     <div class="dropdown-item" onclick="selectProduct(${product.id})">
-      <img src="${product.image || 'assets/imgs/placeholder.jpg'}" alt="${product.name}">
+      <img src="${product.images[0] || 'assets/imgs/placeholder.jpg'}" alt="${product.name}">
       <div class="product-info">
         <span class="product-name">${product.name}</span>
         <span class="product-price">
@@ -1181,8 +1180,6 @@ function toggleInvoiceCodeInput(){
   document.getElementById("invoiceCodeInputModal").classList.toggle("show");
 }
 
-const scrollTopBtn = document.getElementById("scrollTopBtn"); // زر العودة للأعلى
-
 function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -1197,26 +1194,6 @@ window.addEventListener("scroll", () => {
         scrollBtn.classList.add("hide");
         setTimeout(() => scrollBtn.classList.remove("hide"), 300);
     }})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // دالة جلب المتاجر (تستخدم في صفحة الفواتير)

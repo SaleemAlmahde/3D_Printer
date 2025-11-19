@@ -235,7 +235,7 @@ function showModal(id) {
                         <h2>${product.name}</h2>
                         <h3>${product.price}</h3>
                         </div>
-                        <img src="./${product.image}" alt="${product.name}">
+                        <img src="./${product.images[0]}" alt="${product.name}">
                         </div>
                         ${colorsHTML}
                         <input type="number" id="pQ" placeholder="الكمية" required>
@@ -392,43 +392,6 @@ window.onload = function () {
     showCat();
     loadMoreProducts();
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // دالة لتهيئة كل سلايدر
 function initializeSlider(card) {
