@@ -319,12 +319,11 @@
 .slider {
     display: flex; /* Enables flexbox layout to line up slides horizontally */
     transition: transform 0.4s ease-in-out; /* Smooth transition when sliding between images */
-    width: 300%;
 }
 
 /* Each individual slide - takes up full width of the container */
 .slide {
-    min-width: 33.333%; /* Each slide takes up 100% of the slider container's width */
+    min-width: 100%; /* Each slide takes up 100% of the slider container's width */
     height: 320px; /* Fixed height for each slide */
 }
 
