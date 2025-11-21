@@ -199,5 +199,62 @@
 
     <script src="assets/java/script2.js"></script>
 
+    <div class="fab-container">
+    
+    <div id="fabSpeedDial" class="fab-menu hidden">
+        <button id="openFilterModalBtn" class="fab-item" onclick="openFilterModal()">
+            <i class="fa fa-filter"></i>
+            <span>🔍 تصفية وعرض</span>
+        </button>
+        <button id="addByCodeBtn" class="fab-item" onclick="openNewInvoiceModel(null, true); toggleFabMenu();">
+            <i class="fa fa-code"></i>
+            <span></> إضافة عبر الكود</span>
+        </button>
+        <button id="addNewInvoiceBtn" class="fab-item" onclick="openNewInvoiceModel(); toggleFabMenu();">
+            <i class="fa fa-file-invoice"></i>
+            <span>+ فاتورة جديدة</span>
+        </button>
+    </div>
+
+    <button id="mainFab" class="fab-main" onclick="toggleFabMenu()">
+        <i class="fa fa-plus"></i> 
+    </button>
+</div>
+
+<div id="filterModal" class="modal hidden">
+    <div class="modal-content bottom-sheet">
+        <h2>🔍 خيارات التصفية والترتيب</h2>
+        <hr>
+        <div id="filterOptionsContainer">
+            <label for="paymentFilter">حالة الدفع:</label>
+            <select id="paymentFilter" class="full-width-select">
+                <option value="all">الكل</option>
+                <option value="unpaid">غير مدفوع</option>
+                <option value="paid-partial">دفع جزئي</option>
+                <option value="paid-full">مدفوع بالكامل</option>
+            </select>
+            
+            <label for="storeFilter">المتجر:</label>
+            <select id="storeFilter" class="full-width-select">
+                <option value="all">جميع المتاجر</option>
+                </select>
+
+            <label for="sortOption">الترتيب حسب:</label>
+            <select id="sortOption" class="full-width-select">
+                <option value="date_desc">تاريخ الإضافة (الأحدث)</option>
+                <option value="date_asc">تاريخ الإضافة (الأقدم)</option>
+                <option value="total_desc">قيمة الفاتورة (الأعلى)</option>
+                <option value="remaining_desc">المبلغ المتبقي (الأعلى)</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="applyFiltersAndSort()">تطبيق الفلاتر</button>
+            <button class="btn btn-secondary" onclick="closeFilterModal()">إغلاق</button>
+        </div>
+    </div>
+</div>
+<div id="filterOverlay" class="overlay hidden"></div>
+
 </body>
 </html>
