@@ -1,3 +1,16 @@
+// ======================================================
+// ⚙️ إعدادات البحث الحالي (Global State)
+// ======================================================
+let currentSearchQuery = ''; // متغير جديد لحفظ نص البحث السريع
+const DEFAULT_FILTERS = {
+    paymentStatus: 'all',        // حالة الدفع: الكل
+    store: 'all',                // المتجر: جميع المتاجر
+    sortOption: 'date_desc'      // الترتيب: التاريخ (الأحدث أولاً)
+};
+
+// تأكد من أن currentFilters يبدأ بالحالة الافتراضية
+let currentFilters = { ...DEFAULT_FILTERS };
+
 function calculateTotals(products) {
     if (!Array.isArray(products)) {
         console.error('calculateTotals: products is not an array', products);
@@ -68,23 +81,111 @@ function invoiceMatches(invoice, query) {
 
 // قراءة قيمة البحث من الحقل واستدعاء العرض مع الفلتر
 function searchInvoices() {
-  try {
-    const input = document.getElementById('searchInput');
-    const q = input ? input.value.toString().trim() : '';
-    renderInvoices(q);
-  } catch (e) {
-    console.error('searchInvoices error:', e);
-  }
+    try {
+        const input = document.getElementById('searchInput');
+        const q = input ? input.value.toString().trim() : '';
+        
+        // 💡 1. تحديث المتغير العالمي لنص البحث
+        currentSearchQuery = q; 
+
+        // 💡 2. استدعاء دالة عرض الفواتير بدون وسائط
+        renderInvoices(); 
+    } catch (e) {
+        console.error('searchInvoices error:', e);
+    }
 }
 
-function renderInvoices(filterQuery = '') {
+function renderInvoices() {
   const invoicesDiv = document.getElementById("invoices");
   invoicesDiv.innerHTML = "";
 
   const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
-  const storedInvoices = allInvoices.filter(inv => invoiceMatches(inv, filterQuery));
+  let processedInvoices = [...allInvoices];
 
-  storedInvoices.forEach(invoice => {
+  processedInvoices = processedInvoices.filter(invoice => {
+        // أ. فلترة حالة الدفع
+        const paymentFilter = currentFilters.paymentStatus;
+        const invoiceStatus = invoice.payment?.status || 'unpaid'; // الافتراض هو unpaid
+        
+        if (paymentFilter !== 'all' && invoiceStatus !== paymentFilter) {
+            return false;
+        }
+
+        // ب. فلترة المتجر (نستخدم اسم العميل/المتجر كمعيار)
+        const storeFilter = currentFilters.store;
+        const invoiceStoreName = invoice.customerName; // يمكنك تغييرها إلى invoice.storeName إذا كان متوفراً
+
+        if (storeFilter !== 'all' && invoiceStoreName !== storeFilter) {
+            return false;
+        }
+        // 💡 ج. تطبيق فلترة البحث السريع
+        if (currentSearchQuery && !invoiceMatches(invoice, currentSearchQuery)) {
+            return false;
+        }
+        return true; // إذا نجحت في جميع الفلاتر
+    });
+
+    processedInvoices.sort((a, b) => {
+        const sortOption = currentFilters.sortOption;
+
+        // دالة مساعدة للحصول على القيمة الآمنة للمقارنة
+        const getVal = (invoice, key) => {
+            switch (key) {
+                case 'date':
+                    // نحول التاريخ إلى قيمة يمكن مقارنتها (مثل Timestamp)
+                    return new Date(invoice.date).getTime();
+                case 'total':
+                    // نحصل على الإجمالي الكلي بالليرة السورية
+                    return Number(invoice.totalSYP) || 0;
+                case 'remaining':
+                    // نحصل على المبلغ المتبقي
+                    return Number(invoice.payment?.remainingSYP) || 0;
+                default:
+                    return 0;
+            }
+        };
+
+        const [key, direction] = sortOption.split('_'); // مثال: 'date_desc' -> ['date', 'desc']
+        
+        const valA = getVal(a, key);
+        const valB = getVal(b, key);
+
+        if (valA < valB) {
+            return direction === 'asc' ? -1 : 1;
+        }
+        if (valA > valB) {
+            return direction === 'asc' ? 1 : -1;
+        }
+        return 0; // متساوون
+    });
+
+    // ===================================
+    // 💡 5. التحكم بزر إلغاء الفلترة (resetFabBtn)
+    // ===================================
+    const isFilteredOrSorted = (
+        currentFilters.paymentStatus !== DEFAULT_FILTERS.paymentStatus ||
+        currentFilters.store !== DEFAULT_FILTERS.store ||
+        currentFilters.sortOption !== DEFAULT_FILTERS.sortOption ||
+        (currentSearchQuery && currentSearchQuery.length > 0) // ظهور الزر إذا كان هناك بحث سريع
+    );
+
+    const resetBtn = document.getElementById('resetFabBtn');
+
+    if (resetBtn) {
+        if (isFilteredOrSorted) {
+            resetBtn.classList.remove('hidden');
+        } else {
+            resetBtn.classList.add('hidden');
+        }
+    }
+    // -----------------------------------
+
+    if (processedInvoices.length === 0) {
+        invoicesDiv.innerHTML = `<div class="no-invoices-message">لا توجد فواتير مطابقة لخيارات الفلترة الحالية.</div>`;
+        return;
+    }
+
+  processedInvoices.forEach(invoice => {
     const invoiceCard = document.createElement("div");
     invoiceCard.classList.add("invoice-card");
 
@@ -264,6 +365,13 @@ function openNewInvoiceModel(targetStoreId=null) {
         resetForm();
     }
 
+    invoiceFormOpen = true;
+
+       closeFabMenu();
+
+    mainFab.classList.add("hidden");
+    
+    
     // 2. 💡 استدعاء populateStoreSelect هنا
     populateStoreSelect(targetStoreId);
 
@@ -286,6 +394,10 @@ function closeModal() {
   // deactivate overlay
   overlay.classList.remove("active");
   overlay.classList.add("hidden");
+
+  invoiceFormOpen = false;
+
+  mainFab.classList.remove("hidden");
 
   // إعادة تعيين النموذج بعد إغلاق المودال
   setTimeout(resetForm, 300); // تأخير قليل لضمان انتهاء الأنيميشن
@@ -1184,16 +1296,34 @@ function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-window.addEventListener("scroll", () => {
+// دالة موحدة لتحديد ما إذا كان يجب عرض زر الصعود للأعلى
+function checkScrollButtonVisibility() {
     const scrollBtn = document.getElementById("scrollTopBtn");
-    if (window.scrollY > 300) {
-        scrollBtn.classList.add("show");
+
+    // 1. يجب أن يكون هناك تمرير أكثر من 300 بكسل
+    const scrolledEnough = window.scrollY > 300;
+    
+    // 2. يجب أن تكون قائمة FAB مغلقة
+    const fabClosed = !fabMenuOpen;
+
+    if (scrolledEnough && fabClosed && invoiceFormOpen === false) {
+        // العرض: يجب أن نستخدم 'show' و 'hide' بشكل متناسق
         scrollBtn.classList.remove("hide");
+        scrollBtn.classList.add("show");
     } else {
+        // الإخفاء
         scrollBtn.classList.remove("show");
         scrollBtn.classList.add("hide");
-        setTimeout(() => scrollBtn.classList.remove("hide"), 300);
-    }})
+        
+        // 💡 ملاحظة: هذا السطر غير ضروري وقد يسبب مشاكل بصرية
+        // setTimeout(() => scrollBtn.classList.remove("hide"), 300); 
+    }
+}
+
+// استمع فقط لحدث التمرير
+window.addEventListener("scroll", checkScrollButtonVisibility);
+
+window.addEventListener("click", checkScrollButtonVisibility);
 
 
 // دالة جلب المتاجر (تستخدم في صفحة الفواتير)
@@ -1334,4 +1464,259 @@ function handleStoreSelection(selectedId) {
             provinceInput.value = selectedStore.location; // استخدمنا 'location' للمحافظة
         }
     }
+}
+
+let fabMenuOpen = false;
+let invoiceFormOpen = false;
+const menu = document.getElementById("fabSpeedDial");
+const mainFab = document.getElementById("mainFab");
+    
+function toggleFabMenu() {
+
+
+    fabMenuOpen = !fabMenuOpen;
+
+    // تبديل حالة العرض
+    menu.classList.toggle("hidden"); 
+
+
+    // تغيير أيقونة الـ FAB الرئيسي
+    if (menu.classList.contains("hidden")) {
+        mainFab.querySelector('i').className = 'fa fa-plus'; // عند الإغلاق
+    } else {
+        mainFab.querySelector('i').className = 'fa fa-times'; // عند الفتح
+    }
+}
+
+function closeFabMenu() {
+    if (!menu.classList.contains("hidden")) {
+        menu.classList.add("hidden");
+        mainFab.querySelector('i').className = 'fa fa-plus';
+        fabMenuOpen = false;
+    }
+}
+
+/**
+ * فتح مودال التصفية (Bottom Sheet).
+ */
+function openFilterModal() {
+    const modal = document.getElementById("filterModal");
+    const overlay = document.getElementById("filterOverlay");
+    
+    // 💡 نقطة هامة: يجب تعبئة قائمة المتاجر الخاصة بالفلتر قبل الفتح
+    // سنستخدم populateStoreSelect(null) مع تعديل بسيط لاحقاً
+    // حالياً نستخدم دالة افتراضية
+    // populateStoreFilterSelect(); 
+    
+    modal.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    
+    // تأكد من إغلاق قائمة الـ FAB بعد فتح المودال
+    toggleFabMenu(); 
+}
+
+/**
+ * إغلاق مودال التصفية.
+ */
+function closeFilterModal() {
+    const modal = document.getElementById("filterModal");
+    const overlay = document.getElementById("filterOverlay");
+    
+    modal.classList.add("hidden");
+    overlay.classList.add("hidden");
+    document.body.style.overflow = "";
+}
+
+// دالة لتطبيق الفلاتر (سنقوم بكتابتها لاحقاً)
+function applyFiltersAndSort() {
+    // هنا سيتم قراءة قيم الفلاتر واستدعاء renderInvoices()
+    closeFilterModal();
+}
+
+/**
+ * تبديل حالة منبثق إدخال الكود.
+ * @param {Event} event - حدث النقر.
+ */
+function toggleCodeInputPopup(event) {
+    const popup = document.getElementById("codeInputPopup");
+    
+    // 1. إغلاق قائمة الـ FAB الرئيسية أولاً
+    // if (fabMenuOpen) {
+    //     toggleFabMenu(); 
+    // }
+    
+    // 2. إغلاق مودال الفلترة (لضمان عدم التداخل)
+    closeFilterModal(); 
+
+    // 3. تبديل المنبثق نفسه
+    if (!popup.classList.contains("hidden")) {
+        closeCodeInputPopup(); // نستخدم دالة الإغلاق لضمان مسح الحقل
+        return;
+    }
+    
+    popup.classList.remove("hidden");
+    document.getElementById("pasteInvoiceCodeInput").focus();
+
+    // 4. منع انتشار حدث النقر
+    if (event) {
+        event.stopPropagation();
+    }
+}
+
+/**
+ * إغلاق منبثق إدخال الكود (للاستخدام الداخلي).
+ */
+function closeCodeInputPopup() {
+    const popup = document.getElementById("codeInputPopup");
+    popup.classList.add("hidden");
+    document.getElementById("pasteInvoiceCodeInput").value = ''; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// 🛒 دالة تعبئة قائمة المتاجر في مودال الفلترة
+// ======================================================
+function populateStoreFilterSelect() {
+    // نفترض أن مصفوفة الفواتير الرئيسية لديك تسمى 'invoices'
+    // ويتم تخزينها غالباً في localStorage
+    const invoices = JSON.parse(localStorage.getItem('invoices')) || [];
+    const storeSelect = document.getElementById('storeFilter');
+    
+    // 1. جمع المتاجر الفريدة
+    const storeNames = new Set();
+    invoices.forEach(invoice => {
+        // نفترض أن اسم المتجر موجود في خاصية 'storeName' أو 'customerName' إذا لم يكن المتجر موجوداً
+        // إذا كان لديك خاصية storeName في كائن الفاتورة، استخدمها
+        if (invoice.storeName) {
+            storeNames.add(invoice.storeName);
+        } else {
+            // استخدام اسم العميل كمتجر افتراضي إذا لم يكن هناك اسم متجر محدد
+            storeNames.add(invoice.customerName);
+        }
+    });
+    
+    // 2. مسح الخيارات الحالية وإضافة خيار "الكل"
+    storeSelect.innerHTML = '<option value="all">جميع المتاجر</option>';
+
+    // 3. إضافة الخيارات الفريدة
+    storeNames.forEach(name => {
+        if (name) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            storeSelect.appendChild(option);
+        }
+    });
+
+    // 4. تعيين القيمة المحددة مسبقاً (إن وجدت)
+    storeSelect.value = currentFilters.store;
+}
+
+// ======================================================
+// 💾 دالة تطبيق الفلترة والترتيب
+// ======================================================
+function applyFiltersAndSort() {
+    // 1. قراءة القيم من حقول الإدخال
+    const paymentFilter = document.getElementById('paymentFilter').value;
+    const storeFilter = document.getElementById('storeFilter').value;
+    const sortOption = document.getElementById('sortOption').value;
+
+    // 2. تحديث الإعدادات العالمية
+    currentFilters.paymentStatus = paymentFilter;
+    currentFilters.store = storeFilter;
+    currentFilters.sortOption = sortOption;
+
+    // 3. إغلاق المودال
+    closeFilterModal();
+
+    // 4. 💡 استدعاء دالة عرض الفواتير المحدثة
+    // يجب أن تكون هذه الدالة (renderInvoices) جاهزة لاستلام الفلتر وتطبيقه
+    renderInvoices(); 
+}
+
+// ======================================================
+// 🔍 تحديث دالة فتح مودال الفلترة
+// ======================================================
+function openFilterModal() {
+    const modal = document.getElementById("filterModal");
+    const overlay = document.getElementById("filterOverlay");
+    
+    // إغلاق قائمة الـ FAB الرئيسية ومنبثق الكود
+    if (fabMenuOpen) {
+        toggleFabMenu(); 
+    }
+    closeCodeInputPopup(); 
+    
+    // 💡 الجديد: تعبئة قائمة المتاجر
+    populateStoreFilterSelect(); 
+
+    // تعيين القيم الحالية في حقول الإدخال
+    document.getElementById('paymentFilter').value = currentFilters.paymentStatus;
+    document.getElementById('storeFilter').value = currentFilters.store;
+    document.getElementById('sortOption').value = currentFilters.sortOption;
+    
+    modal.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+}
+
+// 💡 تضاف هذه الدالة في أي مكان في ملف الـ JavaScript
+
+function resetFilters() {
+    // 1. إعادة تعيين الفلاتر العالمية إلى القيم الافتراضية
+    currentFilters.paymentStatus = DEFAULT_FILTERS.paymentStatus;
+    currentFilters.store = DEFAULT_FILTERS.store;
+    currentFilters.sortOption = DEFAULT_FILTERS.sortOption;
+
+    // 2. مسح حقل البحث السريع (إذا كان مستخدماً)
+    currentSearchQuery = '';
+    // إذا كان لديك حقل إدخال للبحث السريع، يجب مسحه أيضاً:
+    const searchInput = document.getElementById('quickSearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+
+    closeFabMenu();
+
+    // 3. إعادة عرض الفواتير. الدالة renderInvoices ستخفي الزر تلقائياً
+    renderInvoices();
 }

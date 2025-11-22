@@ -125,3 +125,161 @@ body {
 .dot.active {
     background-color: rgba(255, 255, 255, 1); /* Solid white background for the active dot */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==================================== */
+/* 1. Floating Action Button (FAB) */
+/* ==================================== */
+
+.fab-container {
+    /* يضمن تثبيت الـ FAB في الزاوية السفلية اليسرى (يمكن تغيير left إلى right حسب تفضيلك) */
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* يمكن تغييرها إلى right: 20px إذا كنت تفضل الزاوية اليسرى */
+    z-index: 1000; /* يضمن أنه فوق معظم العناصر */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.fab-main {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #07A98C; /* استخدم لونك الأساسي */
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+/* حالة الضغط على الزر */
+.fab-main:active {
+    transform: scale(0.95);
+}
+
+/* ==================================== */
+/* 2. FAB Speed Dial Menu */
+/* ==================================== */
+
+.fab-menu {
+    /* يوضع فوق الزر الرئيسي */
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.3s ease-in-out;
+    /* لإخفاء القائمة عند تحميل الصفحة */
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.fab-menu.hidden {
+    opacity: 0;
+    pointer-events: none; /* يمنع التفاعل مع العناصر المخفية */
+    transform: translateY(10px); /* حركة بسيطة عند الإخفاء */
+}
+
+.fab-item {
+    /* تصميم أزرار القائمة الفرعية */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 15px;
+    background-color: white;
+    color: var(--text-color);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: right;
+}
+
+.fab-item:hover {
+    background-color: #f0f0f0;
+}
+
+.fab-item i {
+    margin-right: 10px; /* تباعد الأيقونة عن النص */
+    min-width: 20px;
+    text-align: center;
+}
+
+
+/* ==================================== */
+/* 3. Bottom Sheet Modal (مودال الفلترة) */
+/* ==================================== */
+
+/* استخدام نفس الـ CSS الخاص بالمودال لديك، مع التركيز على bottom-sheet */
+
+.modal-content.bottom-sheet {
+    /* يضمن أن المودال يبدأ من الأسفل */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 80vh; /* يغطي 80% من طول الشاشة */
+    width: 100%;
+    margin: 0;
+    border-radius: 20px 20px 0 0; /* حواف مستديرة في الأعلى فقط */
+    transform: translateY(100%); /* يختفي لأسفل الشاشة افتراضياً */
+    transition: transform 0.4s ease-out;
+    padding: 20px;
+    z-index: 1003; /* فوق الـ FAB */
+}
+
+/* عند فتح المودال، يصبح مرئياً */
+.modal:not(.hidden) .modal-content.bottom-sheet {
+    transform: translateY(0); /* يصعد إلى الأعلى */
+}
+
+/* تنسيقات حقول الفلترة داخل المودال */
+#filterOptionsContainer label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.full-width-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Overlay for Filter Modal */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999; 
+    transition: opacity 0.3s;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

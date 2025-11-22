@@ -15,7 +15,7 @@
     <script src="assets/java/data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="assets/java/invoiceCodec.js"></script>
-    <script src="assets/java/script2.js"></script>
+    <!-- <script src="assets/java/script2.js"></script> -->
 </head>
 <body>
     <!-- Nav Section -->
@@ -50,14 +50,14 @@
 <button id="addInvoiceBtn" class="add-invoice-btn" onclick="openNewInvoiceModel()">إضافة فاتورة</button>
 
 <!-- زر اضافة فاتورة عبر الكود -->
-<div id="invoice-code-tools">
+<!-- <div id="invoice-code-tools">
 
   <button class="add-invoice-btn-code" onclick="toggleInvoiceCodeInput()">اضف فاتورة عبر الكود</button>
   <div id="invoiceCodeInputModal" class="hidden-code-input">
   <input id="pasteInvoiceCodeInput" placeholder="ألصق كود الفاتورة هنا"></input>
     <button onclick="onPasteCode()">استيراد الكود (يفتح المودال أو يحفظ)</button>
 </div>
-</div>
+</div> -->
 
 <!-- Modal -->
     <div id="newInvoiceOverlay" class="hidden" onclick="closeModal()"></div>
@@ -197,30 +197,39 @@
 
    <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
 
-    <script src="assets/java/script2.js"></script>
-
     <div class="fab-container">
     
     <div id="fabSpeedDial" class="fab-menu hidden">
+        <button id="resetFabBtn" class="fab-item hidden" onclick="resetFilters()">
+            <i class="fa fa-close"></i>
+            <span>الغاء الفلترة</span>
+        </button>
+
         <button id="openFilterModalBtn" class="fab-item" onclick="openFilterModal()">
             <i class="fa fa-filter"></i>
-            <span>🔍 تصفية وعرض</span>
+            <span>تصفية وعرض</span>
         </button>
-        <button id="addByCodeBtn" class="fab-item" onclick="openNewInvoiceModel(null, true); toggleFabMenu();">
+        
+        <button id="addByCodeBtn" class="fab-item" onclick="toggleCodeInputPopup(event)">
             <i class="fa fa-code"></i>
-            <span></> إضافة عبر الكود</span>
+            <span>إضافة عبر الكود</span>
         </button>
-        <button id="addNewInvoiceBtn" class="fab-item" onclick="openNewInvoiceModel(); toggleFabMenu();">
-            <i class="fa fa-file-invoice"></i>
-            <span>+ فاتورة جديدة</span>
+        
+        <button id="addNewInvoiceBtn" class="fab-item" onclick="openNewInvoiceModel()">
+            <i class="fa fa-plus"></i>
+            <span>فاتورة جديدة</span>
         </button>
     </div>
 
     <button id="mainFab" class="fab-main" onclick="toggleFabMenu()">
         <i class="fa fa-plus"></i> 
     </button>
+    
+    <div id="codeInputPopup" class="code-popup hidden">
+        <input id="pasteInvoiceCodeInput" placeholder="ألصق كود الفاتورة هنا"/>
+        <button onclick="onPasteCode(); closeCodeInputPopup()">استيراد الكود</button>
+    </div>
 </div>
-
 <div id="filterModal" class="modal hidden">
     <div class="modal-content bottom-sheet">
         <h2>🔍 خيارات التصفية والترتيب</h2>
@@ -254,7 +263,11 @@
         </div>
     </div>
 </div>
+
 <div id="filterOverlay" class="overlay hidden"></div>
+
+    <script src="assets/java/script2.js"></script>
+
 
 </body>
 </html>

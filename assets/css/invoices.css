@@ -1059,46 +1059,6 @@
   justify-content: space-between;
 }
 
-/* #invoice-code-tools{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#invoice-code-tools button{
-      background: orange;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: 0.3s;
-    display: block;
-    margin: 25px auto;
-}
-
-#invoice-code-tools input{
-    width: 380px;
-    padding: 12px;
-    border: 2px solid black;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.9) !important;
-    color: black;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    margin-top: 15px;
-  background: #07ae91;
-  cursor: text;
-}
-
-.hidden-code-input{
-  display: none !important;
-} */
-
 /* الحاوية الرئيسية */
 #invoice-code-tools {
   display: flex;
@@ -1216,7 +1176,7 @@
 
 #scrollTopBtn {
     position: fixed;
-    bottom: 30px;
+    bottom: 90px;
     left: 30px;
     z-index: 1000;
     background-color: #049277;
@@ -1233,4 +1193,260 @@
     transition: all 0.3s 
 ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==================================== */
+/* 1. Floating Action Button (FAB) */
+/* ==================================== */
+
+.fab-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* أو right: 20px */
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    /* 💡 التعديل: إذا كان left: 20px، نستخدم flex-start. إذا كان right: 20px، نستخدم flex-end */
+    align-items: flex-end; /* لضمان محاذاة الأزرار في اليسار */
+}
+
+.fab-main {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #07A98C; /* استخدم لونك الأساسي */
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+/* حالة الضغط على الزر */
+.fab-main:active {
+    transform: scale(0.95);
+}
+
+/* ==================================== */
+/* 2. FAB Speed Dial Menu */
+/* ==================================== */
+
+.fab-menu {
+    /* يوضع فوق الزر الرئيسي */
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.3s ease-in-out;
+    /* لإخفاء القائمة عند تحميل الصفحة */
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.fab-menu.hidden {
+    opacity: 0;
+    pointer-events: none; /* يمنع التفاعل مع العناصر المخفية */
+    transform: translateY(10px); /* حركة بسيطة عند الإخفاء */
+}
+
+.fab-item {
+    /* تصميم أزرار القائمة الفرعية - مُعدَّل */
+    display: flex;
+    align-items: center;
+    /* 💡 التعديل: المحاذاة تبقى flex-start لكن سنضبط عرض الأزرار */
+    justify-content: flex-start; 
+    padding: 10px 15px; /* زيادة التباعد الرأسي قليلاً */
+    /* 💡 التعديل: جعل الخلفية شبه شفافة وأكثر عصرية */
+    background-color: rgba(255, 255, 255, 0.95); 
+    color: #333; /* لون نص أغمق وأوضح */
+    border: none; /* إزالة الحد لجعل المظهر أنعم */
+    border-radius: 25px; /* حواف مستديرة بالكامل */
+    /* 💡 التعديل: تظليل خفيف لتعطي عمقاً */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); 
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s; /* انتقال سلس لجميع الخصائص */
+    text-align: right;
+    min-width: 165px; /* عرض أدنى لضمان اتساق الشكل */
+}
+
+.fab-item:hover {
+    /* 💡 التعديل: عند المرور أو الضغط، يصبح اللون الأساسي شبه شفاف */
+    background-color: rgba(7, 169, 140, 0.1); 
+    color: #07A98C; /* تلوين النص بلونك الأساسي */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* تظليل أقوى قليلاً */
+}
+
+.fab-item i {
+    /* 💡 التعديل: زيادة حجم الأيقونة وجعلها بلون واضح */
+    margin-right: 12px;
+    margin-left: 12px;
+    min-width: 25px;
+    text-align: center;
+    font-size: 18px; /* تكبير الأيقونة */
+    color: #07A98C; /* الأيقونة بلونك الأساسي */
+}
+
+
+/* ==================================== */
+/* 3. Bottom Sheet Modal (مودال الفلترة) */
+/* ==================================== */
+
+/* استخدام نفس الـ CSS الخاص بالمودال لديك، مع التركيز على bottom-sheet */
+
+.modal-content.bottom-sheet {
+    /* يضمن أن المودال يبدأ من الأسفل */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 80vh; /* يغطي 80% من طول الشاشة */
+    width: 100%;
+    margin: 0;
+    border-radius: 20px 20px 0 0; /* حواف مستديرة في الأعلى فقط */
+    transform: translateY(100%); /* يختفي لأسفل الشاشة افتراضياً */
+    transition: transform 0.4s ease-out;
+    padding: 20px;
+    z-index: 1003; /* فوق الـ FAB */
+}
+
+/* عند فتح المودال، يصبح مرئياً */
+.modal:not(.hidden) .modal-content.bottom-sheet {
+    transform: translateY(0); /* يصعد إلى الأعلى */
+}
+
+/* تنسيقات حقول الفلترة داخل المودال */
+#filterOptionsContainer label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.full-width-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Overlay for Filter Modal */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999; 
+    transition: opacity 0.3s;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ==================================== */
+/* 4. Code Input Popup (منبثق الكود) */
+/* ==================================== */
+
+.code-popup {
+    /* وضعه في موقع مطلق بالنسبة للحاوية fab-container */
+    position: absolute;
+    /* 💡 التعديل: نضعه على يسار قائمة الـ FAB ليظهر بجانب زر "إضافة عبر الكود" */
+    top: 50%; /* تقريبًا في الوسط الرأسي (للحاوية) */
+    
+    /* إذا كنت تستخدم FAB في اليسار (left: 20px)، استخدم هذا */
+    left: 100%; 
+    transform: translate(20px, -50%); /* إزاحة أفقية صغيرة لتباعده عن القائمة */
+    
+    /* إذا كنت تستخدم FAB في اليمين (right: 20px)، استخدم هذا بدلاً من السطرين أعلاه */
+    /* right: 100%;
+    transform: translate(-20px, -50%); */
+    
+    width: 300px; /* عرض مناسب لحقل الإدخال */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    z-index: 990; /* أقل من الـ FAB (1000) لكن أعلى من محتوى الصفحة */
+    transition: all 0.3s ease-in-out;
+}
+
+.code-popup.hidden {
+    opacity: 0;
+    pointer-events: none;
+    /* حركة عند الإخفاء */
+    transform: translate(10px, -50%); 
+}
+
+.code-popup input {
+    width: 93%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.code-popup button {
+    /* تصميم زر الاستيراد */
+    background: #ff6f3c; /* لون مميز للإجراء */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+.code-popup button:hover {
+    background: #ff854f;
+}
+
+.hidden{
+  display: none;
 }

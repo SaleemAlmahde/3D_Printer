@@ -35,7 +35,7 @@ function displayCartItems() {
     card.innerHTML = `
         <h3>${product.name}</h3>
       <div class="cart-info">
-      <img class="cart-image" src="${product.image}" alt="${product.name}" style="width:120px; height:120px; border-radius:10px 10px 25px 10px;">
+      <img class="cart-image" src="${product.images[0]}" alt="${product.name}" style="width:120px; height:120px; border-radius:10px 10px 25px 10px;">
         <div class="cart-details">
         <p>اللون : <span style="${colorStyle}; text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;">${item.selectedColor.name}</span></p>
         <p>الكمية : ${item.quantity}</p>
@@ -122,7 +122,7 @@ function openEditModal(cartItem) {
                     <h2>${product.name}</h2>
                     <h3>${product.price} ل.س</h3>
                 </div>
-                <img src="./${product.image}" alt="${product.name}" style="width: 80px; height: 80px;">
+                <img src="./${product.images[0]}" alt="${product.name}" style="width: 80px; height: 80px;">
             </div>
             ${colorsHTML}
             <input type="number" id="pQ" placeholder="الكمية" value="${cartItem.quantity}" required>
@@ -286,21 +286,14 @@ function updateCartTotals() {
 }
 
 
+// ======================================================
+// 📤 دالة إرسال الطلب لـ Telegram (مُعدَّلة)
+// ======================================================
 function sendTelegramOrder() {
-    // ⚠️ يجب التأكد من صحة الحقول قبل الإرسال
-    const customerName = document.getElementById("customerName").value;
-    const customerPhone = document.getElementById("customerPhone").value;
-    
-    if (customerName.trim() === "" || customerPhone.trim() === "") {
-        alert("⚠️ يرجى تعبئة جميع معلومات التواصل (الاسم ورقم الهاتف).");
-        return;
-    }
-    
-    // ... (بقية كود الإرسال إلى Telegram الذي يعمل الآن)
-    
+    // ⚠️ يجب التأكد من صحة الحقول قبل الإرسال (تم التحقق منها في handleCheckout)
     const BOT_TOKEN = "8574296855:AAHWLVBmKLQs95L4dnLHNdAQnp9fPcruUH8"; 
-    const CHAT_ID = "1210190096"; 
-
+    const CHAT_ID = "1604687718"; 
+    
     // 1. الحصول على الكود والتفاصيل
     const { code: encodedCode, details: encodedDetails } = formatOrderDetails();
 
@@ -312,12 +305,22 @@ function sendTelegramOrder() {
     document.getElementById("checkoutBtn").disabled = true; 
     document.getElementById("checkoutBtn").textContent ="جاري إرسال الرسالة 1/2 (الكود)..."; 
 
+    // دالة مساعدة لضمان نجاح استجابة HTTP 
+    const checkResponse = (response) => {
+        if (!response.ok) {
+            // إذا كانت الاستجابة HTTP غير ناجحة (مثل 404 أو 500)
+            throw new Error(`فشل إرسال الطلب. رمز الاستجابة: ${response.status}`);
+        }
+        return response.json();
+    };
+
     // 🛑 الإرسال الأول: الكود فقط
     fetch(codeApiUrl)
-        .then(response => response.json())
+        .then(checkResponse) // التحقق من HTTP ثم قراءة JSON
         .then(data => {
             if (!data.ok) {
-                throw new Error(data.description || 'فشل إرسال الكود.');
+                // إذا رد Telegram بخطأ (مثل CHAT_ID غير صحيح)
+                throw new Error(data.description || 'فشل إرسال الكود عبر Telegram.');
             }
             
             // تحديث رسالة التحميل
@@ -326,7 +329,7 @@ function sendTelegramOrder() {
             // 🛑 الإرسال الثاني: التفاصيل الكاملة
             return fetch(detailsApiUrl);
         })
-        .then(response => response.json())
+        .then(checkResponse) // التحقق من HTTP ثم قراءة JSON
         .then(data => {
             if (data.ok) {
                 // ✅ النجاح الكامل: مسح السلة ورسالة التأكيد
@@ -337,11 +340,12 @@ function sendTelegramOrder() {
                 alert("✅ تم إرسال طلبك بنجاح! سيتم التواصل معكم عبر الهاتف قريباً.");
                 resetCheckoutButton();
             } else {
-                throw new Error(data.description || 'فشل إرسال التفاصيل.');
+                // إذا رد Telegram بخطأ في الرسالة الثانية
+                throw new Error(data.description || 'فشل إرسال التفاصيل عبر Telegram.');
             }
         })
         .catch(error => {
-            // ❌ معالجة الأخطاء (إذا فشل إرسال الكود أو التفاصيل أو الاتصال)
+            // ❌ معالجة الأخطاء
             alert(`⚠️ خطأ في إرسال الطلب: ${error.message}`);
             console.error("Telegram API Error Details:", error);
             

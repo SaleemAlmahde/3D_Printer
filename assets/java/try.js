@@ -74,3 +74,79 @@ sliderContainer.addEventListener('mouseout', startAutoSlide);
 // Start auto-slide when the page loads
 startAutoSlide();
 updateDots(); // Initialize the dots
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// دوال خاصة بزر الإجراء العائم (FAB) والتصفية
+
+/**
+ * تبديل حالة قائمة الـ FAB الموسعة (Speed Dial).
+ */
+function toggleFabMenu() {
+    const menu = document.getElementById("fabSpeedDial");
+    const mainFab = document.getElementById("mainFab");
+    
+    // تبديل حالة العرض
+    menu.classList.toggle("hidden"); 
+
+    // تغيير أيقونة الـ FAB الرئيسي
+    if (menu.classList.contains("hidden")) {
+        mainFab.querySelector('i').className = 'fa fa-plus'; // عند الإغلاق
+    } else {
+        mainFab.querySelector('i').className = 'fa fa-times'; // عند الفتح
+    }
+}
+
+/**
+ * فتح مودال التصفية (Bottom Sheet).
+ */
+function openFilterModal() {
+    const modal = document.getElementById("filterModal");
+    const overlay = document.getElementById("filterOverlay");
+    
+    // 💡 نقطة هامة: يجب تعبئة قائمة المتاجر الخاصة بالفلتر قبل الفتح
+    // سنستخدم populateStoreSelect(null) مع تعديل بسيط لاحقاً
+    // حالياً نستخدم دالة افتراضية
+    // populateStoreFilterSelect(); 
+    
+    modal.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    
+    // تأكد من إغلاق قائمة الـ FAB بعد فتح المودال
+    toggleFabMenu(); 
+}
+
+/**
+ * إغلاق مودال التصفية.
+ */
+function closeFilterModal() {
+    const modal = document.getElementById("filterModal");
+    const overlay = document.getElementById("filterOverlay");
+    
+    modal.classList.add("hidden");
+    overlay.classList.add("hidden");
+    document.body.style.overflow = "";
+}
+
+// دالة لتطبيق الفلاتر (سنقوم بكتابتها لاحقاً)
+function applyFiltersAndSort() {
+    // هنا سيتم قراءة قيم الفلاتر واستدعاء renderInvoices()
+    closeFilterModal();
+}
