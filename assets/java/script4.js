@@ -143,6 +143,7 @@ function calculateStoreDebt(storeId) {
 
 // 💡 تذكر أن دالة getStores() و setStores(stores) تم تعريفها مسبقاً
 
+
 function renderStores() {
     const storesContainer = document.getElementById('storesContainer');
     if (!storesContainer) return;
@@ -315,10 +316,11 @@ function openInvoiceForStore(storeId) {
 
 /**
  * تجهز للانتقال إلى صفحة الفواتير لغرض تصفية الفواتير وعرض فواتير هذا المتجر فقط.
- * @param {number} storeId - معرّف المتجر.
+ * @param {number} storeId - معرّف المتجر. 👈 تم تغيير نوع المدخل
  */
-function filterInvoicesByStore(storeId) {
-    // بناء رابط URL: action=filter (لتطبيق الفلتر) و storeId (لتحديد المتجر)
+function filterInvoicesByStore(storeId) { 
+    // بناء رابط URL: action=filter و storeId (الذي يجب أن يكون رقمياً)
+    // 💡 الآن نرسل ID المتجر
     const url = `invoices.html?action=filter&storeId=${storeId}`;
 
     // الانتقال إلى صفحة الفواتير

@@ -3,9 +3,11 @@
 // ======================================================
 let currentSearchQuery = ''; // متغير جديد لحفظ نص البحث السريع
 const DEFAULT_FILTERS = {
-    paymentStatus: 'all',        // حالة الدفع: الكل
-    store: 'all',                // المتجر: جميع المتاجر
-    sortOption: 'date_desc'      // الترتيب: التاريخ (الأحدث أولاً)
+    paymentStatus: 'all',        
+    store: 'all',                
+    sortOption: 'date_desc',
+    startDate: '', // 👈 القيمة الافتراضية فارغة
+    endDate: ''    // 👈 القيمة الافتراضية فارغة
 };
 
 // تأكد من أن currentFilters يبدأ بالحالة الافتراضية
@@ -95,29 +97,97 @@ function searchInvoices() {
     }
 }
 
-function renderInvoices() {
+function renderInvoices(filterStoreId = null) {
   const invoicesDiv = document.getElementById("invoices");
   invoicesDiv.innerHTML = "";
 
   const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
   let processedInvoices = [...allInvoices];
 
+  // 🚨 الخطوة التشخيصية رقم 2: هل يوجد فواتير أساساً؟
+  console.log('عدد الفواتير التي تم جلبها من localStorage:', allInvoices.length);
+
+  // 💡 تحديد القيمة التي سنستخدمها للفلترة: ID المُمرر أو القيمة المحفوظة
+  // إذا كان هناك ID مُمرر من الـ URL، نستخدمه ونحفظه في currentFilters.store
+  if (filterStoreId) {
+    currentFilters.store = filterStoreId; // حفظ القيمة لتطبيقها ولظهور زر الإلغاء
+  }
+
   processedInvoices = processedInvoices.filter(invoice => {
         // أ. فلترة حالة الدفع
         const paymentFilter = currentFilters.paymentStatus;
-        const invoiceStatus = invoice.payment?.status || 'unpaid'; // الافتراض هو unpaid
+        const invoiceStatus = invoice.payment?.status || 'unpaid'; 
         
         if (paymentFilter !== 'all' && invoiceStatus !== paymentFilter) {
             return false;
         }
 
-        // ب. فلترة المتجر (نستخدم اسم العميل/المتجر كمعيار)
+        // ب. فلترة المتجر 
         const storeFilter = currentFilters.store;
-        const invoiceStoreName = invoice.customerName; // يمكنك تغييرها إلى invoice.storeName إذا كان متوفراً
+        const invoiceStoreName = invoice.customerName; 
 
-        if (storeFilter !== 'all' && invoiceStoreName !== storeFilter) {
+        if (storeFilter && storeFilter !== 'all') {
+            
+            // 💡 ملاحظة: يجب أن نستخدم ID المتجر المخزن في الفاتورة للمقارنة
+            // أنا أستخدم storeId هنا، قم بتغييره إذا كان المفتاح مختلفاً لديك (مثل posId)
+            const invoiceStoreId = invoice.posId; 
+            
+            const numericFilterId = parseInt(storeFilter);
+            const numericInvoiceId = parseInt(invoiceStoreId);
+
+            // 🚨 الخطوة التشخيصية رقم 1: طباعة القِيَم للمقارنة
+        console.log(`
+            ID الفاتورة: ${invoice.id}
+            ID مُفلتر (URL): ${numericFilterId}
+            ID المتجر في الفاتورة: ${numericInvoiceId}
+            المقارنة: ${numericInvoiceId === numericFilterId ? '✅ تطابق' : '❌ لا تطابق'}
+        `);
+
+            // المقارنة بين IDs
+            if (!isNaN(numericFilterId) && numericInvoiceId !== numericFilterId) {
+                return false;
+            }
+        }
+        
+        // 🚨 إضافة فلترة نطاق التاريخ المفقودة
+const startFilter = currentFilters.startDate;
+const endFilter = currentFilters.endDate;
+
+if (startFilter || endFilter) {
+    try {
+        // 1. تحويل تاريخ الفاتورة إلى Date object
+        let invoiceDate;
+        if (invoice.date instanceof Date) {
+            invoiceDate = invoice.date;
+        } else if (typeof invoice.date === 'string') {
+            // معالجة التواريخ المخزنة كنص عربي
+            invoiceDate = parseArabicDate(invoice.date);
+        } else {
+            invoiceDate = new Date(invoice.date);
+        }
+        
+        const invoiceDateTimestamp = invoiceDate.getTime();
+        
+        // 2. تحويل تاريخ البداية إلى Timestamp (بداية اليوم: 00:00:00)
+        const startDateTimestamp = startFilter 
+            ? new Date(startFilter).setHours(0, 0, 0, 0) 
+            : 0; 
+        
+        // 3. تحويل تاريخ النهاية إلى Timestamp (نهاية اليوم: 23:59:59)
+        const endDateTimestamp = endFilter 
+            ? new Date(endFilter).setHours(23, 59, 59, 999) 
+            : Infinity; 
+        
+        // 4. تطبيق المقارنة
+        if (invoiceDateTimestamp < startDateTimestamp || invoiceDateTimestamp > endDateTimestamp) {
             return false;
         }
+    } catch (error) {
+        console.warn('خطأ في معالجة تاريخ الفاتورة:', invoice.date, error);
+        // في حالة الخطأ، نعرض الفاتورة لتجنب فقدان البيانات
+    }
+}
+        
         // 💡 ج. تطبيق فلترة البحث السريع
         if (currentSearchQuery && !invoiceMatches(invoice, currentSearchQuery)) {
             return false;
@@ -166,7 +236,10 @@ function renderInvoices() {
         currentFilters.paymentStatus !== DEFAULT_FILTERS.paymentStatus ||
         currentFilters.store !== DEFAULT_FILTERS.store ||
         currentFilters.sortOption !== DEFAULT_FILTERS.sortOption ||
-        (currentSearchQuery && currentSearchQuery.length > 0) // ظهور الزر إذا كان هناك بحث سريع
+        // 💡 الجديد: إضافة فلاتر التاريخ للتحقق
+        currentFilters.startDate !== DEFAULT_FILTERS.startDate ||
+        currentFilters.endDate !== DEFAULT_FILTERS.endDate ||
+        (currentSearchQuery && currentSearchQuery.length > 0) 
     );
 
     const resetBtn = document.getElementById('resetFabBtn');
@@ -219,6 +292,10 @@ function renderInvoices() {
     if (payment.remainingSYP === undefined) payment.remainingSYP = safeTotalSYP - (payment.paidSYP || 0);
     const notes = invoice.notes || '';
 
+    const formattedShippingDate = invoice.shippingDate 
+    ? formatDateToYYYYMMDD(invoice.shippingDate) 
+    : '-';
+
     invoiceCard.innerHTML = `
       <div class="invoice-header">
         <h4>فاتورة #${invoice.id.toString().padStart(3, '0')}</h4>
@@ -238,7 +315,7 @@ function renderInvoices() {
           </div>
           <img class="invoice-logo" src="./assets/imgs/log_png-removebg-preview.png">
           </div>
-          <p><strong>موعد التسليم :</strong> ${invoice.shippingDate || '-'}</p>
+          <p><strong>موعد التسليم :</strong> ${formattedShippingDate || '-'}</p>
           ${payment.status !== 'paid-partial' ? `<p><strong>حالة الدفع :</strong> ${payment.status === 'unpaid' ? 'لم يدفع' : 'دُفع كامل'}</p>` : ''}
       
 
@@ -1365,9 +1442,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. تنفيذ إجراء 'FILTER' (عرض فواتير متجر محدد)
     else if (action === 'filter' && storeId) {
         const targetStoreId = parseInt(storeId);
-        
-        // يجب أن تكون دالة renderInvoices() موجودة في هذا الملف
-        // (سنعدلها لتستقبل storeId في الخطوة التالية)
+       
+        // ✅ 1. تمرير ID المتجر للدالة
         renderInvoices(targetStoreId); 
         
         // 💡 إظهار رسالة تفيد بأن القائمة مفلترة
@@ -1408,7 +1484,7 @@ function populateStoreSelect(preselectStoreId = null) {
         const option = document.createElement('option');
         // نستخدم ID المتجر كقيمة (Value)
         option.value = store.id; 
-        option.textContent = `${store.name} (${store.phone || store.location})`; // إضافة تفاصيل للتمييز
+        option.textContent = `${store.name}  (${store.location})`; // إضافة تفاصيل للتمييز
         storeSelect.appendChild(option);
     });
 
@@ -1528,10 +1604,31 @@ function closeFilterModal() {
     document.body.style.overflow = "";
 }
 
-// دالة لتطبيق الفلاتر (سنقوم بكتابتها لاحقاً)
+// ======================================================
+// 💾 دالة تطبيق الفلترة والترتيب
+// ======================================================
 function applyFiltersAndSort() {
-    // هنا سيتم قراءة قيم الفلاتر واستدعاء renderInvoices()
+    // 1. قراءة القيم من حقول الإدخال
+    const paymentFilter = document.getElementById('paymentFilter').value;
+    const storeFilter = document.getElementById('storeFilter').value;
+    const sortOption = document.getElementById('sortOption').value;
+    
+    // 🔥 الجديد: قراءة تواريخ البداية والنهاية
+    const startDate = document.getElementById('startDateInput').value;
+    const endDate = document.getElementById('endDateInput').value;
+
+    // 2. تحديث الإعدادات العالمية
+    currentFilters.paymentStatus = paymentFilter;
+    currentFilters.store = storeFilter;
+    currentFilters.sortOption = sortOption;
+    currentFilters.startDate = startDate; // 🔥 تحديث فلتر تاريخ البداية
+    currentFilters.endDate = endDate;     // 🔥 تحديث فلتر تاريخ النهاية
+
+    // 3. إغلاق المودال
     closeFilterModal();
+
+    // 4. استدعاء دالة عرض الفواتير المحدثة
+    renderInvoices(); 
 }
 
 /**
@@ -1573,81 +1670,38 @@ function closeCodeInputPopup() {
     document.getElementById("pasteInvoiceCodeInput").value = ''; 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ======================================================
 // 🛒 دالة تعبئة قائمة المتاجر في مودال الفلترة
 // ======================================================
 function populateStoreFilterSelect() {
-    // نفترض أن مصفوفة الفواتير الرئيسية لديك تسمى 'invoices'
-    // ويتم تخزينها غالباً في localStorage
-    const invoices = JSON.parse(localStorage.getItem('invoices')) || [];
+    // 1. 💡 استرجاع المتاجر من المصدر الرئيسي (pointsOfSale)
+    const stores = getStores(); // نستخدم الدالة التي تجلب المتاجر من localStorage["pointsOfSale"]
+    
     const storeSelect = document.getElementById('storeFilter');
     
-    // 1. جمع المتاجر الفريدة
-    const storeNames = new Set();
-    invoices.forEach(invoice => {
-        // نفترض أن اسم المتجر موجود في خاصية 'storeName' أو 'customerName' إذا لم يكن المتجر موجوداً
-        // إذا كان لديك خاصية storeName في كائن الفاتورة، استخدمها
-        if (invoice.storeName) {
-            storeNames.add(invoice.storeName);
-        } else {
-            // استخدام اسم العميل كمتجر افتراضي إذا لم يكن هناك اسم متجر محدد
-            storeNames.add(invoice.customerName);
-        }
-    });
-    
+    if (!storeSelect) return;
+
     // 2. مسح الخيارات الحالية وإضافة خيار "الكل"
+    // القيمة الافتراضية 'all'
     storeSelect.innerHTML = '<option value="all">جميع المتاجر</option>';
 
-    // 3. إضافة الخيارات الفريدة
-    storeNames.forEach(name => {
-        if (name) {
+    // 3. إضافة خيارات المتاجر بناءً على قائمة المتاجر الرئيسية
+    stores.forEach(store => {
+        if (store.name && store.id !== undefined) {
             const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
+            
+            // ✅ الأهم: نستخدم ID المتجر كقيمة (Value) للفلترة
+            option.value = store.id; 
+            
+            // نستخدم اسم المتجر كنص (Text) للعرض
+            option.textContent = store.name;
             storeSelect.appendChild(option);
         }
     });
 
-    // 4. تعيين القيمة المحددة مسبقاً (إن وجدت)
-    storeSelect.value = currentFilters.store;
+    // 4. تعيين القيمة المحددة مسبقاً (سواء كانت 'all' أو ID المتجر المُفلتر)
+    // نستخدم String() لضمان تطابق نوع القيمة مع قيمة الـ <option>
+    storeSelect.value = String(currentFilters.store); 
 }
 
 // ======================================================
@@ -1659,10 +1713,18 @@ function applyFiltersAndSort() {
     const storeFilter = document.getElementById('storeFilter').value;
     const sortOption = document.getElementById('sortOption').value;
 
+    // 💡 الجديد: قراءة قيم التاريخ
+    const startDate = document.getElementById('startDateInput').value; 
+    const endDate = document.getElementById('endDateInput').value;
+
     // 2. تحديث الإعدادات العالمية
     currentFilters.paymentStatus = paymentFilter;
     currentFilters.store = storeFilter;
     currentFilters.sortOption = sortOption;
+
+    // 💡 الجديد: تحديث فلاتر التاريخ
+    currentFilters.startDate = startDate;
+    currentFilters.endDate = endDate;
 
     // 3. إغلاق المودال
     closeFilterModal();
@@ -1671,7 +1733,6 @@ function applyFiltersAndSort() {
     // يجب أن تكون هذه الدالة (renderInvoices) جاهزة لاستلام الفلتر وتطبيقه
     renderInvoices(); 
 }
-
 // ======================================================
 // 🔍 تحديث دالة فتح مودال الفلترة
 // ======================================================
@@ -1685,13 +1746,17 @@ function openFilterModal() {
     }
     closeCodeInputPopup(); 
     
-    // 💡 الجديد: تعبئة قائمة المتاجر
+    // تعبئة قائمة المتاجر
     populateStoreFilterSelect(); 
 
     // تعيين القيم الحالية في حقول الإدخال
     document.getElementById('paymentFilter').value = currentFilters.paymentStatus;
     document.getElementById('storeFilter').value = currentFilters.store;
     document.getElementById('sortOption').value = currentFilters.sortOption;
+    
+    // 🔥 الجديد: تعيين قيم التاريخ الحالية
+    document.getElementById('startDateInput').value = currentFilters.startDate;
+    document.getElementById('endDateInput').value = currentFilters.endDate;
     
     modal.classList.remove("hidden");
     overlay.classList.remove("hidden");
@@ -1705,18 +1770,38 @@ function resetFilters() {
     currentFilters.paymentStatus = DEFAULT_FILTERS.paymentStatus;
     currentFilters.store = DEFAULT_FILTERS.store;
     currentFilters.sortOption = DEFAULT_FILTERS.sortOption;
+    currentFilters.startDate = DEFAULT_FILTERS.startDate; // 🔥 إعادة تعيين
+    currentFilters.endDate = DEFAULT_FILTERS.endDate;     // 🔥 إعادة تعيين
 
-    // 2. مسح حقل البحث السريع (إذا كان مستخدماً)
+    // 2. مسح حقل البحث السريع
     currentSearchQuery = '';
-    // إذا كان لديك حقل إدخال للبحث السريع، يجب مسحه أيضاً:
     const searchInput = document.getElementById('quickSearchInput');
     if (searchInput) {
         searchInput.value = '';
     }
 
-
     closeFabMenu();
 
-    // 3. إعادة عرض الفواتير. الدالة renderInvoices ستخفي الزر تلقائياً
+    // 3. إعادة عرض الفواتير
     renderInvoices();
+}
+
+/**
+ * تنسيق كائن Date أو سلسلة نصية قابلة للتحويل إلى YYYY/MM/DD
+ * @param {string | Date} dateSource - مصدر التاريخ (يجب أن يكون قابلاً للتحويل إلى Date object).
+ */
+function formatDateToYYYYMMDD(dateSource) {
+    // حاول تحويل المصدر إلى كائن Date
+    const date = new Date(dateSource); 
+    
+    // إذا لم يكن التحويل ناجحاً، أو كانت القيمة فارغة، أرجعها كما هي أو قيمة افتراضية
+    if (isNaN(date.getTime()) || !dateSource) {
+        return dateSource || '-';
+    }
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}/${month}/${day}`;
 }

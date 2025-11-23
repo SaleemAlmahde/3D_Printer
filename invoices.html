@@ -230,6 +230,7 @@
         <button onclick="onPasteCode(); closeCodeInputPopup()">استيراد الكود</button>
     </div>
 </div>
+
 <div id="filterModal" class="modal hidden">
     <div class="modal-content bottom-sheet">
         <h2>🔍 خيارات التصفية والترتيب</h2>
@@ -254,6 +255,13 @@
                 <option value="date_asc">تاريخ الإضافة (الأقدم)</option>
                 <option value="total_desc">قيمة الفاتورة (الأعلى)</option>
                 <option value="remaining_desc">المبلغ المتبقي (الأعلى)</option>
+                </select>
+
+            <label for="startDateInput">تاريخ البداية:</label>
+            <input type="date" id="startDateInput" class="full-width-input" placeholder="من تاريخ">
+
+            <label for="endDateInput">تاريخ النهاية:</label>
+            <input type="date" id="endDateInput" class="full-width-input" placeholder="حتى تاريخ">
             </select>
         </div>
 

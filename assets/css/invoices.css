@@ -1340,7 +1340,7 @@ ease;
     left: 0;
     right: 0;
     max-height: 80vh; /* يغطي 80% من طول الشاشة */
-    width: 100%;
+    /* width: 100%; */
     margin: 0;
     border-radius: 20px 20px 0 0; /* حواف مستديرة في الأعلى فقط */
     transform: translateY(100%); /* يختفي لأسفل الشاشة افتراضياً */
