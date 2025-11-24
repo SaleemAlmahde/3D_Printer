@@ -1195,44 +1195,6 @@ ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==================================== */
 /* 1. Floating Action Button (FAB) */
 /* ==================================== */
@@ -1448,5 +1410,35 @@ ease;
 }
 
 .hidden{
-  display: none;
+  display: none !important;
 }
+
+.status-paid-full{
+  border: 2px solid green;
+}
+
+.status-paid-partial{
+  border: 2px solid yellow;
+}
+
+.status-unpaid{
+  border: 2px solid red;
+}
+
+.summary-line-1, .summary-line-2{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* .invoice-body p {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal; 
+    word-break: break-word;
+    line-height: 1.2em;
+    max-height: calc(1.2em * 4);
+} */

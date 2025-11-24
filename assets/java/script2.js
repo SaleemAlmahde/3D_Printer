@@ -292,17 +292,34 @@ if (startFilter || endFilter) {
     if (payment.remainingSYP === undefined) payment.remainingSYP = safeTotalSYP - (payment.paidSYP || 0);
     const notes = invoice.notes || '';
 
+    const statusClass = `status-${payment.status || 'unpaid'}`;
+    invoiceCard.classList.add(statusClass);
+
     const formattedShippingDate = invoice.shippingDate 
     ? formatDateToYYYYMMDD(invoice.shippingDate) 
     : '-';
 
     invoiceCard.innerHTML = `
-      <div class="invoice-header">
+      <div class="invoice-header invoice-toggle-area">
         <h4>فاتورة #${invoice.id.toString().padStart(3, '0')}</h4>
         <span class="invoice-date">${invoice.date}</span>
       </div>
 
-      <div class="invoice-body">
+      <div class="invoice-summary">
+        <div class="summary-line-1">
+            <span class="summary-customer"><strong>المشتري : </strong> ${invoice.customerName}</span>
+            <span class="summary-total"><strong>الإجمالي : </strong> ${safeTotalSYP.toLocaleString()} ل.س</span>
+            </div>
+
+            <div class="summary-line-2">
+        ${payment.status === 'paid-partial' ? `
+      <p><strong>المبلغ المدفوع :</strong> ${(payment.paidSYP || 0).toLocaleString()} ل.س</p>
+      <p><strong>المتبقي :</strong> ${(payment.remainingSYP || (safeTotalSYP - (payment.paidSYP || 0))).toLocaleString()} ل.س</p>
+    ` : ''}
+    </div>
+        </div>
+
+      <div class="invoice-body hidden">
         <div class="invoice-info">
           <p><strong>المشتري :</strong> ${invoice.customerName}</p>
           <div class="invoice-contacts-logo">
@@ -316,8 +333,16 @@ if (startFilter || endFilter) {
           <img class="invoice-logo" src="./assets/imgs/log_png-removebg-preview.png">
           </div>
           <p><strong>موعد التسليم :</strong> ${formattedShippingDate || '-'}</p>
-          ${payment.status !== 'paid-partial' ? `<p><strong>حالة الدفع :</strong> ${payment.status === 'unpaid' ? 'لم يدفع' : 'دُفع كامل'}</p>` : ''}
-      
+
+          ${
+            `<p><strong>حالة الدفع :</strong>
+            ${payment.status === 'unpaid' ? 
+            `لم يدفع <i class="fa fa-times-circle" style="color: red;"></i>` : 
+            payment.status === 'paid-partial' ? 
+            `دُفع جزئياً <i class="fa fa-adjust" style="color: yellow;"></i>` : 
+            `دُفع كامل <i class="fa fa-check-circle" style="color: green;"></i>`}
+            `
+          }      
 
           ${notes ? `<p><strong>ملاحظات :</strong> ${notes}</p>` : ''}
 
@@ -331,9 +356,8 @@ if (startFilter || endFilter) {
         <div class="invoice-products hidden">
           <ul>${productsHTML}</ul>
         </div>
-      </div>
 
-      <div class="invoice-footer">
+        <div class="invoice-footer">
   <div class="invoice-info">
     <span class="total">الإجمالي: ${safeTotalSYP.toLocaleString()} ل.س / ${safeTotalUSD}$</span>
 
@@ -341,16 +365,52 @@ if (startFilter || endFilter) {
       <p><strong>المبلغ المدفوع :</strong> ${(payment.paidSYP || 0).toLocaleString()} ل.س</p>
       <p><strong>المتبقي :</strong> ${(payment.remainingSYP || (safeTotalSYP - (payment.paidSYP || 0))).toLocaleString()} ل.س</p>
     ` : ''}
-
-    
   </div>
-
   <button class="btn-view" onclick="editInvoice(${invoice.id})">تعديل الفاتورة</button>
 </div>
-
+      </div>
     `;
 
+    
+
     invoicesDiv.appendChild(invoiceCard);
+
+    // ------------------------------------------------------------------
+    // ⬇️ 🎯 المنطقة الصحيحة لإضافة منطق التبديل الرئيسي 🎯 ⬇️
+    // ------------------------------------------------------------------
+
+    const toggleArea = invoiceCard.querySelector(".invoice-toggle-area");
+const summaryContainer = invoiceCard.querySelector(".invoice-summary");
+const detailsContainer = invoiceCard.querySelector(".invoice-body");
+
+// 2. معالج الحدث الجديد (التعديل الرئيسي يكمن هنا)
+toggleArea.addEventListener("click", (e) => {
+    // نتحقق من أن النقر ليس على زر المنتجات الداخلية
+    if (e.target.closest(".btn-toggle-products")) return;
+
+    // تبديل حالة الإظهار/الإخفاء بين الملخص والتفاصيل:
+    // إذا كان الملخص ظاهراً، سنخفيه. وإذا كان مخفياً، سنظهره.
+    summaryContainer.classList.toggle("hidden"); 
+    
+    // إذا كان البودي (التفاصيل) مخفياً، سنظهره. وإذا كان ظاهراً، سنخفيه.
+    detailsContainer.classList.toggle("hidden"); 
+
+    // ✅ منطق طي المنتجات (لضمان التناسق)
+    if (detailsContainer.classList.contains("hidden")) {
+        // إذا كان البودي مُخفى (أي الفاتورة مطوية الآن)، يجب طي المنتجات الداخلية.
+        const productsDiv = invoiceCard.querySelector(".invoice-products");
+        const toggleProductsBtn = invoiceCard.querySelector(".btn-toggle-products");
+        const toggleProductsIcon = toggleProductsBtn ? toggleProductsBtn.querySelector("i") : null;
+        
+        // نطوي المنتجات إذا كانت مفتوحة
+        if (productsDiv && !productsDiv.classList.contains("hidden")) {
+            productsDiv.classList.add("hidden"); 
+            if (toggleProductsIcon) {
+                toggleProductsIcon.classList.replace("fa-chevron-up", "fa-chevron-down");
+            }
+        }
+    }
+});
 
     // ✅ إظهار/إخفاء زر تعديل الفاتورة
     invoiceCard.addEventListener("click", (e) => {
@@ -1804,4 +1864,50 @@ function formatDateToYYYYMMDD(dateSource) {
     const day = String(date.getDate()).padStart(2, '0');
     
     return `${year}/${month}/${day}`;
+}
+
+// ✅ ملاحظة: هذه الدالة لم تعد تحتاج إلى document.getElementById() لأننا مررنا الزر مباشرة
+function toggleAllInvoicesAction(clickedButton) {
+    
+    const allInvoices = document.querySelectorAll(".invoice-card"); 
+    
+    if (allInvoices.length === 0) return;
+
+    // 1. تحديد حالة الفواتير الحالية
+    const firstBody = allInvoices[0].querySelector(".invoice-body");
+    const isCurrentlyHidden = firstBody.classList.contains("hidden");
+    
+    // 2. تحديد الأيقونة والنص الجديد لزر FAB
+    const newText = isCurrentlyHidden ? "إغلاق الكل" : "فتح الكل";
+    const newIconClass = isCurrentlyHidden ? "fa-compress-arrows-alt" : "fa-expand-arrows-alt";
+    
+    // 3. تحديث أيقونة ونصوص زر FAB (باستخدام clickedButton الذي مررناه)
+    const iconElement = clickedButton.querySelector("i");
+    iconElement.className = `fa ${newIconClass}`;
+    clickedButton.querySelector("span").textContent = newText;
+
+    // 4. تطبيق التبديل على كل فاتورة
+    allInvoices.forEach(invoiceCard => {
+        const summary = invoiceCard.querySelector(".invoice-summary");
+        const body = invoiceCard.querySelector(".invoice-body");
+        
+        // الأيقونات الداخلية (مؤشر السهم)
+        const productsDiv = invoiceCard.querySelector(".invoice-products");
+        const productsToggleIcon = invoiceCard.querySelector(".btn-toggle-products i");
+
+        // عملية التبديل
+        if (isCurrentlyHidden) { 
+            // فتح الكل
+            summary.classList.add("hidden");
+            body.classList.remove("hidden");
+        } else { 
+            // إغلاق الكل
+            summary.classList.remove("hidden");
+            body.classList.add("hidden");
+            
+            // نضمن طي المنتجات الداخلية وتحديث أيقونتها إلى الأسفل
+            if (productsDiv) productsDiv.classList.add("hidden"); 
+            if (productsToggleIcon) productsToggleIcon.classList.replace("fa-chevron-up", "fa-chevron-down");
+        }
+    });
 }
