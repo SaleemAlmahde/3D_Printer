@@ -1442,3 +1442,8 @@ ease;
     line-height: 1.2em;
     max-height: calc(1.2em * 4);
 } */
+
+.summary-total{
+  font-weight: bold;
+    font-size: 1.1rem;
+}

@@ -221,7 +221,7 @@ function showModal(id) {
         // عرض الألوان كدوائر
         let colorsHTML = '';
         if (product.colors && product.colors.length > 0) {
-            colorsHTML = `<div class="color-container" id="colorContainer" style="display:flex; gap:10px; margin:12px 0; align-items:center;">
+            colorsHTML = `<div class="color-container" id="colorContainer" style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
                 ${product.colors.filter(c => c.code).map(c => `
                     <div class="color-circle" title="${c.name}" onclick="selectColor(this, '${id}', '${c.name}', '${c.code}')" style="width:28px; height:28px; border-radius:50%; background:${c.code}; cursor:pointer; box-shadow:0 2px 6px #0001;"></div>
                 `).join('')}
@@ -229,13 +229,17 @@ function showModal(id) {
         }
 
         modelContent.innerHTML = `
+        <button class="close-modal-btn" onclick="closeModal()">
+            <i class="fa fa-times"></i> 
+        </button>
+        
                 <div class="container">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; flex-direction:column; justify-content:space-between; align-items:center;">
                 <div>
                         <h2>${product.name}</h2>
-                        <h3>${product.price}</h3>
-                        </div>
                         <img src="./${product.images[0]}" alt="${product.name}">
+                        </div>
+                        <h3>${product.price} ل.س</h3>
                         </div>
                         ${colorsHTML}
                         <input type="number" id="pQ" placeholder="الكمية" required>

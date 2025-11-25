@@ -307,8 +307,8 @@ if (startFilter || endFilter) {
 
       <div class="invoice-summary">
         <div class="summary-line-1">
-            <span class="summary-customer"><strong>المشتري : </strong> ${invoice.customerName}</span>
-            <span class="summary-total"><strong>الإجمالي : </strong> ${safeTotalSYP.toLocaleString()} ل.س</span>
+            <span class="summary-customer"><strong >المشتري : </strong> ${invoice.customerName}</span>
+            <span class="summary-total"><strong class="summary-total" >الإجمالي : </strong> ${safeTotalSYP.toLocaleString()} ل.س</span>
             </div>
 
             <div class="summary-line-2">
