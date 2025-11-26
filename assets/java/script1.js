@@ -161,7 +161,7 @@ function loadMoreProducts() {
             <div class="slider">
             ${product.images.map((imgSrc , index)=>`<div class="slide"><img src="${imgSrc}" alt="Image ${index+1}"></div>`).join('')}
             </div>
-            <button class="prev" onclick="prev"event.stopPropagation(); prevSlide(this)">&#10095;</button>
+            <button class="prev" onclick="event.stopPropagation(); prevSlide(this)">&#10095;</button>
             <button class="next" onclick="event.stopPropagation(); nextSlide(this)">&#10094;</button>
             </div>
             <div class="dots-container">
@@ -232,7 +232,7 @@ function showModal(id) {
         <button class="close-modal-btn" onclick="closeModal()">
             <i class="fa fa-times"></i> 
         </button>
-        
+
                 <div class="container">
                 <div style="display:flex; flex-direction:column; justify-content:space-between; align-items:center;">
                 <div>
@@ -399,19 +399,16 @@ window.onload = function () {
 
 // دالة لتهيئة كل سلايدر
 function initializeSlider(card) {
-    const slider = card.querySelector('.slider');
-    const slides = card.querySelectorAll('.slide');
-    const dots = card.querySelectorAll('.dot');
-    
-    let currentIndex = 0;
-    let autoSlideInterval;
+    const sliderContainer = card.querySelector('.slider-container');
+    const slider = sliderContainer.querySelector('.slider');
+    const slides = sliderContainer.querySelectorAll('.slide');
     
     // حفظ البيانات في عنصر السلايدر
     slider.currentIndex = 0;
     slider.autoSlideInterval = null;
     
-    // تحديث النقاط
-    updateDots(card);
+    // تحديث النقاط الأولي
+    updateDots(sliderContainer, 0);
 }
 
 // تعديل جميع الدوال لتأخذ عنصر السلايدر كمعامل
@@ -432,25 +429,32 @@ function showSlides(sliderContainer, index) {
     
     slider.currentIndex = currentIndex;
     slider.style.transform = `translateX(${currentIndex * 33.333}%)`;
-    updateDots(sliderContainer);
+    updateDots(sliderContainer, currentIndex);
 }
 
 function nextSlide(button) {
     const sliderContainer = button.parentElement;
     const slider = sliderContainer.querySelector('.slider');
-    showSlides(sliderContainer, (slider.currentIndex || 0) + 1);
+    const slides = sliderContainer.querySelectorAll('.slide');
+    let currentIndex = slider.currentIndex || 0;
+    
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    showSlides(sliderContainer, currentIndex);
 }
 
 function prevSlide(button) {
     const sliderContainer = button.parentElement;
     const slider = sliderContainer.querySelector('.slider');
-    showSlides(sliderContainer, (slider.currentIndex || 0) - 1);
+    const slides = sliderContainer.querySelectorAll('.slide');
+    let currentIndex = slider.currentIndex || 0;
+    
+    currentIndex = (currentIndex + 1) % slides.length;
+    showSlides(sliderContainer, currentIndex);
 }
 
-function updateDots(sliderContainer) {
-    const dots = sliderContainer.querySelectorAll('.dot');
-    const slider = sliderContainer.querySelector('.slider');
-    const currentIndex = slider.currentIndex || 0;
+function updateDots(sliderContainer, currentIndex) {
+    const dotsContainer = sliderContainer.nextElementSibling;
+    const dots = dotsContainer.querySelectorAll('.dot');
     
     dots.forEach((dot, index) => {
         if (index === currentIndex) {
@@ -467,9 +471,10 @@ function startAutoSlide(sliderContainer) {
         clearInterval(slider.autoSlideInterval);
     }
     slider.autoSlideInterval = setInterval(() => {
-    nextSlide(sliderContainer.querySelector('.next'));
-}, 4000);
+        nextSlide(sliderContainer.querySelector('.next'));
+    }, 4000);
 }
+
 
 function stopAutoSlide(sliderContainer) {
     const slider = sliderContainer.querySelector('.slider');

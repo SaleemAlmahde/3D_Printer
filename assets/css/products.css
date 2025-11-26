@@ -230,6 +230,39 @@
     background-color: #f0f0f0;
 }
 
+/* ========================== */
+/* تنسيق الصورة داخل المودل (#modal) */
+/* ========================== */
+#modal img {
+    /* 1. الحد الأقصى للعرض: يضمن عدم تجاوز عرض الصورة */
+    max-width: 100%; 
+    /* هذا يضمن أن الصورة لن تكون أبداً أوسع من العنصر الأب الذي يحتويها */
+
+    /* 2. تحديد ارتفاع أقصى (اختياري لكن موصى به) */
+    max-height: 250px; 
+    /* يمنع الصورة من أن تصبح طويلة جداً في الشاشات الكبيرة */
+
+    /* 3. لضمان ظهور الصورة بشكل صحيح دون تشويه */
+    height: auto;
+    width: auto; 
+    
+    /* 4. جعل الصورة كتلة (Block) وضبطها في المنتصف */
+    display: block;
+    margin: 10px auto; 
+
+    /* 5. تحسينات بصرية (اختياري) */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 💡 تحسين لمظهر الصورة داخل الـ div الحالي */
+#modal .container > div:first-child img {
+    /* إذا كانت صورتك داخل هذا الـ div تحديداً */
+    width: 100%;
+    max-width: 300px; /* يمكن تعديل هذا الرقم ليكون الحجم "الممتاز" الذي تريده */
+    max-height: unset; /* لإلغاء قيود الارتفاع إذا كان الـ max-width كافياً */
+}
+
 /* قسم الزر */
 .load-more-section {
   text-align: center;
@@ -326,34 +359,6 @@
     box-shadow: 0 0 0 4px rgba(77, 77, 77, 0.25); /* ظل رمادي خفيف */
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Main container for the slider - this holds the images and navigation buttons */
 .slider-container {
     position: relative; /* Allows for absolute positioning of navigation buttons */
@@ -430,7 +435,7 @@
     height: 15px; /* Fixed height for the dots */
     width: 15px; /* Fixed width for the dots */
     margin: 0 5px; /* Spacing between the dots */
-    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+    background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent white background */
     border-radius: 50%; /* Makes the dots round */
     display: inline-block; /* Ensures dots are inline */
     cursor: pointer; /* Changes cursor to pointer on hover */
@@ -439,5 +444,5 @@
 
 /* Styling for the active dot - indicates the current slide */
 .dot.active {
-    background-color: rgba(255, 255, 255, 1); /* Solid white background for the active dot */
+    background-color: var(--main-color); /* Solid white background for the active dot */
 }
