@@ -25,7 +25,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    images: ["assets/imgs/try.jpg"]
   },
   {
     id: 2,

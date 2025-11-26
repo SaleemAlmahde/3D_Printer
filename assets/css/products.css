@@ -371,13 +371,12 @@
 .slider {
     display: flex; /* Enables flexbox layout to line up slides horizontally */
     transition: transform 0.4s ease-in-out; /* Smooth transition when sliding between images */
-    width: 300%;
 }
 
 /* Each individual slide - takes up full width of the container */
 .slide {
-    min-width: 33.333%; /* Each slide takes up 100% of the slider container's width */
     height: 320px; /* Fixed height for each slide */
+    flex-shrink: 0; /* مهم: يمنع انكماش الشرائح */
 }
 
 /* Ensures that images fill the slide area while maintaining aspect ratio */
@@ -445,4 +444,21 @@
 /* Styling for the active dot - indicates the current slide */
 .dot.active {
     background-color: var(--main-color); /* Solid white background for the active dot */
+}
+
+/* ✅ التعديل الجديد: عندما تكون هناك صورة واحدة فقط */
+.dots-container.single-dot .dot {
+    background-color: var(--section-background); /* نفس لون خلفية الكارد */
+    cursor: default; /* إزالة شكل المؤشر */
+    transform: scale(0.8); /* تصغير حجم النقطة قليلاً */
+}
+
+.dots-container.single-dot .dot.active {
+    background-color: var(--section-background); /* نفس اللون حتى عندما تكون active */
+}
+
+/* إخفاء الأزرار والنقاط إذا كان هناك صورة واحدة فقط */
+.slider-container:has(.slide:only-child) .prev,
+.slider-container:has(.slide:only-child) .next {
+    display: none;
 }
