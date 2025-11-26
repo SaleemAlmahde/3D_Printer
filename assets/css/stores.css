@@ -46,23 +46,21 @@
 
 #scrollTopBtn {
     position: fixed;
-    bottom: 100px;
-    left: 30px;
+    bottom: 90px;
+    left: 20px;
     z-index: 1000;
-    background-color: rgb(4, 146, 119);
+    background-color: #07A98C;
     color: white;
-    width: 50px;
-    height: 50px;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
     font-size: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 15px;
-    border: none;
-    border-radius: 50%;
-    
-    /* إعدادات الأنيميشن */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.4s ease;
@@ -81,14 +79,9 @@
 
 #addStoreBtn{
     position: fixed;
-    bottom: 30px;
-    left: 30px;
+    bottom: 20px;
+    left: 20px;
     z-index: 1000;
-    background-color: rgb(4, 146, 119);
-    color: white;
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -100,7 +93,20 @@
     border-image: initial;
     border-radius: 50%;
     transition: 0.3s;
+
+
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #07A98C;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 24px;
+    cursor: pointer;
 }
+
+
 
 .hidden {
     display: none !important;

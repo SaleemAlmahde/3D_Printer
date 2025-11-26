@@ -1177,14 +1177,14 @@
 #scrollTopBtn {
     position: fixed;
     bottom: 90px;
-    left: 30px;
+    left: 20px;
     z-index: 1000;
-    background-color: #049277;
+    background-color: #07A98C;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     font-size: 20px;
     cursor: pointer;
     display: none;
@@ -1331,6 +1331,26 @@ ease;
     border-radius: 5px;
 }
 
+.modal-actions{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.modal-actions .btn{
+background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.btn-secondary{
+  background: linear-gradient(135deg, #ae2727, #cc3b2e) !important;
+}
+
 /* Overlay for Filter Modal */
 .overlay {
     position: fixed;
@@ -1430,18 +1450,6 @@ ease;
   justify-content: space-between;
   align-items: center;
 }
-
-/* .invoice-body p {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal; 
-    word-break: break-word;
-    line-height: 1.2em;
-    max-height: calc(1.2em * 4);
-} */
 
 .summary-total{
   font-weight: bold;

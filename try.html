@@ -1,95 +1,0 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Image Slider</title>
-    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/css/try.css">
-</head>
-<body>
-    <div class="background">
-        <h1 class="slider-title">Slider</h1>
-        <div class="slider-container" onmouseover="">
-            <div class="slider">
-                <div class="slide"><img src="https://images.unsplash.com/photo-1725120344808-420e96dd8fdf?q=80&w=2026&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image 1"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1724931282671-2d3bcd6de8f2?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image 2"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1724875299388-7257f4af1cf9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image 3"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1724770646663-2a806ed04ca4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image 4"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1723675510074-6e9f59fd3af0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image 5"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1724690416953-c787bc34b56f?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image 6"></div>
-            </div>
-            <button class="prev">&#10094;</button>
-            <button class="next">&#10095;</button>
-        </div>
-        <div class="dots-container">
-            <span class="dot" data-index="0"></span>
-            <span class="dot" data-index="1"></span>
-            <span class="dot" data-index="2"></span>
-            <span class="dot" data-index="3"></span>
-            <span class="dot" data-index="4"></span>
-            <span class="dot" data-index="5"></span>
-        </div>
-    </div>
-
-    <div class="fab-container">
-    
-    <div id="fabSpeedDial" class="fab-menu hidden">
-        <button id="openFilterModalBtn" class="fab-item" onclick="openFilterModal()">
-            <i class="fa fa-filter"></i>
-            <span>🔍 تصفية وعرض</span>
-        </button>
-        <button id="addByCodeBtn" class="fab-item" onclick="openNewInvoiceModel(null, true); toggleFabMenu();">
-            <i class="fa fa-code"></i>
-            <span></> إضافة عبر الكود</span>
-        </button>
-        <button id="addNewInvoiceBtn" class="fab-item" onclick="openNewInvoiceModel(); toggleFabMenu();">
-            <i class="fa fa-file-invoice"></i>
-            <span>+ فاتورة جديدة</span>
-        </button>
-    </div>
-
-    <button id="mainFab" class="fab-main" onclick="toggleFabMenu()">
-        <i class="fa fa-plus"></i> 
-    </button>
-</div>
-
-<div id="filterModal" class="modal hidden">
-    <div class="modal-content bottom-sheet">
-        <h2>🔍 خيارات التصفية والترتيب</h2>
-        <hr>
-        <div id="filterOptionsContainer">
-            <label for="paymentFilter">حالة الدفع:</label>
-            <select id="paymentFilter" class="full-width-select">
-                <option value="all">الكل</option>
-                <option value="unpaid">غير مدفوع</option>
-                <option value="paid-partial">دفع جزئي</option>
-                <option value="paid-full">مدفوع بالكامل</option>
-            </select>
-            
-            <label for="storeFilter">المتجر:</label>
-            <select id="storeFilter" class="full-width-select">
-                <option value="all">جميع المتاجر</option>
-                </select>
-
-            <label for="sortOption">الترتيب حسب:</label>
-            <select id="sortOption" class="full-width-select">
-                <option value="date_desc">تاريخ الإضافة (الأحدث)</option>
-                <option value="date_asc">تاريخ الإضافة (الأقدم)</option>
-                <option value="total_desc">قيمة الفاتورة (الأعلى)</option>
-                <option value="remaining_desc">المبلغ المتبقي (الأعلى)</option>
-            </select>
-        </div>
-
-        <div class="modal-actions">
-            <button class="btn btn-primary" onclick="applyFiltersAndSort()">تطبيق الفلاتر</button>
-            <button class="btn btn-secondary" onclick="closeFilterModal()">إغلاق</button>
-        </div>
-    </div>
-</div>
-<div id="filterOverlay" class="overlay hidden"></div>
-
-
-    <script src="assets/java/try.js"></script>
-</body>
-</html>

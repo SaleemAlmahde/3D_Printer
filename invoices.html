@@ -20,11 +20,6 @@
 <body>
     <!-- Nav Section -->
     <nav>
-        <div class="nav-logo">
-            <img src="assets/imgs/logo.jpg" alt="logo">
-            <h2>3D Printer</h2>
-        </div>
-
         <div class="container">
             <ul class="nav-menu">
                 <a href="index.html"><li>الصفحة الرئيسية</li></a>
@@ -32,6 +27,8 @@
                 <a href="cart.html"><li>السلة</li></a>
                 <a href="stores.html"><li>المتاجر</li></a>
             </ul>
+
+            <img src="assets/imgs/3dp web logo.png" alt="logo">
         </div>
     </nav>    
 
@@ -48,16 +45,6 @@
 
 <!-- زر إضافة فاتورة -->
 <button id="addInvoiceBtn" class="add-invoice-btn" onclick="openNewInvoiceModel()">إضافة فاتورة</button>
-
-<!-- زر اضافة فاتورة عبر الكود -->
-<!-- <div id="invoice-code-tools">
-
-  <button class="add-invoice-btn-code" onclick="toggleInvoiceCodeInput()">اضف فاتورة عبر الكود</button>
-  <div id="invoiceCodeInputModal" class="hidden-code-input">
-  <input id="pasteInvoiceCodeInput" placeholder="ألصق كود الفاتورة هنا"></input>
-    <button onclick="onPasteCode()">استيراد الكود (يفتح المودال أو يحفظ)</button>
-</div>
-</div> -->
 
 <!-- Modal -->
     <div id="newInvoiceOverlay" class="hidden" onclick="closeModal()"></div>
@@ -140,10 +127,6 @@
           <label>الإجمالي (ل.س):</label>
           <span id="totalSYP">0</span>
         </div>
-        <div class="total-item">
-          <label>الإجمالي ($):</label>
-          <span id="totalUSD">0</span>
-        </div>
       </div>
 
       <button type="button" class="save-invoice-btn" onclick="saveInvoice()">حفظ الفاتورة</button>
@@ -206,7 +189,7 @@
         </button>
 
         <button id="toggleAllInvoicesFabBtn" class="fab-item" onclick="toggleAllInvoicesAction(this)">
-            <i class="fa fa-expand-arrows-alt"></i>
+            <i class="fa fa-expand"></i>
             <span>فتح الكل</span>
         </button>
 

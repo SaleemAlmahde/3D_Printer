@@ -22,6 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     storeOverlay.addEventListener('click', closeStoreModal);
 
+    // تهيئة البحث
+    const searchInput = document.getElementById('storeSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchStores);
+        searchInput.addEventListener('keyup', searchStores);
+    }
+
     // 2. التحقق وبدء عرض المتاجر
     if (document.getElementById('storesContainer')) {
         renderStores();
@@ -125,26 +132,36 @@ function getInvoices() {
  * @returns {number} إجمالي المبلغ المتبقي بالليرة السورية.
  */
 function calculateStoreDebt(storeId) {
-    const allInvoices = getInvoices();
-    let totalDebt = 0;
+    try {
+        const allInvoices = getInvoices();
+        let totalDebt = 0;
 
-    // فلترة الفواتير المرتبطة بهذا المتجر فقط
-    const storeInvoices = allInvoices.filter(inv => inv.posId === storeId);
+        const storeInvoices = allInvoices.filter(inv => inv.posId === storeId);
 
-    storeInvoices.forEach(invoice => {
-        // نجمع المتبقي فقط من قسم الدفع
-        // يتم التحقق من وجود payment و remainingSYP لتجنب الأخطاء
-        const remaining = (invoice.payment && invoice.payment.remainingSYP) || 0;
-        totalDebt += remaining;
-    });
-    
-    return totalDebt;
+        storeInvoices.forEach(invoice => {
+            const remaining = (invoice.payment && invoice.payment.remainingSYP) || 0;
+            totalDebt += Number(remaining) || 0;
+        });
+        
+        return totalDebt;
+    } catch (error) {
+        console.error('Error calculating store debt:', error);
+        return 0;
+    }
 }
 
 // 💡 تذكر أن دالة getStores() و setStores(stores) تم تعريفها مسبقاً
 
+// ======================================================
+// 🔍 دالة البحث (مطلوبة من حقل البحث في HTML)
+// ======================================================
+function searchStores() {
+    const searchInput = document.getElementById('storeSearchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    renderStores(searchTerm);
+}
 
-function renderStores() {
+function renderStores(searchTerm = '') {
     const storesContainer = document.getElementById('storesContainer');
     if (!storesContainer) return;
 
@@ -156,20 +173,43 @@ function renderStores() {
         return;
     }
 
-    stores.forEach(store => {
+    // فلترة المتاجر بناءً على مصطلح البحث
+    const filteredStores = stores.filter(store => {
+        if (!searchTerm) return true; // لا فلترة إذا كان الحقل فارغاً
+
+        const totalDebt = calculateStoreDebt(store.id);
+        
+        // البحث في جميع الحقول النصية
+        const searchableText = [
+            store.name || '',
+            store.phone || '',
+            store.location || '',
+            totalDebt.toString()
+        ].join(' ').toLowerCase();
+
+        return searchableText.includes(searchTerm);
+    });
+
+    // التحقق من النتائج بعد الفلترة
+    if (filteredStores.length === 0) {
+        storesContainer.innerHTML = '<p class="empty-list-msg">لا يوجد نتائج تطابق معيار البحث.</p>';
+        return;
+    }
+
+    // عرض المتاجر المفلترة
+    filteredStores.forEach(store => {
         const totalDebt = calculateStoreDebt(store.id);
         const storeCard = document.createElement('div');
         storeCard.className = 'store-card';
-        // 💡 النقر على الكارد يفتح الأوفرلاي بدلاً من التعديل مباشرة
         storeCard.setAttribute('onclick', `showStoreActions(${store.id})`);
 
         storeCard.innerHTML = `
-            <h2>${store.name}</h2>
+            <h2>${store.name || 'بدون اسم'}</h2>
             
             <div class="bottom-store-card">
                 <div class="store-details">
-                    <p><strong> <i class="fa fa-phone"></i> الهاتف :</strong> ${store.phone}</p>
-                    <p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${store.location}</p>
+                    <p><strong> <i class="fa fa-phone"></i> الهاتف :</strong> ${store.phone || 'غير محدد'}</p>
+                    <p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${store.location || 'غير محدد'}</p>
                     <p class="store-debt-info">
                         <strong> <i class="fa fa-money"></i> المديونية المتبقية :</strong> 
                         <span class="${totalDebt > 0 ? 'debt-due' : 'debt-clear'}">
@@ -243,13 +283,6 @@ function confirmStoreDelete() {
     cancelStoreDelete();
     closeStoreModal();
     renderStores(); // إعادة عرض القائمة
-}
-
-// دالة البحث (مطلوبة من حقل البحث في HTML)
-function searchStores() {
-    // 💡 سنقوم بتعريف منطق البحث هنا، لكن حالياً نتركها فارغة لتجنب أخطاء "الدالة غير معرفة"
-    // يمكنك إضافة منطق الفلترة لاحقاً في دالة renderStores()
-    renderStores();
 }
 
 const scrollTopBtn = document.getElementById("scrollTopBtn"); // زر العودة للأعلى

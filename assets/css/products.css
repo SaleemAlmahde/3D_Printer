@@ -461,4 +461,15 @@
 .slider-container:has(.slide:only-child) .prev,
 .slider-container:has(.slide:only-child) .next {
     display: none;
+} 
+/* تأثير للنقاط في السلايدر النشط */
+.product-card.active-card .dot.active {
+    background-color: var(--main-color);
+    transform: scale(1.2);
+}
+
+/* تأثير للكارد النشط */
+.product-card.active-card {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }

@@ -154,14 +154,17 @@ function loadMoreProducts() {
     nextProducts.forEach((product, index) => {
     const card = document.createElement("div");
     card.classList.add("product-card");
-    card.setAttribute("onclick", "addActiveCard(this)");
+    
+    // استخدام الدالة الجديدة لتفعيل المنتج
+    card.setAttribute("onclick", "activateProductCard(this)");
 
-    // ✅ تحديد إذا كان هناك صورة واحدة فقط
     const isSingleImage = product.images.length === 1;
     const dotsContainerClass = isSingleImage ? 'dots-container single-dot' : 'dots-container';
 
     card.innerHTML = `
-        <div class="slider-container" onmouseover="${!isSingleImage ? 'stopAutoSlide(this)' : ''}" onmouseout="${!isSingleImage ? 'startAutoSlide(this)' : ''}">
+        <div class="slider-container" 
+             onmouseover="${!isSingleImage ? `startAutoSlideForProduct(this)` : ''}" 
+             onmouseout="${!isSingleImage ? `stopAutoSlideForProduct(this)` : ''}">
             <div class="slider">
                 ${product.images.map((imgSrc, index) => `
                     <div class="slide"><img src="${imgSrc}" alt="Image ${index+1}"></div>
@@ -175,7 +178,7 @@ function loadMoreProducts() {
         <div class="${dotsContainerClass}">
             ${product.images.map((imgSrc, index) => `
                 <span class="dot" data-index="${index}" 
-                    ${!isSingleImage ? `onclick="event.stopPropagation(); stopAutoSlide(this.parentElement.previousElementSibling); showSlides(this.parentElement.previousElementSibling, ${index}); startAutoSlide(this.parentElement.previousElementSibling)"` : ''}>
+                    ${!isSingleImage ? `onclick="event.stopPropagation(); stopAutoSlideForProduct(this.parentElement.previousElementSibling); showSlides(this.parentElement.previousElementSibling, ${index})"` : ''}>
                 </span>
             `).join('')}
         </div>
@@ -191,12 +194,10 @@ function loadMoreProducts() {
     `;
     productsDiv.appendChild(card);
 
-    // تهيئة السلايدر لهذا المنتج فقط إذا كان هناك أكثر من صورة
     if (!isSingleImage) {
         initializeSlider(card);
     }
 
-    // تأثير الظهور المتتالي
     setTimeout(() => card.classList.add("show"), 100 * index);
 });
 
@@ -411,18 +412,66 @@ window.onload = function () {
     loadMoreProducts();
 };
 
+// متغير لتتبع السلايدر النشط حاليًا
+let activeSlider = null;
+
+// دالة لبدء التمرير التلقائي لمنتج معين
+function startAutoSlideForProduct(sliderContainer) {
+    // إيقاف أي سلايدر نشط سابقًا
+    if (activeSlider && activeSlider !== sliderContainer) {
+        stopAutoSlide(activeSlider);
+    }
+    
+    // بدء التمرير التلقائي للسلايدر الحالي
+    startAutoSlide(sliderContainer);
+    activeSlider = sliderContainer;
+}
+
+// دالة لإيقاف التمرير التلقائي لمنتج معين
+function stopAutoSlideForProduct(sliderContainer) {
+    stopAutoSlide(sliderContainer);
+    if (activeSlider === sliderContainer) {
+        activeSlider = null;
+    }
+}
+
+// دالة لتفعيل كارد المنتج
+function activateProductCard(card) {
+    // إلغاء تفعيل جميع الكروت الأخرى
+    document.querySelectorAll('.product-card').forEach(c => {
+        c.classList.remove('active-card');
+        if (c !== card) {
+            const otherSlider = c.querySelector('.slider-container');
+            if (otherSlider) {
+                stopAutoSlideForProduct(otherSlider);
+            }
+        }
+    });
+    
+    // تفعيل الكارد الحالي
+    card.classList.add('active-card');
+    
+    // بدء التمرير التلقائي إذا كان هناك أكثر من صورة
+    const sliderContainer = card.querySelector('.slider-container');
+    const slides = card.querySelectorAll('.slide');
+    
+    if (sliderContainer && slides.length > 1) {
+        startAutoSlideForProduct(sliderContainer);
+    }
+}
+
 // دالة لتهيئة كل سلايدر
 function initializeSlider(card) {
     const sliderContainer = card.querySelector('.slider-container');
     const slider = sliderContainer.querySelector('.slider');
     const slides = sliderContainer.querySelectorAll('.slide');
 
-    // ✅ التحقق من أن هناك أكثر من صورة قبل التهيئة
+    // التحقق من أن هناك أكثر من صورة قبل التهيئة
     if (slides.length <= 1) {
-        return; // لا داعي لتهيئة السلايدر إذا كانت صورة واحدة
+        return;
     }
     
-    // ✅ التعديل: حساب العرض الديناميكي بناءً على عدد الصور
+    // حساب العرض الديناميكي بناءً على عدد الصور
     const slideCount = slides.length;
     slider.style.width = `${slideCount * 100}%`;
     
@@ -433,13 +482,13 @@ function initializeSlider(card) {
     
     // حفظ البيانات في عنصر السلايدر
     slider.currentIndex = 0;
-    slider.slideCount = slideCount; // حفظ عدد الصور
+    slider.slideCount = slideCount;
     
     // تحديث النقاط الأولي
     updateDots(sliderContainer, 0);
 }
 
-// تعديل جميع الدوال لتأخذ عنصر السلايدر كمعامل
+// دالة لعرض شرائح محددة
 function showSlides(sliderContainer, index) {
     const slider = sliderContainer.querySelector('.slider');
     const slides = sliderContainer.querySelectorAll('.slide');
@@ -457,34 +506,45 @@ function showSlides(sliderContainer, index) {
     
     slider.currentIndex = currentIndex;
     
-    // ✅ التعديل: حساب النسبة المئوية بناءً على عدد الصور
+    // حساب النسبة المئوية بناءً على عدد الصور
     const translateXValue = currentIndex * (100 / slideCount);
     slider.style.transform = `translateX(${translateXValue}%)`;
     
     updateDots(sliderContainer, currentIndex);
 }
 
-// باقي الدوال تبقى كما هي مع تعديلات طفيفة
+// دالة للانتقال للصورة التالية
+// دالة للانتقال للصورة التالية (معدلة)
 function nextSlide(button) {
     const sliderContainer = button.parentElement;
     const slider = sliderContainer.querySelector('.slider');
     const slideCount = slider.slideCount || sliderContainer.querySelectorAll('.slide').length;
-    let currentIndex = slider.currentIndex || 0;
     
+    if (slideCount <= 1) return;
+    
+    let currentIndex = slider.currentIndex || 0;    
     currentIndex = (currentIndex - 1 + slideCount) % slideCount;
+
+    console.log('➡️ الانتقال للصورة:', currentIndex);
     showSlides(sliderContainer, currentIndex);
 }
 
+// دالة للانتقال للصورة السابقة (معدلة)
 function prevSlide(button) {
     const sliderContainer = button.parentElement;
     const slider = sliderContainer.querySelector('.slider');
     const slideCount = slider.slideCount || sliderContainer.querySelectorAll('.slide').length;
-    let currentIndex = slider.currentIndex || 0;
     
+    if (slideCount <= 1) return;
+    
+    let currentIndex = slider.currentIndex || 0;
     currentIndex = (currentIndex + 1) % slideCount;
+    
+    console.log('⬅️ الانتقال للصورة:', currentIndex);
     showSlides(sliderContainer, currentIndex);
 }
 
+// دالة لتحديث النقاط
 function updateDots(sliderContainer, currentIndex) {
     const dotsContainer = sliderContainer.nextElementSibling;
     const dots = dotsContainer.querySelectorAll('.dot');
@@ -498,19 +558,38 @@ function updateDots(sliderContainer, currentIndex) {
     });
 }
 
+// دالة لبدء التمرير التلقائي (معدلة)
 function startAutoSlide(sliderContainer) {
     const slider = sliderContainer.querySelector('.slider');
+    const slideCount = slider.slideCount || sliderContainer.querySelectorAll('.slide').length;
+    
+    if (slideCount <= 1) {
+        console.log('❌ صورة واحدة فقط - لا داعي للتمرير التلقائي');
+        return;
+    }
+    
+    // تأكد من إلغاء أي فاصل زمني سابق
     if (slider.autoSlideInterval) {
         clearInterval(slider.autoSlideInterval);
+        slider.autoSlideInterval = null;
     }
+    
+    console.log('🔄 بدء التمرير التلقائي...');
+    
     slider.autoSlideInterval = setInterval(() => {
-        nextSlide(sliderContainer.querySelector('.next'));
+        const nextBtn = sliderContainer.querySelector('.next');
+        if (nextBtn) {
+            console.log('⏩ التمرير التلقائي للصورة التالية');
+            nextSlide(nextBtn);
+        }
     }, 4000);
 }
 
+// دالة لإيقاف التمرير التلقائي (معدلة)
 function stopAutoSlide(sliderContainer) {
     const slider = sliderContainer.querySelector('.slider');
     if (slider.autoSlideInterval) {
+        console.log('⏹️ إيقاف التمرير التلقائي');
         clearInterval(slider.autoSlideInterval);
         slider.autoSlideInterval = null;
     }

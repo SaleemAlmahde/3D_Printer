@@ -1,39 +1,14 @@
 /* Nav Style */
 
 nav {
-  position: relative;
   width: 100%;
   background: linear-gradient(to left, #09c4a4 0%, #049277 100%);
   height: 80px; /* ارتفاع الناف */
-  display: flex;
-  justify-content: start;
-  align-items: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
-/* ===== الشعار فوق الناف جزئياً ===== */
-.nav-logo {
-  position: absolute;
-  top: -35px;
-  left: 10%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  background-color: #fff;
-  border-radius: 15px;
-  padding: 10px 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  
-  /* هذه السطر يجعلها “تدخل” قليلاً داخل الناف */
-  transform: translate(-50%, 25%);
-  z-index: 2;
-}
-
-/* صورة الشعار */
-.nav-logo img {
- width: 120px;
+nav img {
+  width: 120px;
   border-radius: 12px;
   object-fit: cover;
 }
@@ -48,7 +23,7 @@ nav {
 /* قائمة الروابط */
 nav .container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 }
 

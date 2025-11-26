@@ -16,24 +16,22 @@ let currentFilters = { ...DEFAULT_FILTERS };
 function calculateTotals(products) {
     if (!Array.isArray(products)) {
         console.error('calculateTotals: products is not an array', products);
-        return { totalSYP: 0, totalUSD: 0 };
+        return { totalSYP: 0};
     }
     
     try {
         return products.reduce((totals, p) => {
             // التحقق من وجود القيم المطلوبة
             const priceSYP = Number(p.priceSYP) || 0;
-            const priceUSD = Number(p.priceUSD) || 0;
             const quantity = Number(p.quantity) || 0;
             
             return {
-                totalSYP: totals.totalSYP + (priceSYP * quantity),
-                totalUSD: totals.totalUSD + (priceUSD * quantity)
+                totalSYP: totals.totalSYP + (priceSYP * quantity)
             };
-        }, { totalSYP: 0, totalUSD: 0 });
+        }, { totalSYP: 0});
     } catch (error) {
         console.error('Error in calculateTotals:', error, products);
-        return { totalSYP: 0, totalUSD: 0 };
+        return { totalSYP: 0};
     }
 }
 
@@ -61,7 +59,6 @@ function invoiceMatches(invoice, query) {
     invoice.date,
     invoice.shippingDate,
     invoice.totalSYP,
-    invoice.totalUSD
   ];
   if (fields.some(f => includes(f))) return true;
 
@@ -71,7 +68,7 @@ function invoiceMatches(invoice, query) {
   // products (name, color name, color code)
   if (Array.isArray(invoice.products)) {
     for (const p of invoice.products) {
-      if (includes(p.name) || includes(p.quantity) || includes(p.priceSYP) || includes(p.priceUSD)) return true;
+      if (includes(p.name) || includes(p.quantity) || includes(p.priceSYP)) return true;
       if (p.color) {
         if (includes(p.color.name) || includes(p.color.code)) return true;
       }
@@ -283,10 +280,7 @@ if (startFilter || endFilter) {
       `;
     });
 
-    const { totalSYP, totalUSD } = calculateTotals(productsArr);
-        // ✅ إصلاح: استخدام القيم الآمنة
-    const safeTotalSYP = totalSYP || 0;
-    const safeTotalUSD = totalUSD || 0;
+    const safeTotalSYP = Number(invoice.totalSYP) || 0;
 
     const payment = invoice.payment || { status: 'unpaid', paidSYP: 0, remainingSYP: safeTotalSYP };
     if (payment.remainingSYP === undefined) payment.remainingSYP = safeTotalSYP - (payment.paidSYP || 0);
@@ -359,7 +353,7 @@ if (startFilter || endFilter) {
 
         <div class="invoice-footer">
   <div class="invoice-info">
-    <span class="total">الإجمالي: ${safeTotalSYP.toLocaleString()} ل.س / ${safeTotalUSD}$</span>
+    <span class="total">الإجمالي : ${safeTotalSYP.toLocaleString()} ل.س </span>
 
     ${payment.status === 'paid-partial' ? `
       <p><strong>المبلغ المدفوع :</strong> ${(payment.paidSYP || 0).toLocaleString()} ل.س</p>
@@ -462,7 +456,6 @@ function resetForm() {
 
     // إعادة تعيين الإجماليات
     document.getElementById("totalSYP").textContent = "0";
-    document.getElementById("totalUSD").textContent = "0";
 
     // إخفاء حقول الشحن والموقع
     document.getElementById("shippingFields").classList.add("hidden");
@@ -631,14 +624,13 @@ function editInvoice(id) {
 
   // تحديث الإجماليات
   const safeProducts = Array.isArray(invoice.products) ? invoice.products : [];
-  const { totalSYP, totalUSD } = calculateTotals(safeProducts);
+  const { totalSYP } = calculateTotals(safeProducts);
+  
 
     // ✅ إصلاح: استخدام القيم الآمنة
     const safeTotalSYP = totalSYP || 0;
-    const safeTotalUSD = totalUSD || 0;
 
     document.getElementById("totalSYP").textContent = safeTotalSYP.toLocaleString();
-    document.getElementById("totalUSD").textContent = safeTotalUSD.toString();
 
     // تعبئة حالة الدفع والملاحظات إن وجدت
     const paymentStatusEl = document.getElementById('paymentStatus');
@@ -746,9 +738,6 @@ function confirmDelete() {
 // 🟨 دالة الحفظ (إضافة أو تعديل) - تم تحديثها لـ: (1) حل خطأ toLocaleString، (2) حساب الدولار بشكل صحيح.
 function saveInvoice() {
   try {
-    // 💡 سعر الصرف الثابت المستخدم لحساب الدولار
-    const USD_RATE = 1000; 
-
   const form = document.getElementById("invoiceForm");
   const buyerName = document.getElementById("buyerName").value;
   const buyerPhone = document.getElementById("buyerPhone").value;
@@ -803,8 +792,6 @@ function saveInvoice() {
       name,
       quantity,
       priceSYP,
-      // ✅ إصلاح #2: حساب priceUSD مباشرةً من priceSYP المُقرَأ
-      priceUSD: priceSYP / USD_RATE, 
       color: { name: colorName, code: colorCode }
     };
   });
@@ -833,11 +820,10 @@ function saveInvoice() {
   const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
 
   // حساب الإجمالي من المنتجات المختارة
-  const { totalSYP, totalUSD } = calculateTotals(selectedProducts);
+  const { totalSYP} = calculateTotals(selectedProducts);
 
   // استخدام القيم الآمنة (مع أنها أصبحت آمنة بالفعل في calculateTotals)
     const safeTotalSYP = totalSYP || 0;
-    const safeTotalUSD = totalUSD || 0;
 
   if (form.dataset.editingId) {
     // تعديل فاتورة
@@ -868,7 +854,6 @@ function saveInvoice() {
         shippingDate,
         products: selectedProducts,
         totalSYP:safeTotalSYP,
-        totalUSD:safeTotalUSD,
         payment: paymentObj,
         notes,
         posId: posId
@@ -896,13 +881,11 @@ function saveInvoice() {
       phone: buyerPhone,
       city: buyerProvince,
       shipping: deliveryType === "shipping",
-      // نحتفظ بحقلَي شركة الشحن ومعلومات الشحن
       shippingCompany,
       shippingInfo,
       shippingDate,
       products: selectedProducts,
       totalSYP:safeTotalSYP,
-      totalUSD:safeTotalUSD,
       payment: paymentObjNew,
       notes: notesNew,
       posId: posId
@@ -975,7 +958,7 @@ function renderProductsList(searchQuery = '') {
       <div class="product-info">
         <span class="product-name">${product.name}</span>
         <span class="product-price">
-          ${(product.price * 1000).toLocaleString()} ل.س / ${product.price}$
+          ${product.price.toLocaleString()} ل.س 
         </span>
         ${product.shortDisc ? `<span class="product-desc">${product.shortDisc}</span>` : ''}
       </div>
@@ -1110,7 +1093,7 @@ function confirmAddProduct() {
     <div class="product-info">
       <span class="product-name">${product.name}</span>
       <span class="product-qty">x${quantity}</span>
-      <span class="product-price">${(product.price * 1000).toLocaleString()} ل.س</span>
+      <span class="product-price">${product.price.toLocaleString()} ل.س</span>
       <div class="selected-color" style="background-color: ${selectedColor.code}" title="${selectedColor.name}"></div>
     </div>
     <button type="button" class="remove-product" onclick="this.closest('.selected-product').remove(); updateTotals();">
@@ -1161,19 +1144,16 @@ function updateTotals() {
       name,
       quantity,
       color: { name: colorName, code: colorCode },
-      priceSYP: product ? product.price * 1000 : 0,
-      priceUSD: product ? product.price : 0
+      priceSYP: product ? product.price : 0,
     };
   });
 
-  const { totalSYP, totalUSD } = calculateTotals(selectedProducts);
+  const { totalSYP } = calculateTotals(selectedProducts);
   
   // ✅ إصلاح: استخدام القيم الآمنة
   const safeTotalSYP = totalSYP || 0;
-  const safeTotalUSD = totalUSD || 0;
   
   document.getElementById("totalSYP").textContent = safeTotalSYP.toLocaleString();
-  document.getElementById("totalUSD").textContent = safeTotalUSD.toString();
 }
 
 // معالجة البحث عند الكتابة
@@ -1183,28 +1163,6 @@ document.addEventListener('DOMContentLoaded', function() {
   productInput.addEventListener("input", handleProductSearch);
   productInput.addEventListener("focus", () => renderProductsList(productInput.value));
 });
-
-// يجلب آخر فاتورة من localStorage ويولّد لها الكود
-function onGenerateCode() {
-  const arr = JSON.parse(localStorage.getItem('invoices')) || [];
-  if (!arr.length) return alert('لا توجد فواتير في localStorage');
-  const invoice = arr[arr.length - 1];
-  try {
-    const code = encodeInvoice(invoice); // من invoiceCodec.js
-    document.getElementById('generatedInvoiceCode').textContent = code;
-  } catch (e) {
-    console.error(e);
-    alert('خطأ في توليد الكود: ' + (e.message || e));
-  }
-}
-
-// نسخ الكود من الـ pre
-function copyGeneratedCode() {
-  const txt = document.getElementById('generatedInvoiceCode').textContent.trim();
-  if (!txt) return alert('لا يوجد كود للنسخ');
-  navigator.clipboard?.writeText(txt).then(() => alert('تم نسخ الكود'), () => alert('فشل النسخ'));
-}
-
 
 function fillFormWithInvoice(invoice, allInvoices = []) {
   if (!invoice || typeof invoice !== 'object') {
@@ -1339,17 +1297,14 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
 
   // حساب وتعبئة الإجمالي في الحقول/العناصر ذات الصلة
   const productsForCalculation = Array.isArray(invoice.products) ? invoice.products : [];
-  const { totalSYP, totalUSD } = calculateTotals(productsForCalculation);
+  const { totalSYP } = calculateTotals(productsForCalculation);
   
   // ✅ إصلاح: استخدام القيم الآمنة
   const safeTotalSYP = totalSYP || 0;
-  const safeTotalUSD = totalUSD || 0;
   
   const totalDisplay = document.getElementById('totalSYP'); // عنصر عرض الإجمالي
-  const totalUSDDisplay = document.getElementById('totalUSD'); // عنصر عرض الدولار
   
   if (totalDisplay) totalDisplay.textContent = safeTotalSYP.toLocaleString();
-  if (totalUSDDisplay) totalUSDDisplay.textContent = safeTotalUSD.toString();
 
   // ملاحظات
   const notesEl = document.getElementById('invoiceNotes');
@@ -1451,9 +1406,6 @@ function checkScrollButtonVisibility() {
         // الإخفاء
         scrollBtn.classList.remove("show");
         scrollBtn.classList.add("hide");
-        
-        // 💡 ملاحظة: هذا السطر غير ضروري وقد يسبب مشاكل بصرية
-        // setTimeout(() => scrollBtn.classList.remove("hide"), 300); 
     }
 }
 
@@ -1467,8 +1419,6 @@ window.addEventListener("click", checkScrollButtonVisibility);
 function getStores() {
     try {
         const stores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
-        // يمكنك إبقاء هذا السطر للتصحيح إذا أردت:
-        // console.log('🔍 جلب المتاجر من localStorage:', stores);
         return stores;
     } catch (error) {
         console.error('❌ خطأ في جلب المتاجر:', error);
@@ -1608,13 +1558,10 @@ const menu = document.getElementById("fabSpeedDial");
 const mainFab = document.getElementById("mainFab");
     
 function toggleFabMenu() {
-
-
     fabMenuOpen = !fabMenuOpen;
 
     // تبديل حالة العرض
     menu.classList.toggle("hidden"); 
-
 
     // تغيير أيقونة الـ FAB الرئيسي
     if (menu.classList.contains("hidden")) {
@@ -1632,9 +1579,6 @@ function closeFabMenu() {
     }
 }
 
-/**
- * فتح مودال التصفية (Bottom Sheet).
- */
 function openFilterModal() {
     const modal = document.getElementById("filterModal");
     const overlay = document.getElementById("filterOverlay");
@@ -1697,11 +1641,6 @@ function applyFiltersAndSort() {
  */
 function toggleCodeInputPopup(event) {
     const popup = document.getElementById("codeInputPopup");
-    
-    // 1. إغلاق قائمة الـ FAB الرئيسية أولاً
-    // if (fabMenuOpen) {
-    //     toggleFabMenu(); 
-    // }
     
     // 2. إغلاق مودال الفلترة (لضمان عدم التداخل)
     closeFilterModal(); 
@@ -1879,7 +1818,7 @@ function toggleAllInvoicesAction(clickedButton) {
     
     // 2. تحديد الأيقونة والنص الجديد لزر FAB
     const newText = isCurrentlyHidden ? "إغلاق الكل" : "فتح الكل";
-    const newIconClass = isCurrentlyHidden ? "fa-compress-arrows-alt" : "fa-expand-arrows-alt";
+    const newIconClass = isCurrentlyHidden ? "fa-compress" : "fa-expand";
     
     // 3. تحديث أيقونة ونصوص زر FAB (باستخدام clickedButton الذي مررناه)
     const iconElement = clickedButton.querySelector("i");

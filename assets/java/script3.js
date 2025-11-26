@@ -35,7 +35,7 @@ function displayCartItems() {
     card.innerHTML = `
         <h3>${product.name}</h3>
       <div class="cart-info">
-      <img class="cart-image" src="${product.images[0]}" alt="${product.name}" style="width:120px; height:120px; border-radius:10px 10px 25px 10px;">
+      <img class="cart-image" src="${product.images[0]}" alt="${product.name}" style="width:120px; height:120px; border-radius:10px 10px 25px 10px; object-fit:contain;">
         <div class="cart-details">
         <p>اللون : <span style="${colorStyle}; text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;">${item.selectedColor.name}</span></p>
         <p>الكمية : ${item.quantity}</p>
@@ -393,7 +393,10 @@ function handleCheckout() {
         // 3. الانتقال إلى المرحلة التالية
         checkoutBtn.dataset.stage = 'confirm';
         // 4. تعيين placeholder الافتراضي وتوجيه المستخدم
-        updateShippingPlaceholder(); 
+        updateShippingPlaceholder();
+
+        setFutureDateMin(); // نضبط أقل تاريخ مسموح به (الغد)
+
         document.getElementById("customerName").focus();
         
     } else if (currentStage === 'confirm') {
@@ -517,6 +520,21 @@ function validateCustomerInputs() {
         alert("⚠️ يرجى تعبئة جميع معلومات التواصل والموقع الإلزامية.");
         return false;
     }
+
+    // 2. 🛑 التحقق الجديد: التأكد من أن التاريخ هو تاريخ مستقبلي
+    const inputDate = new Date(date);
+    const today = new Date();
+    
+    // لتبسيط المقارنة وإزالة عامل الوقت (الساعة/الدقيقة/الثانية)،
+    // نحدد اليوم الحالي عند بداية اليوم (الساعة 00:00:00).
+    today.setHours(0, 0, 0, 0); 
+
+    // إذا كان التاريخ المدخل أصغر من أو يساوي اليوم الحالي (مقارنة بالمللي ثانية)
+    if (inputDate.getTime() <= today.getTime()) {
+        alert("❌ يرجى اختيار تاريخ شحن مستقبلي (لا يمكن الشحن في نفس اليوم أو يوم سابق).");
+        document.getElementById("shippingDate").focus();
+        return false;
+    }
     return true;
 }
 
@@ -532,13 +550,7 @@ function generateOrderCode() {
     const shippingDate = shippingDateRaw || new Date().toISOString().slice(0, 10);
     const notes = document.getElementById("notes").value.trim();
 
-    // 💡 سعر الصرف الذي سيتم استخدامه في كود التشفير
-    // ⚠️ يجب أن يتطابق هذا السعر مع السعر المستخدم في دالة calculateTotals في صفحة الفواتير إن كانت تعتمد على الدولار
-    const USD_RATE = 1000; 
-
-    // 2. حساب الإجمالي الكلي وتفاصيل المنتجات (مع إضافة priceSYP و priceUSD)
     let totalSYP = 0;
-    let totalUSD = 0;
 
     const productsArray = cartItems.map(item => {
         const product = finalBaseProducts.find(p => p.id == item.productId);
@@ -546,18 +558,15 @@ function generateOrderCode() {
 
         // نفترض أن product.price هو السعر بالليرة السورية (SYP)
         const priceSYP = parseFloat(product.price) || 0;
-        // حساب السعر المكافئ بالدولار
-        const priceUSD = priceSYP / USD_RATE; 
 
         totalSYP += item.quantity * priceSYP;
-        totalUSD += item.quantity * priceUSD;
 
         return {
             name: product.name,
             quantity: item.quantity,
             // 🛑 إضافة المفاتيح الصحيحة التي تحتاجها صفحة الفواتير
             priceSYP: priceSYP, 
-            priceUSD: priceUSD, 
+            priceAtOrder: priceSYP,
             color: item.selectedColor ? {
                 name: item.selectedColor.name || '',
                 code: item.selectedColor.code || ''
@@ -586,12 +595,34 @@ function generateOrderCode() {
         },
         
         // 🛑 إضافة الإجماليين هنا للمقارنة
-        totalSYP: totalSYP, 
-        totalUSD: totalUSD, 
+        totalSYP: totalSYP,  
 
         products: productsArray // استخدام مصفوفة المنتجات التي تم إنشاؤها
     };
 
     // 4. تشفير الكائن
     return encodeInvoice(orderObject);
+}
+
+// ======================================================
+// 📅 دالة ضبط الحد الأدنى للتاريخ المستقبلي
+// ======================================================
+function setFutureDateMin() {
+    const shippingDateInput = document.getElementById("shippingDate");
+    if (!shippingDateInput) return;
+
+    // حساب تاريخ الغد
+    const today = new Date();
+    const tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000)); 
+    
+    // تنسيق التاريخ إلى YYYY-MM-DD
+    const year = tomorrow.getFullYear();
+    // نستخدم padStart لضمان وجود الصفر في الأرقام الفردية (01، 09)
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+
+    const minDate = `${year}-${month}-${day}`;
+    
+    // تعيين خاصية min
+    shippingDateInput.min = minDate;
 }
