@@ -281,3 +281,8 @@ const finalBaseProducts = [
   }
 ];
 
+const defaultStores = [
+    { id: 101, name: "متجر الفا للمطبوعات", phone: "0991234567", location: "دمشق", balance: 0 },
+    { id: 102, name: "نقطة بيع المهندس", phone: "0998765432", location: "حلب", balance: 0 },
+    { id: 103, name: "مكتبة الإبداع الرقمي", phone: "0995551112", location: "حمص", balance: 0 }
+];

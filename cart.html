@@ -8,6 +8,7 @@
 
 
     <script src="assets/java/data.js"></script>
+    <script src="assets/java/admin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="assets/java/invoiceCodec.js"></script>
     <script src="assets/java/script3.js"></script>
@@ -23,7 +24,7 @@
         <div class="container">
             <ul class="nav-menu">
                 <a href="index.html"><li>الصفحة الرئيسية</li></a>
-                <a href="invoices.html"><li>الفواتير</li></a>
+                <a href="invoices.html" id="invoicesLink"><li>الفواتير</li></a>
                 <a href="cart.html"><li>السلة</li></a>
                 <a href="stores.html"><li>المتاجر</li></a>
             </ul>
@@ -46,9 +47,9 @@
     <div id="cartSummary">
     <div class="container summary-content">
         <div id="customerInfoFields" class="hidden">
-            
+    
             <input type="text" id="customerName" placeholder="الاسم الكامل" required>
-            <input type="tel" id="customerPhone" placeholder="رقم الهاتف للتواصل" required>
+            <input type="tel" id="customerPhone" placeholder="رقم الجوال للتواصل" pattern="[0-9]{10}" required>
             <input type="text" id="customerCity" placeholder="المحافظة" required>
 
             <select id="shippingType" required onchange="updateShippingPlaceholder()">

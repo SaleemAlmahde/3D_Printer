@@ -626,3 +626,19 @@ function setFutureDateMin() {
     // تعيين خاصية min
     shippingDateInput.min = minDate;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... الكود الأساسي ...
+
+    // 💡 إخفاء أو إظهار زر الإضافة بناءً على الصلاحية
+    const invoicesLink = document.getElementById('invoicesLink'); 
+    
+    // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
+    if (isAdmin()) {
+        
+    } else {
+        invoicesLink.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
+    }
+    
+    // ... باقي الكود ...
+});

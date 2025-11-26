@@ -5,7 +5,24 @@ let storeForm;
 let deleteStoreBtn;
 
 function getStores() {
-    return JSON.parse(localStorage.getItem("pointsOfSale")) || [];
+    // حاول قراءة البيانات من localStorage
+    let stores = JSON.parse(localStorage.getItem("pointsOfSale"));
+    
+    // 💡 التعديل الجديد هنا:
+    if (!stores || stores.length === 0) {
+        // إذا كانت فارغة أو غير موجودة، استخدم البيانات الافتراضية
+        if (typeof defaultStores !== 'undefined') {
+            stores = defaultStores;
+            // وحفظها مباشرة في localStorage لتبدأ العمل بها
+            setStores(stores); 
+            console.log("📝 تم تهيئة المتاجر بالبيانات الافتراضية.");
+        } else {
+            // في حال عدم وجود حتى defaultStores
+            stores = [];
+        }
+    }
+    
+    return stores;
 }
 
 // دالة لحفظ قائمة المتاجر الجديدة في localStorage
@@ -359,3 +376,37 @@ function filterInvoicesByStore(storeId) {
     // الانتقال إلى صفحة الفواتير
     window.location.href = url;
 }
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const addBtn = document.getElementById('addStoreBtn'); 
+    const scrollBtn = document.getElementById("scrollTopBtn");
+    const invoicesLink = document.getElementById('invoicesLink'); 
+    
+    // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
+    if (!isAdmin()){
+        addBtn.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
+        scrollBtn.style.left='20px';
+        scrollBtn.style.bottom='20px';
+        invoicesLink.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... الكود الأساسي ...
+
+    // 💡 إخفاء أو إظهار زر الإضافة بناءً على الصلاحية
+    const invoicesLink = document.getElementById('invoicesLink'); 
+    
+    // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
+    if (isAdmin()) {
+        
+    } else {
+        invoicesLink.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
+    }
+    
+    // ... باقي الكود ...
+});
