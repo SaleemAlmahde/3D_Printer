@@ -337,7 +337,7 @@ function sendTelegramOrder() {
                 localStorage.setItem("cartItems", JSON.stringify(cartItems));
                 displayCartItems(); 
                 
-                alert("✅ تم إرسال طلبك بنجاح! سيتم التواصل معكم عبر الهاتف قريباً.");
+                showConfirmationModal();
                 resetCheckoutButton();
             } else {
                 // إذا رد Telegram بخطأ في الرسالة الثانية
@@ -678,3 +678,37 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // ... باقي الكود ...
 });
+
+
+// ======================================================
+// 🎯 دوال التحكم بمودال التأكيد
+// ======================================================
+
+/**
+ * إظهار مودال التأكيد بعد إرسال الطلب بنجاح
+ */
+function showConfirmationModal() {
+    document.getElementById('confirmationOverlay').classList.remove('hidden');
+    document.getElementById('confirmationModal').classList.remove('hidden');
+}
+
+/**
+ * إغلاق مودال التأكيد
+ */
+function closeConfirmationModal() {
+    document.getElementById('confirmationOverlay').classList.add('hidden');
+    document.getElementById('confirmationModal').classList.add('hidden');
+}
+
+// إغلاق المودال عند الضغط على زر الهروب (Escape)
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeConfirmationModal();
+    }
+});
+
+function closeCustomerInfoFields() {
+    if (confirm("هل تريد إلغاء عملية الشراء؟ سيتم مسح جميع البيانات المدخلة.")) {
+        resetCheckoutButton();
+    }
+}

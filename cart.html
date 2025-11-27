@@ -84,6 +84,17 @@
 
    <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
 
+   <!-- مودال التأكيد -->
+<div id="confirmationOverlay" class="hidden" onclick="closeConfirmationModal()"></div>
+<div id="confirmationModal" class="hidden">
+    <div class="confirmation-modal-content">
+        <span class="close-btn" onclick="closeConfirmationModal()">&times;</span>
+        <h3>تم إرسال طلبك بنجاح!</h3>
+        <p>سيتم التواصل معكم عبر الهاتف قريباً.</p>
+        <button type="button" class="btn-confirm" onclick="closeConfirmationModal()">موافق</button>
+    </div>
+</div>
+
     
 </body>
 </html>
