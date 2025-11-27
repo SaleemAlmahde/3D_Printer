@@ -297,22 +297,23 @@
 
 #scrollTopBtn {
     position: fixed;
-    bottom: 30px;
-    left: 30px; /* أو right حسب اتجاهك */
+    bottom: 20px;
+    left: 20px;
     z-index: 1000;
-    background-color: #049277;
+    background-color: #07A98C;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     font-size: 20px;
     cursor: pointer;
-    display: none; /* سيظهر عند التمرير */
+    display: none;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: all 0.3s 
+ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 #scrollTopBtn.show {

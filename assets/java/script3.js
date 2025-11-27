@@ -24,7 +24,7 @@ function displayCartItems() {
     let colorStyle = `color:${itemColorCode}; font-weight:bold;`;
 
     // إذا كان كود اللون أبيض (بصيغة #FFFFFF أو #FFF أو white)
-    if (itemColorCode === '#ffffff' || itemColorCode === '#fff' || itemColorCode === 'white') {
+    if (itemColorCode === '#ffffff' || itemColorCode === '#fff' || itemColorCode === 'white' || itemColorCode === '#f5f5dc' || itemColorCode === '#5dadec' || itemColorCode === '#ffff00' || itemColorCode === '#40e0d0') {
         // تطبيق إطار أسود (Text Stroke/Shadow) لجعل النص مرئياً
         colorStyle += ` text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;`;
     }
@@ -368,6 +368,8 @@ function resetCheckoutButton() {
     // تنظيف الحقول (اختياري)
     document.getElementById("customerName").value = "";
     document.getElementById("customerPhone").value = "";
+
+    updateCartTotals();
 }
 
 // ======================================================
@@ -388,6 +390,8 @@ function handleCheckout() {
         
         // 1. إظهار حقول العميل
         document.getElementById("customerInfoFields").classList.remove("hidden");
+
+        document.getElementById("closeBtn").classList.remove("hidden");
         // 2. تحديث نص الزر
         checkoutBtn.textContent = "حفظ وإرسال الطلب";
         // 3. الانتقال إلى المرحلة التالية
@@ -406,9 +410,41 @@ function handleCheckout() {
         if (!validateCustomerInputs()) {
             return; // توقف إذا كانت الحقول غير مكتملة
         }
+
+        // -----------------------------------------------------
+        // 💡 التحقق من قاعدة الستيكرات (3 ستيكرات على الأقل) 💡
+        // -----------------------------------------------------
+        let totalStickerCount = 0;
+        console.log(totalStickerCount);
+
+        cartItems.forEach(item => {
+            // العثور على المنتج الأصلي من مصفوفة finalBaseProducts
+            const product = finalBaseProducts.find(p => p.id == item.productId);
+        console.log(totalStickerCount);
+            
+            // التحقق: إذا كان المنتج موجوداً ويحتوي على تصنيفات، والتصنيف الأول فيه كلمة 'ستيكر'
+            if (product && product.categories && product.categories.length > 0 && product.categories[0]=== 'ستيكر') { 
+                totalStickerCount += item.quantity;
+        console.log(totalStickerCount);
+
+            }
+        });
+
+        console.log(totalStickerCount);
+
+        // تطبيق الشرط: إذا كان هناك ستيكرات (الكمية > 0) وكانت الكمية الإجمالية أقل من 3
+        if (totalStickerCount > 0 && totalStickerCount < 3) {
+            alert(`⚠️ عذراً، يجب طلب 3 ستيكرات على الأقل لإتمام عملية الشراء. (الكمية الحالية: ${totalStickerCount})`);
+            return; // إيقاف العملية ومنع المتابعة
+        }
+        // -----------------------------------------------------
+        console.log(totalStickerCount);
         
         // 2. استدعاء دالة الإرسال
         sendTelegramOrder();
+
+        updateCartTotals();
+        document.getElementById("closeBtn").classList.add("hidden");
     }
 }
 

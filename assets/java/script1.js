@@ -233,6 +233,23 @@ function showModal(id) {
     const product = finalBaseProducts.find(r => r.id == id);
     const modelContent = document.getElementById("modalContent");
 
+    // -----------------------------------------------------
+    // 💡 1. منطق التحقق من قاعدة الستيكرات 💡
+    // -----------------------------------------------------
+    let stickerWarningHTML = '';
+    
+    // التحقق: إذا كان المنتج موجوداً ويحتوي على تصنيفات، والتصنيف الأول فيه كلمة 'ستيكر'
+    if (product.categories && product.categories.length > 0 && product.categories[0] == 'ستيكر') {
+        stickerWarningHTML = `
+            <div class="sticker-warning-alert" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                🔔 تنبيه: هذا المنتج من فئة الستيكرات. يجب طلب 3 ستيكرات على الأقل (من أي نوع) لإتمام الطلب.
+            </div>
+        `;
+    }
+    // -----------------------------------------------------
+
+    console.log(stickerWarningHTML);
+
         // عرض الألوان كدوائر
         let colorsHTML = '';
         if (product.colors && product.colors.length > 0) {
@@ -258,6 +275,7 @@ function showModal(id) {
                         </div>
                         ${colorsHTML}
                         <input type="number" id="pQ" placeholder="الكمية" required>
+                        ${stickerWarningHTML}
                         <button onClick="addToCart('${id}')">أضف للسلة</button>
                 </div>
         `;
@@ -349,6 +367,8 @@ function addToCart(productId) {
 
   // رسالة نجاح لطيفة
   alert(`✅ تمت إضافة ${product.name} (${selectedColor.name}) إلى السلة!`);
+
+  closeModal();
 }
 
 function scrollToTop() {

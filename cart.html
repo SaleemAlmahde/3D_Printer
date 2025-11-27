@@ -46,8 +46,10 @@
 
     <div id="cartSummary">
     <div class="container summary-content">
+            <button type="button" id="closeBtn" class="close-confirm-btn hidden" onclick="closeCustomerInfoFields()"><i class="fa fa-close"></i></button>
+
         <div id="customerInfoFields" class="hidden">
-    
+
             <input type="text" id="customerName" placeholder="الاسم الكامل" required>
             <input type="tel" id="customerPhone" placeholder="رقم الجوال للتواصل" pattern="[0-9]{10}" required>
             <input type="text" id="customerCity" placeholder="المحافظة" required>

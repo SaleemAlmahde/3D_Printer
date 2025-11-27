@@ -243,22 +243,22 @@
 
 #scrollTopBtn {
     position: fixed;
-    bottom: 80px;
-    left: 30px; /* أو right حسب اتجاهك */
+    bottom: 90px;
+    left: 20px;
     z-index: 1000;
-    background-color: #049277;
+    background-color: #07A98C;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     font-size: 20px;
     cursor: pointer;
-    display: none; /* سيظهر عند التمرير */
+    display: none;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 #scrollTopBtn.show {
@@ -600,10 +600,17 @@
     flex-wrap: wrap; 
 }
 
+.close-confirm-btn{
+padding: 10px 15px;
+background-color: red;
+color: #fff;
+border-radius: 25px;
+}
+
 /* تنسيق حاوية حقول العميل */
 #customerInfoFields {
     display: grid; /* استخدام grid لترتيب احترافي */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 200px كحد أدنى للعرض */
+    grid-template-columns: repeat(3, minmax(200px, 1fr)); /* 200px كحد أدنى للعرض */
     gap: 10px;
     width: 100%; 
     margin: 10px 0;
