@@ -474,3 +474,31 @@ ease;
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px){
+    #products{
+        grid-template-columns: repeat(1, minmax(300px, 1fr));
+    }
+}

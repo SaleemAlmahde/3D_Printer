@@ -615,23 +615,6 @@ function stopAutoSlide(sliderContainer) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 document.addEventListener('DOMContentLoaded', () => {
     // ... الكود الأساسي ...
 
