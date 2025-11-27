@@ -324,6 +324,7 @@ window.addEventListener("scroll", () => {
  * @param {number} storeId - معرّف المتجر
  */
 function showStoreActions(storeId) {
+    if(isAdmin()){
     // إخفاء أي أوفرلاي آخر مفتوح حالياً (إذا كنت تريد فتح واحد فقط في كل مرة)
     document.querySelectorAll('.store-actions-overlay').forEach(overlay => {
         overlay.classList.add('hidden');
@@ -333,6 +334,7 @@ function showStoreActions(storeId) {
     const overlay = document.querySelector(`.store-actions-overlay[data-store-id="${storeId}"]`);
     if (overlay) {
         overlay.classList.remove('hidden');
+    }
     }
 }
 
