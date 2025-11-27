@@ -1335,44 +1335,53 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
 
 function onPasteCode() {
     const codeInput = document.getElementById('pasteInvoiceCodeInput');
-    const code = codeInput.value.trim();
+    if (!codeInput) {
+        console.error('❌ حقل إدخال الكود غير موجود.');
+        return;
+    }
 
+    const code = codeInput.value.trim();
     if (!code) {
         alert('ألصق الكود أولاً');
         return;
     }
 
     try {
-        // 1. فك تشفير الكود
+        // 1️⃣ فك تشفير الكود
         const invoice = decodeInvoice(code);
         if (!invoice) throw new Error('لم يتم فك الكود بشكل صحيح');
 
-        // 2. تجهيز الفاتورة
-        let targetInvoice = { ...invoice };
-        targetInvoice.id = Date.now(); // معرف جديد
+        // 2️⃣ تجهيز الفاتورة مع معرف جديد
+        const targetInvoice = { ...invoice, id: Date.now() };
 
-        // 3. جلب جميع الفواتير الحالية
+        // 3️⃣ جلب جميع الفواتير الحالية
         const allInvoices = JSON.parse(localStorage.getItem('invoices')) || [];
-        
-        // 4. تعبئة النموذج وفتح المودال
-        fillFormWithInvoice(targetInvoice, allInvoices);
-        
-        // 5. ✅ إصلاح مهم: حذف معرف التعديل لضمان الحفظ كفاتورة جديدة
+
+        // 4️⃣ تعبئة النموذج وفتح المودال إذا كانت الدالة موجودة
+        if (typeof fillFormWithInvoice === 'function') {
+            fillFormWithInvoice(targetInvoice, allInvoices);
+        } else {
+            console.warn('⚠️ الدالة fillFormWithInvoice غير موجودة.');
+        }
+
+        // 5️⃣ حذف معرف التعديل إذا موجود
         const form = document.getElementById('invoiceForm');
         if (form && form.dataset.editingId) {
             delete form.dataset.editingId;
         }
-        
-        // 6. ✅ إظهار زر الحذف (اختياري - يمكن إزالته)
+
+        // 6️⃣ إخفاء زر الحذف فقط إذا موجود
         const delBtn = document.getElementById("deleteInvoiceBtn");
         if (delBtn) delBtn.classList.add('hidden');
-        
-        // 7. رسالة توضيحية
+
+        // 7️⃣ رسالة نجاح
         alert('📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.');
-        
-        // 8. مسح حقل الكود وإخفاء المودال
+
+        // 8️⃣ مسح حقل الكود وإخفاء المودال إذا الدالة موجودة
         codeInput.value = '';
-        toggleInvoiceCodeInput();
+        if (typeof toggleInvoiceCodeInput === 'function') {
+            toggleInvoiceCodeInput();
+        }
 
     } catch (e) {
         console.error(e);
@@ -1380,9 +1389,16 @@ function onPasteCode() {
     }
 }
 
-function toggleInvoiceCodeInput(){
-  document.getElementById("invoiceCodeInputModal").classList.toggle("show");
+
+function toggleInvoiceCodeInput() {
+    const modal = document.getElementById("invoiceCodeInputModal");
+    if (modal) {
+        modal.classList.toggle("show");
+    } else {
+        console.warn("⚠️ العنصر invoiceCodeInputModal غير موجود.");
+    }
 }
+
 
 function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
