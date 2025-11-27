@@ -13,7 +13,7 @@ function isAdmin() {
  */
 function enableAdminMode() {
     localStorage.setItem(ADMIN_TOKEN_KEY, 'active');
-    alert("✅ تم تفعيل وضع المدير بنجاح!");
+    console.log("✅ تم تفعيل وضع المدير بنجاح!");
     // يجب إعادة تحميل الصفحة أو تحديث الواجهة بعد هذه الخطوة
 }
 
@@ -22,7 +22,7 @@ function enableAdminMode() {
  */
 function disableAdminMode() {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
-    alert("❌ تم إلغاء تفعيل وضع المدير.");
+    console.log("❌ تم إلغاء تفعيل وضع المدير.");
     // يجب إعادة تحميل الصفحة أو تحديث الواجهة بعد هذه الخطوة
 }
 
@@ -30,32 +30,58 @@ function disableAdminMode() {
 // disableAdminMode(); ل الغاء تفعيل وضع الادمن
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    const logo = document.getElementById("logo");
-    if (!logo) return;
+// متغير لتخزين ID المؤقت
+let pressTimer = null; 
+// المدة المطلوبة للضغط المطول (مللي ثانية)
+const LONG_PRESS_DURATION = 5000; // 2 ثانية
 
-    let clickCount = 0;
-    let clickTimer = null;
-    const maxClicks = 10;
-    const timeWindow = 5000;
+function startPress(event) {
+    // منع السلوك الافتراضي للمتصفح (مثل ظهور قائمة السياق أو التكبير)
+    event.preventDefault(); 
+    
+    // إذا كان المؤقت قيد التشغيل بالفعل، نتجاهل (حماية)
+    if (pressTimer) return;
 
-    logo.addEventListener("click", () => {
-        clickCount++;
-        if (!clickTimer) {
-            clickTimer = setTimeout(() => {
-                clickCount = 0;
-                clickTimer = null;
-            }, timeWindow);
+    // بدء المؤقت: بعد ثانيتين، سيتم استدعاء الدالة
+    pressTimer = setTimeout(() => {
+        // إذا وصل المؤقت إلى نهايته، فهذا يعني أنه "ضغط مطول"
+        if(isAdmin()) {
+            disableAdminMode();
+        }else{
+        enableAdminMode();
         }
-        if (clickCount >= maxClicks) {
-            if (isAdmin()) {
-                disableAdminMode();
-            } else {
-                enableAdminMode();
-            }
-            clickCount = 0;
-            clearTimeout(clickTimer);
-            clickTimer = null;
-        }
-    });
+        // إعادة تحميل الصفحة لرؤية التغييرات (الأزرار الإدارية)
+        window.location.reload(); 
+        
+    }, LONG_PRESS_DURATION);
+}
+
+function cancelPress() {
+    // إيقاف المؤقت (سواء تم تحرير الضغط أو حدث سحب)
+    clearTimeout(pressTimer);
+    pressTimer = null;
+}
+
+// -----------------------------------------------------
+// 💡 الخطوة 3: ربط الأحداث باللوغو عند تحميل الصفحة
+// -----------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    // ⚠️ استبدل 'logoId' بـ ID الحقيقي لعنصر اللوغو الخاص بك 
+    const logoElement = document.getElementById('logo'); 
+    
+    if (logoElement) {
+        // 1. عند بدء اللمس
+        logoElement.addEventListener('touchstart', startPress);
+        // 2. عند إنهاء اللمس (تحرير الإصبع)
+        logoElement.addEventListener('touchend', cancelPress);
+        // 3. عند تحريك الإصبع (السحب)
+        logoElement.addEventListener('touchmove', cancelPress);
+        
+        // دعم الحاسوب (الزر الأيسر للماوس)
+        logoElement.addEventListener('mousedown', startPress);
+        logoElement.addEventListener('mouseup', cancelPress);
+        logoElement.addEventListener('mouseleave', cancelPress);
+    }
+    
+    // ... (بقية منطق DOMContentLoaded في utility.js إن وجد)
 });
