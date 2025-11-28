@@ -4,7 +4,6 @@
     font-family: "lantx";
     /* src: url(../plugins/fonts/alfont_com_LANTX-Regular.otf) format("opentype"); */
     src: url(../plugins/fonts/AM-ZAIN-ORIGINAL.ttf) format("opentype");
-    unicode-range: U+0600-06FF, U+2000-206F;
     font-weight: normal;
     font-style: normal;
 }
