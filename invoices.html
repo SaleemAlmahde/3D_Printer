@@ -14,6 +14,7 @@
     <!-- JavaScript Files -->
     <script src="assets/java/data.js"></script>
     <script src="assets/java/admin.js"></script>
+    <script src="assets/java/export_import_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="assets/java/invoiceCodec.js"></script>
     <!-- <script src="assets/java/script2.js"></script> -->
@@ -200,6 +201,16 @@
         <button id="openFilterModalBtn" class="fab-item" onclick="openFilterModal()">
             <i class="fa fa-filter"></i>
             <span>تصفية وعرض</span>
+        </button>
+
+        <button id="addByCodeBtn" class="fab-item" onclick="importAdminData()">
+            <i class="fa fa-upload"></i>
+            <span>إستعادة البيانات</span>
+        </button>
+
+        <button id="addByCodeBtn" class="fab-item" onclick="exportAdminData()">
+            <i class="fa fa-cloud-download"></i>
+            <span>الحفظ الاحتياطي</span>
         </button>
         
         <button id="addByCodeBtn" class="fab-item" onclick="toggleCodeInputPopup(event)">
