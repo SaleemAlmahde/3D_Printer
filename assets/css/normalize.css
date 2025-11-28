@@ -2,7 +2,8 @@
 
 @font-face {
     font-family: "lantx";
-    src: url(../plugins/fonts/alfont_com_LANTX-Regular.otf) format("opentype");
+    /* src: url(../plugins/fonts/alfont_com_LANTX-Regular.otf) format("opentype"); */
+    src: url(../plugins/fonts/alfont_com_AlFont_com_K24KurdishBold-Bold-1.ttf) format("opentype");
     font-weight: normal;
     font-style: normal;
 }
