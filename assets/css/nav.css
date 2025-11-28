@@ -8,8 +8,7 @@ nav {
 }
 
 nav img {
-  width: 120px;
-  border-radius: 12px;
+  width: 213px;
   object-fit: cover;
 }
 
@@ -25,12 +24,13 @@ nav .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: -webkit-fill-available;
 }
 
 .nav-menu {
   list-style: none;
   display: flex;
-  gap: 40px;
+  gap: 10px;
   margin: 0;
   padding: 0;
 }
@@ -42,12 +42,8 @@ nav .container {
   font-weight: 600;
   cursor: pointer;
   padding: 10px 25px;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.1); /* خلفية خفيفة شفافة */
-  border: 1px solid rgba(255, 255, 255, 0.25); /* حدود شفافة ناعمة */
   transition: all 0.3s ease;
   position: relative;
-  backdrop-filter: blur(3px); /* تأثير زجاجي بسيط */
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
@@ -86,4 +82,20 @@ nav .container {
   background: linear-gradient(135deg, #ffffff33, #ffffff66);
   border-color: rgba(255, 255, 255, 0.6);
   color: #fff;
+}
+
+.divider {
+    /* يجب أن يكون معروضاً كعنصر داخلي لمنعه من أخذ سطر جديد */
+    display: inline-block; 
+    
+    /* تحديد العرض والارتفاع ولون الحد لجعله خطاً */
+    width: 1px; 
+    height: 20px; /* ليتناسب مع ارتفاع النص */
+    background-color: #fff; /* لون الخط الفاصل */
+    
+    /* إضافة مسافة حول الفاصل */
+    margin-top: 15px; 
+    
+    /* لمنع قراءة العنصر الفاصل من قبل قارئات الشاشة (مهم لإمكانية الوصول) */
+    overflow: true; 
 }

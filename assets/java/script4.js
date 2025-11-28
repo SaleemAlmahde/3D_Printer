@@ -227,12 +227,13 @@ function renderStores(searchTerm = '') {
                 <div class="store-details">
                     <p><strong> <i class="fa fa-phone"></i> الهاتف :</strong> ${store.phone || 'غير محدد'}</p>
                     <p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${store.location || 'غير محدد'}</p>
-                    <p class="store-debt-info">
+                    ${isAdmin() ? `<p class="store-debt-info">
                         <strong> <i class="fa fa-money"></i> المديونية المتبقية :</strong> 
                         <span class="${totalDebt > 0 ? 'debt-due' : 'debt-clear'}">
                             ${totalDebt.toLocaleString()} ل.س
                         </span>
-                    </p>
+                    </p>` : ''}
+                    
                 </div>
             </div>
             
