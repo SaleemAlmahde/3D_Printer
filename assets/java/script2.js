@@ -1866,3 +1866,12 @@ function toggleAllInvoicesAction(clickedButton) {
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const dividers = document.getElementById('firstDivider');
+    if (isAdmin()) {
+        
+    } else {
+        dividers.style.display = 'none';
+    }
+});

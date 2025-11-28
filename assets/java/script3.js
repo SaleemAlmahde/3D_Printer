@@ -664,16 +664,14 @@ function setFutureDateMin() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ... الكود الأساسي ...
-
-    // 💡 إخفاء أو إظهار زر الإضافة بناءً على الصلاحية
-    const invoicesLink = document.getElementById('invoicesLink'); 
+    const invoicesLink = document.getElementById('invoicesLink');
+    const dividers = document.getElementById('firstDivider');
     
-    // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
     if (isAdmin()) {
         
     } else {
         invoicesLink.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
+        dividers.style.display = 'none';
     }
     
     // ... باقي الكود ...
