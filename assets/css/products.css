@@ -516,7 +516,7 @@ ease;
     }
 
     #dropDownContainer select {
-    padding: 8px 0px 9px 0px;
+    padding: 8px 27px 9px 0px;
     }
     
     .cats button {
@@ -551,7 +551,7 @@ ease;
     }
 
     h2{
-        color: red;
+        color: blue;
     }
 
     #logo{
@@ -559,6 +559,10 @@ ease;
     }
 
     .product-card img {
-        height: 234px;
+        height: 220px;
+    }
+
+    .slide {
+    height: 220px;
     }
 }
