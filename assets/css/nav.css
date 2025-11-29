@@ -49,8 +49,8 @@ nav .container {
 
 /* عند تمرير الماوس */
 .nav-menu li:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.4);
+  /* background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4); */
   transform: translateY(-2px);
 }
 
@@ -98,4 +98,19 @@ nav .container {
     
     /* لمنع قراءة العنصر الفاصل من قبل قارئات الشاشة (مهم لإمكانية الوصول) */
     overflow: true; 
+}
+
+@media(max-width: 768px){
+  nav img{
+    width: 120px;
+  }
+
+  .nav-menu{
+    gap: 10px;
+  }
+
+  .nav-menu li{
+    padding: 10px 0px;
+  }
+
 }

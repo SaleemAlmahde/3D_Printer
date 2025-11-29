@@ -502,4 +502,16 @@ ease;
     #products{
         grid-template-columns: repeat(1, minmax(300px, 1fr));
     }
+
+    .top-products{
+    margin-bottom: 25px;
+    }
+    
+    .product-card h3{
+        margin: 0;
+    }
+
+    .dots-container{
+        margin-top: 10px;
+    }
 }
