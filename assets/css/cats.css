@@ -36,7 +36,6 @@
 
 #dropDownContainer select {
   padding: 8px 35px 8px 15px;
-  margin-left: 15px;
   border: 2px solid var(--main-color);
   border-radius: 25px;
   background-color: transparent;
@@ -51,13 +50,13 @@
 }
 
 /* حاوية السهم */
-#dropDownContainer {
+/* #dropDownContainer {
   position: relative;
   display: inline-block;
-}
+} */
 
 /* السهم المخصص */
-#dropDownContainer::after {
+/* #dropDownContainer::after {
   content: "▼";
   position: absolute;
   top: 50%;
@@ -66,7 +65,7 @@
   font-size: 15px;
   color: var(--main-color);
   pointer-events: none;
-}
+} */
 
 /* تأثير عند التحويم */
 #dropDownContainer select:hover {
@@ -98,3 +97,6 @@
   color: white !important;
 }
 
+select{
+  width: 100px;
+}
