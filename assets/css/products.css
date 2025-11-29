@@ -544,4 +544,13 @@ ease;
     #dropDownContainer select {
     margin-left: 0;
     }
+
+    #scrollTopBtn {
+        bottom: 40px;
+        left: 40px;
+    }
+
+    h2{
+        color: red;
+    }
 }
