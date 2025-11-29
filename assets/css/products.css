@@ -526,4 +526,8 @@ ease;
     .product-card img {
     height: 280px;
     }
+
+    .slide {
+    height: 280px;
+    }
 }
