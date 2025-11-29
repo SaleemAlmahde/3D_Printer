@@ -494,7 +494,7 @@ ease;
 
 
 
-@media (max-width: 480px) {}
+
 
 
 
@@ -529,5 +529,19 @@ ease;
 
     .slide {
     height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    #products{
+        grid-template-columns: repeat(1, minmax(300px, 380px));
+    }
+
+    .search-container input{
+        padding: 10px 40px 10px 0px;
+    }
+
+    #dropDownContainer select {
+    margin-left: 0;
     }
 }
