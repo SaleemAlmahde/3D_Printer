@@ -514,4 +514,24 @@ ease;
     .dots-container{
         margin-top: 10px;
     }
+
+    #dropDownContainer select {
+    padding: 8px 0px 9px 0px;
+    }
+    
+    .cats button {
+    padding: 5px 10px;
+    }
+
+    .product-card img {
+    height: 280px;
+    }
+
+    .slide {
+    height: 280px;
+    }
+
+    .nav-menu li {
+    font-size: medium;
+    }
 }
