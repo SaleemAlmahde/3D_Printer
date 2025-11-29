@@ -520,7 +520,7 @@ ease;
     }
     
     .cats button {
-    padding: 5px 10px;
+    padding: 5px 5px;
     }
 
     .product-card img {
@@ -556,5 +556,9 @@ ease;
 
     #logo{
         width: 100px;
+    }
+
+    .product-card img {
+        height: 234px;
     }
 }
