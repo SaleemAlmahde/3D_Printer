@@ -381,14 +381,6 @@
   transform: translateY(-2px);
 }
 
-/* متجاوب للشاشات الصغيرة */
-@media (max-width: 500px) {
-  #newInvoiceModal {
-    width: 90%;
-    padding: 20px;
-  }
-}
-
 /* تصحيح عرض المودال والـ overlay عند الإخفاء */
 #newInvoiceModal.hidden,
 #newInvoiceOverlay.hidden {
@@ -864,6 +856,7 @@
 
 /* زر إضافة منتج */
 #openProductsSheet {
+  width: 80%;
   background: #4CAF50;
   color: white;
   font-weight: bold;
@@ -1442,4 +1435,22 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
 .summary-total{
   font-weight: bold;
     font-size: 1.1rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 480px) {
+  #newInvoiceModal {
+    width: 75%;
+    padding: 20px;
+  }
 }

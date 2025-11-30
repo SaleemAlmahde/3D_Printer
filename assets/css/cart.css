@@ -737,3 +737,27 @@ border-radius: 25px;
 .hidden {
     display: none !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width: 480px){
+    #customerInfoFields {
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    }
+}
