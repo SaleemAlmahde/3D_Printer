@@ -523,9 +523,9 @@ ease;
     padding: 5px 5px;
     }
 
-    .product-card img {
+    /* .product-card img {
     height: 280px;
-    }
+    } */
 
     .slide {
     height: 280px;
@@ -558,11 +558,13 @@ ease;
         width: 100px;
     }
 
-    .product-card img {
+    /* .product-card img {
         height: 220px;
-    }
+    } */
 
     .slide {
     height: 220px;
     }
+
+
 }

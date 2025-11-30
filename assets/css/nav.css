@@ -114,3 +114,9 @@ nav .container {
     font-size: medium;
   }
 }
+
+@media (max-width:480px) {
+      .nav-menu {
+        gap: 5px;
+    }
+}
