@@ -378,7 +378,13 @@ ease;
 /* Each individual slide - takes up full width of the container */
 .slide {
     height: 320px; /* Fixed height for each slide */
-    flex-shrink: 0; /* مهم: يمنع انكماش الشرائح */
+    /* الحل الحديث مع fallback */
+    aspect-ratio: 4 / 3;
+    
+    /* تأكد من التكيف */
+    width: 100%;
+    /* flex-shrink: 0;  */
+    /* مهم: يمنع انكماش الشرائح */
 }
 
 /* Ensures that images fill the slide area while maintaining aspect ratio */
@@ -386,6 +392,7 @@ ease;
     width: 100%; /* Image width matches the slide width */
     height: 100%; /* Image height matches the slide height */
     object-fit: cover; /* Images are scaled to cover the entire slide, cropping if necessary */
+    object-position: center;
 }
 
 /* Common styling for both previous and next navigation buttons */
@@ -527,9 +534,9 @@ ease;
     height: 280px;
     } */
 
-    .slide {
+    /* .slide {
     height: 280px;
-    }
+    } */
 }
 
 @media (max-width: 480px) {
@@ -562,9 +569,41 @@ ease;
         height: 220px;
     } */
 
-    .slide {
+    /* .slide {
     height: 220px;
+    } */
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px) {
+    .slide {
+        height: 280px; /* fallback */
+        aspect-ratio: 3 / 4; /* عمودي أكثر للجوال */
     }
+}
 
-
+@media (max-width: 480px) {
+    .slide {
+        height: 240px; /* fallback */
+        aspect-ratio: 1 / 1; /* مربع للشاشات الصغيرة */
+    }
 }
