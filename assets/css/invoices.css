@@ -1458,11 +1458,11 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
     width: 275px;
     }
 
-    /* .fab-container{
-    left: 40px;
+    .product-item {
+    grid-template-columns: 1fr 36px 36px 74px;
     }
 
-    #scrollTopBtn {
-    left: 40px;
-    } */
+    .invoice-hr {
+    width: 180px;
+    }
 }

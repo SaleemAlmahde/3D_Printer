@@ -529,14 +529,6 @@ ease;
     .cats button {
     padding: 5px 5px;
     }
-
-    /* .product-card img {
-    height: 280px;
-    } */
-
-    /* .slide {
-    height: 280px;
-    } */
 }
 
 @media (max-width: 480px) {
@@ -560,20 +552,6 @@ ease;
     h2{
         color: blue;
     }
-
-    #logo{
-        width: 100px;
-    }
-
-    /* .product-card img {
-        height: 220px;
-    } */
-
-    /* .slide {
-    height: 220px;
-    } */
-
-
 }
 
 
