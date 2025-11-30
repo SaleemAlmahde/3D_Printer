@@ -1453,4 +1453,16 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
     width: 75%;
     padding: 20px;
   }
+
+  .invoice-card {
+    width: 275px;
+    }
+
+    /* .fab-container{
+    left: 40px;
+    }
+
+    #scrollTopBtn {
+    left: 40px;
+    } */
 }

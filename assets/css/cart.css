@@ -760,4 +760,8 @@ border-radius: 25px;
     #customerInfoFields {
     grid-template-columns: repeat(2, minmax(200px, 1fr));
     }
+
+    .cart-card {
+    width: 315px;
+    }
 }

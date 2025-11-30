@@ -660,3 +660,28 @@
 .btn-cancel:active {
     transform: translateY(0);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width: 480px){
+    .store-card {
+    width: 315px;
+    }
+}
