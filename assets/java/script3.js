@@ -415,22 +415,23 @@ function handleCheckout() {
         // 💡 التحقق من قاعدة الستيكرات (3 ستيكرات على الأقل) 💡
         // -----------------------------------------------------
         let totalStickerCount = 0;
-        console.log(totalStickerCount);
 
         cartItems.forEach(item => {
             // العثور على المنتج الأصلي من مصفوفة finalBaseProducts
             const product = finalBaseProducts.find(p => p.id == item.productId);
-        console.log(totalStickerCount);
+
+            if(product.categories[0] != 'ستيكر'){
+                totalStickerCount=100;
+            }
             
             // التحقق: إذا كان المنتج موجوداً ويحتوي على تصنيفات، والتصنيف الأول فيه كلمة 'ستيكر'
             if (product && product.categories && product.categories.length > 0 && product.categories[0]=== 'ستيكر') { 
                 totalStickerCount += item.quantity;
-        console.log(totalStickerCount);
 
             }
         });
 
-        console.log(totalStickerCount);
+
 
         // تطبيق الشرط: إذا كان هناك ستيكرات (الكمية > 0) وكانت الكمية الإجمالية أقل من 3
         if (totalStickerCount > 0 && totalStickerCount < 3) {
@@ -438,7 +439,6 @@ function handleCheckout() {
             return; // إيقاف العملية ومنع المتابعة
         }
         // -----------------------------------------------------
-        console.log(totalStickerCount);
         
         // 2. استدعاء دالة الإرسال
         sendTelegramOrder();

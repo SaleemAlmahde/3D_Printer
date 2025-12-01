@@ -30,14 +30,15 @@ function showCat() {
 
     importantCats.forEach(cat => {
         importantHTML += `
-            <button onclick="filterProducts('${cat}')" id="${cat}">${cat}</button>
+            <button onclick="filterProducts('${cat}')" id="${cat}">${cat === "all"? "الكل" : cat}</button>
+            <div class="cats-divider" role="separator" aria-orientation="vertical" ></div>
         `;
     });
 
     importantCatDiv.innerHTML = importantHTML;
 
     const dropDown = document.getElementById("otherCat");
-    let otherHTML = `<option value="Other" selected>Other</option>`;
+    let otherHTML = `<option value="Other" selected>أخرى</option>`;
 
     otherCats.forEach(cat => {
         otherHTML += `
@@ -242,7 +243,7 @@ function showModal(id) {
     if (product.categories && product.categories.length > 0 && product.categories[0] == 'ستيكر') {
         stickerWarningHTML = `
             <div class="sticker-warning-alert" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
-                🔔 تنبيه: هذا المنتج من فئة الستيكرات. يجب طلب 3 ستيكرات على الأقل (من أي نوع) لإتمام الطلب.
+            🔔 يجب طلب 3 ستيكرات على الأقل إذا كانت طلبيتك ستيكرات فقط.
             </div>
         `;
     }
