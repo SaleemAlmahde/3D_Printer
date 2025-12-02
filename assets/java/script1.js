@@ -679,7 +679,7 @@ function showAds() {
     if (ads.length > 1) {
         const prevBtn = document.createElement('button');
         prevBtn.className = 'ad-prev';
-        prevBtn.innerHTML = '&#10095;';
+        prevBtn.innerHTML = '&#10094;';
         prevBtn.onclick = () => {
             currentAdIndex = (currentAdIndex - 1 + ads.length) % ads.length;
             showAds();
@@ -688,7 +688,7 @@ function showAds() {
         
         const nextBtn = document.createElement('button');
         nextBtn.className = 'ad-next';
-        nextBtn.innerHTML = '&#10094;';
+        nextBtn.innerHTML = '&#10095;';
         nextBtn.onclick = () => {
             currentAdIndex = (currentAdIndex + 1) % ads.length;
             showAds();
