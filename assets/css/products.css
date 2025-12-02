@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 30px;
+  /* padding-top: 30px; */
   padding-bottom: 30px;
 }
 
@@ -491,7 +491,297 @@ ease;
 
 
 
+/* قسم الإعلانات الرئيسي */
+#adSection {
+    margin: 10px 0;
+    padding: 15px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
 
+/* الحاوية الرئيسية للسلايدر */
+.ad-slider-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    background: white;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* حاوية السلايدر الداخلية */
+.ad-slider-wrapper {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* كل شريحة إعلان */
+.ad-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.ad-slide.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.ad-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 20px;
+}
+
+/* رابط الإعلان */
+.ad-link, .ad-no-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.ad-link:hover img {
+    transform: scale(1.03);
+}
+
+/* أزرار التنقل */
+.ad-prev, .ad-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    backdrop-filter: blur(5px);
+}
+
+.ad-prev {
+    right: 15px;
+}
+
+.ad-next {
+    left: 15px;
+}
+
+.ad-prev:hover, .ad-next:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* حاوية النقاط */
+.ad-dots-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 15px;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+}
+
+/* النقاط الفردية */
+.ad-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.ad-dot.active {
+    background: white;
+    transform: scale(1.3);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    border-color: white;
+}
+
+.ad-dot:hover {
+    background: white;
+    transform: scale(1.2);
+}
+
+/* إذا كان هناك إعلان واحد فقط */
+.ad-slider-wrapper:has(.ad-slide:only-child) .ad-prev,
+.ad-slider-wrapper:has(.ad-slide:only-child) .ad-next,
+.ad-slider-wrapper:has(.ad-slide:only-child) .ad-dots-container {
+    display: none;
+}
+
+.ad-slider-wrapper:has(.ad-slide:only-child) .ad-slide {
+    opacity: 1 !important;
+}
+
+/* تأثير النقاط النشطة */
+.ad-slider-container.active-ad .ad-dot.active {
+    background: var(--main-color);
+    box-shadow: 0 0 10px var(--main-color);
+}
+
+/* تحسينات للجوال */
+@media (max-width: 768px) {
+    #adSection {
+        margin: 15px 0;
+        padding: 10px 0;
+    }
+    
+    .ad-slider-container {
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .ad-slider-wrapper {
+        height: 220px;
+    }
+    
+    .ad-slide img {
+        border-radius: 15px;
+    }
+    
+    .ad-prev, .ad-next {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+    }
+    
+    .ad-prev {
+        right: 10px;
+    }
+    
+    .ad-next {
+        left: 10px;
+    }
+    
+    .ad-dots-container {
+        bottom: 15px;
+        gap: 10px;
+        padding: 6px 12px;
+    }
+    
+    .ad-dot {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ad-slider-wrapper {
+        height: 180px;
+    }
+    
+    .ad-slider-container {
+        border-radius: 12px;
+    }
+    
+    .ad-slide img {
+        border-radius: 12px;
+    }
+    
+    .ad-prev, .ad-next {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .ad-dots-container {
+        bottom: 10px;
+        gap: 8px;
+        padding: 5px 10px;
+    }
+    
+    .ad-dot {
+        width: 10px;
+        height: 10px;
+        border-width: 1px;
+    }
+}
+
+/* رسوم متحركة لدخول الإعلانات */
+@keyframes adSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ad-slide.active img {
+    animation: adSlideIn 0.5s ease-out;
+}
+
+/* مؤشر التحميل (اختياري) */
+.ad-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--main-color);
+    border-radius: 50%;
+    animation: adSpin 1s linear infinite;
+    z-index: 5;
+}
+
+@keyframes adSpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* تأثير اللمس للجوال */
+@media (hover: none) and (pointer: coarse) {
+    .ad-prev, .ad-next {
+        width: 44px;
+        height: 44px;
+        min-height: 44px;
+    }
+    
+    .ad-dot {
+        min-width: 16px;
+        min-height: 16px;
+    }
+}
+
+/* تحسين الوصولية */
+.ad-prev:focus,
+.ad-next:focus,
+.ad-dot:focus {
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+}
 
 
 

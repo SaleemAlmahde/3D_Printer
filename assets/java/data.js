@@ -286,3 +286,18 @@ const defaultStores = [
     { id: 102, name: "نقطة بيع المهندس", phone: "0998765432", location: "حلب", balance: 0 },
     { id: 103, name: "مكتبة الإبداع الرقمي", phone: "0995551112", location: "حمص", balance: 0 }
 ];
+
+const ads = [
+  {id: 0,
+    image: "assets/imgs/try.jpg",
+    link: ""
+  },
+  {id: 1,
+    image: "assets/imgs/Chicken_Alfredo.jpg",
+    link: ""
+  },
+  {id: 2,
+    image: "assets/imgs/Spaghetti_Bolognese.jpg",
+    link: ""
+  },
+]

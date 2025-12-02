@@ -633,3 +633,157 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // ... باقي الكود ...
 });
+
+
+
+
+
+
+
+
+
+
+
+
+let currentAdIndex = 0;
+let adAutoSlideInterval = null;
+
+function showAds() {
+    const adDiv = document.getElementById("adSlider");
+    if (!adDiv) return;
+    
+    adDiv.innerHTML = '';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ad-slider-wrapper';
+    
+    // إضافة الإعلانات
+    ads.forEach((ad, index) => {
+        const slide = document.createElement('div');
+        slide.className = `ad-slide ${index === currentAdIndex ? 'active' : ''}`;
+        slide.dataset.index = index;
+        
+        const content = ad.link ? 
+            `<a href="${ad.link}" target="_blank" class="ad-link">
+                <img src="${ad.image}" alt="إعلان ${index + 1}" loading="lazy">
+            </a>` :
+            `<div class="ad-no-link">
+                <img src="${ad.image}" alt="إعلان ${index + 1}" loading="lazy">
+            </div>`;
+        
+        slide.innerHTML = content;
+        wrapper.appendChild(slide);
+    });
+    
+    // إضافة الأزرار إذا كان هناك أكثر من إعلان
+    if (ads.length > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'ad-prev';
+        prevBtn.innerHTML = '&#10095;';
+        prevBtn.onclick = () => {
+            currentAdIndex = (currentAdIndex - 1 + ads.length) % ads.length;
+            showAds();
+            resetAdAutoSlide();
+        };
+        
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'ad-next';
+        nextBtn.innerHTML = '&#10094;';
+        nextBtn.onclick = () => {
+            currentAdIndex = (currentAdIndex + 1) % ads.length;
+            showAds();
+            resetAdAutoSlide();
+        };
+        
+        wrapper.appendChild(prevBtn);
+        wrapper.appendChild(nextBtn);
+        
+        // إضافة النقاط
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'ad-dots-container';
+        
+        ads.forEach((ad, index) => {
+            const dot = document.createElement('span');
+            dot.className = `ad-dot ${index === currentAdIndex ? 'active' : ''}`;
+            dot.dataset.index = index;
+            dot.onclick = () => {
+                currentAdIndex = index;
+                showAds();
+                resetAdAutoSlide();
+            };
+            dotsContainer.appendChild(dot);
+        });
+        
+        wrapper.appendChild(dotsContainer);
+        
+        // بدء التمرير التلقائي
+        startAdAutoSlide();
+    }
+    
+    adDiv.appendChild(wrapper);
+}
+
+// الانتقال لإعلان محدد
+function goToAd(index) {
+    if (index < 0 || index >= ads.length) return;
+    
+    currentAdIndex = index;
+    showAds();
+    resetAdAutoSlide();
+}
+
+// إعلان سابق
+function prevAd() {
+    currentAdIndex = currentAdIndex === 0 ? ads.length - 1 : currentAdIndex - 1;
+    showAds();
+    resetAdAutoSlide();
+}
+
+// إعلان تالي
+function nextAd() {
+    currentAdIndex = currentAdIndex === ads.length - 1 ? 0 : currentAdIndex + 1;
+    showAds();
+    resetAdAutoSlide();
+}
+
+// بدء التمرير التلقائي بين الإعلانات
+function startAdAutoSlide() {
+    if (adAutoSlideInterval) clearInterval(adAutoSlideInterval);
+    
+    adAutoSlideInterval = setInterval(() => {
+        currentAdIndex = (currentAdIndex + 1) % ads.length;
+        showAds();
+    }, 5000);
+}
+
+// إعادة ضبط المؤقت
+function resetAdAutoSlide() {
+    if (adAutoSlideInterval) {
+        clearInterval(adAutoSlideInterval);
+        startAdAutoSlide();
+    }
+}
+
+// إيقاف التمرير التلقائي (عند التمرير فوق الإعلان)
+function stopAutoAdSlide() {
+    if (adAutoSlideInterval) {
+        clearInterval(adAutoSlideInterval);
+        adAutoSlideInterval = null;
+    }
+}
+
+// عند التحميل
+window.addEventListener('DOMContentLoaded', () => {
+    showAds();
+});
+
+// عند التمرير فوق الإعلان (إيقاف التمرير التلقائي)
+document.addEventListener('DOMContentLoaded', () => {
+    showAds();
+    
+    const adSection = document.getElementById('adSection');
+    if (adSection) {
+        adSection.addEventListener('mouseenter', stopAutoAdSlide);
+        adSection.addEventListener('mouseleave', startAdAutoSlide);
+    }
+});
