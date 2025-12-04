@@ -243,7 +243,7 @@ function showModal(id) {
     if (product.categories && product.categories.length > 0 && product.categories[0] == 'ستيكر') {
         stickerWarningHTML = `
             <div class="sticker-warning-alert" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
-            🔔 يجب طلب 3 ستيكرات على الأقل إذا كانت طلبيتك ستيكرات فقط.
+            🔔 يجب طلب 3 ستيكرات على الأقل من أي نوع إذا كانت طلبيتك ستيكرات فقط.
             </div>
         `;
     }
@@ -677,26 +677,26 @@ function showAds() {
     
     // إضافة الأزرار إذا كان هناك أكثر من إعلان
     if (ads.length > 1) {
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'ad-prev';
-        prevBtn.innerHTML = '&#10094;';
-        prevBtn.onclick = () => {
-            currentAdIndex = (currentAdIndex - 1 + ads.length) % ads.length;
-            showAds();
-            resetAdAutoSlide();
-        };
+        // const prevBtn = document.createElement('button');
+        // prevBtn.className = 'ad-prev';
+        // prevBtn.innerHTML = '&#10094;';
+        // prevBtn.onclick = () => {
+        //     currentAdIndex = (currentAdIndex - 1 + ads.length) % ads.length;
+        //     showAds();
+        //     resetAdAutoSlide();
+        // };
         
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'ad-next';
-        nextBtn.innerHTML = '&#10095;';
-        nextBtn.onclick = () => {
-            currentAdIndex = (currentAdIndex + 1) % ads.length;
-            showAds();
-            resetAdAutoSlide();
-        };
+        // const nextBtn = document.createElement('button');
+        // nextBtn.className = 'ad-next';
+        // nextBtn.innerHTML = '&#10095;';
+        // nextBtn.onclick = () => {
+        //     currentAdIndex = (currentAdIndex + 1) % ads.length;
+        //     showAds();
+        //     resetAdAutoSlide();
+        // };
         
-        wrapper.appendChild(prevBtn);
-        wrapper.appendChild(nextBtn);
+        // wrapper.appendChild(prevBtn);
+        // wrapper.appendChild(nextBtn);
         
         // إضافة النقاط
         const dotsContainer = document.createElement('div');
@@ -733,18 +733,18 @@ function goToAd(index) {
 }
 
 // إعلان سابق
-function prevAd() {
-    currentAdIndex = currentAdIndex === 0 ? ads.length - 1 : currentAdIndex - 1;
-    showAds();
-    resetAdAutoSlide();
-}
+// function prevAd() {
+//     currentAdIndex = currentAdIndex === 0 ? ads.length - 1 : currentAdIndex - 1;
+//     showAds();
+//     resetAdAutoSlide();
+// }
 
-// إعلان تالي
-function nextAd() {
-    currentAdIndex = currentAdIndex === ads.length - 1 ? 0 : currentAdIndex + 1;
-    showAds();
-    resetAdAutoSlide();
-}
+// // إعلان تالي
+// function nextAd() {
+//     currentAdIndex = currentAdIndex === ads.length - 1 ? 0 : currentAdIndex + 1;
+//     showAds();
+//     resetAdAutoSlide();
+// }
 
 // بدء التمرير التلقائي بين الإعلانات
 function startAdAutoSlide() {

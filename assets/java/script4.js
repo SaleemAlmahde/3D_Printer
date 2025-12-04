@@ -220,8 +220,18 @@ function renderStores(searchTerm = '') {
         storeCard.className = 'store-card';
         storeCard.setAttribute('onclick', `showStoreActions(${store.id})`);
 
+        let hasLogo = store.logo === "" ? false : true;
+
+
+        const topCardStyle = hasLogo 
+            ? 'display: flex; justify-content: space-around; align-items: center;' 
+            : '';
+
         storeCard.innerHTML = `
+        <div class="top-store-card" style="${topCardStyle}">
             <h2>${store.name || 'بدون اسم'}</h2>
+            ${hasLogo ? `<img src="${store.logo}" alt="store logo">` : ''}
+            </div>
             
             <div class="bottom-store-card">
                 <div class="store-details">
@@ -253,6 +263,10 @@ function renderStores(searchTerm = '') {
                 </button>
             </div>
         `;
+
+        if(hasLogo){
+        }
+
         storesContainer.appendChild(storeCard);
     });
 }
