@@ -252,7 +252,7 @@ function renderStores(searchTerm = '') {
 
 
         const topCardStyle = hasLogo 
-            ? 'display: flex; justify-content: space-around; align-items: center;' 
+            ? 'display: flex; justify-content: space-around; align-items: center; width: 100%;' 
             : '';
 
         storeCard.innerHTML = `

@@ -661,7 +661,23 @@
     transform: translateY(0);
 }
 
+/* تنسيقات اللوجو */
+.top-store-card img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+    background-color: white;
+    padding: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
 
+/* لوجو أكبر قليلاً عند التمرير */
+.store-card:hover .top-store-card img {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
 
 
 
