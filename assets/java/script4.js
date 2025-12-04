@@ -5,29 +5,57 @@ let storeForm;
 let deleteStoreBtn;
 
 function getStores() {
-    // حاول قراءة البيانات من localStorage
-    let stores = JSON.parse(localStorage.getItem("pointsOfSale"));
+    // أولاً: جلب المتاجر المحفوظة في localStorage
+    let userStores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
     
-    // 💡 التعديل الجديد هنا:
-    if (!stores || stores.length === 0) {
-        // إذا كانت فارغة أو غير موجودة، استخدم البيانات الافتراضية
-        if (typeof defaultStores !== 'undefined') {
-            stores = defaultStores;
-            // وحفظها مباشرة في localStorage لتبدأ العمل بها
-            setStores(stores); 
-            console.log("📝 تم تهيئة المتاجر بالبيانات الافتراضية.");
+    // ثانياً: دمج المتاجر الافتراضية مع متاجر المستخدم
+    // نبدأ بإنشاء نسخة من المتاجر الافتراضية
+    let combinedStores = [...defaultStores];
+    
+    // ندمج مع متاجر المستخدم (نستبدل المتاجر الافتراضية التي تم تعديلها)
+    userStores.forEach(userStore => {
+        // البحث إذا كان هذا المتجر موجوداً في الافتراضية (بنفس الـ id)
+        const index = combinedStores.findIndex(store => store.id === userStore.id);
+        
+        if (index !== -1) {
+            // إذا كان متجراً افتراضياً معدلاً، نستبدله
+            combinedStores[index] = userStore;
         } else {
-            // في حال عدم وجود حتى defaultStores
-            stores = [];
+            // إذا كان متجراً جديداً أضافه المستخدم، نضيفه
+            combinedStores.push(userStore);
         }
-    }
+    });
     
-    return stores;
+    return combinedStores;
 }
 
 // دالة لحفظ قائمة المتاجر الجديدة في localStorage
 function setStores(stores) {
-    localStorage.setItem("pointsOfSale", JSON.stringify(stores));
+    // نحدد المتاجر الافتراضية الأصلية
+    const defaultStoreIds = defaultStores.map(store => store.id);
+    
+    // نجهز مصفوفة المتاجر التي سنحفظها
+    let storesToSave = [];
+    
+    stores.forEach(store => {
+        // إذا كان المتجر غير افتراضي، نحفظه
+        if (!defaultStoreIds.includes(store.id)) {
+            storesToSave.push(store);
+        } else {
+            // إذا كان افتراضياً، نتحقق إذا كان مختلفاً عن الأصل
+            const originalStore = defaultStores.find(s => s.id === store.id);
+            
+            // مقارنة المتجر مع الأصل
+            if (JSON.stringify(store) !== JSON.stringify(originalStore)) {
+                // إذا كان مختلفاً (تم تعديله)، نحفظه
+                storesToSave.push(store);
+            }
+            // إذا كان مطابقاً للأصل، لا نحفظه (سيعرض من الافتراضيات)
+        }
+    });
+    
+    // حفظ في localStorage
+    localStorage.setItem("pointsOfSale", JSON.stringify(storesToSave));
 }
 
 document.addEventListener('DOMContentLoaded', () => {

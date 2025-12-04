@@ -284,7 +284,7 @@ const finalBaseProducts = [
 const defaultStores = [
     { id: 101,
       name: "متجر الفا للمطبوعات",
-      phone: "0991234567",
+      phone: "ؤسؤسؤسؤ",
       location: "دمشق",
       balance: 0,
       logo:"assets/imgs/Untitled-11.png"
@@ -294,14 +294,28 @@ const defaultStores = [
       phone: "0998765432",
       location: "حلب",
       balance: 0,
-      logo:"Untitled-11"
+      logo:"assets/imgs/Untitled-11.png"
     },
     { id: 103,
       name: "مكتبة الإبداع الرقمي",
       phone: "0995551112",
       location: "حمص",
       balance: 0,
-      logo:"Untitled-11"
+      logo:"assets/imgs/Untitled-33.png"
+    },
+    { id: 104,
+      name: "مكتبة jg الرقمي",
+      phone: "0995551112",
+      location: "حمص",
+      balance: 0,
+      logo:"assets/imgs/Untitled-22.png"
+    },
+    { id: 105,
+      name: "نقطة بيع المهندس",
+      phone: "0998765432",
+      location: "حلب",
+      balance: 0,
+      logo:"assets/imgs/Untitled-11.png"
     }
 ];
 
