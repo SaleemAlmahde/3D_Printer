@@ -798,22 +798,22 @@ function saveInvoice() {
 
   // التحقق من صحة البيانات
   if (!buyerName || !buyerPhone || !buyerProvince || !deliveryType) {
-    alert("⚠️ يرجى ملء جميع الحقول المطلوبة");
+    showToast("⚠️ يرجى ملء جميع الحقول المطلوبة", 3000, 'orange');
     return;
   }
 
   if (deliveryType === "shipping" && (!shippingCompany || !shippingInfo)) {
-    alert("⚠️ يرجى ملء شركة الشحن ومعلومات الشحن");
+    showToast("⚠️ يرجى ملء شركة الشحن ومعلومات الشحن", 3000, 'orange');
     return;
   }
 
   if (deliveryType === "local" && !shippingInfo) {
-    alert("⚠️ يرجى إدخال الموقع");
+    showToast("⚠️ يرجى إدخال الموقع", 3000, 'orange');
     return;
   }
 
   if (selectedProducts.length === 0) {
-    alert("⚠️ يرجى إضافة منتج واحد على الأقل");
+    showToast("⚠️ يرجى إضافة منتج واحد على الأقل", 3000, 'orange');
     return;
   }
 
@@ -1068,12 +1068,12 @@ function confirmAddProduct() {
   const selectedColorData = productInput.dataset.selectedColor;
   
   if (!productName) {
-    alert("⚠️ يرجى اختيار منتج");
+    showToast("⚠️ يرجى اختيار منتج", 3000, 'orange');
     return;
   }
 
   if (!selectedColorData) {
-    alert("⚠️ يرجى اختيار لون للمنتج");
+    showToast("⚠️ يرجى اختيار لون للمنتج", 3000, 'orange');
     return;
   }
 
@@ -1342,7 +1342,7 @@ function onPasteCode() {
 
     const code = codeInput.value.trim();
     if (!code) {
-        alert('ألصق الكود أولاً');
+        showToast('ألصق الكود أولاً', 3000, 'orange');
         return;
     }
 
@@ -1474,6 +1474,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 💡 إظهار رسالة تفيد بأن القائمة مفلترة
         alert(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`);
+        showToast(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`, 5000, 'green');
     }
     
     // إذا لم يكن هناك معامل في الرابط، نعرض الفواتير بشكل طبيعي

@@ -125,7 +125,7 @@ function saveStore() {
         const location = document.getElementById('storeLocation').value.trim();
 
         if (!name || !phone || !location) {
-            alert("⚠️ يرجى ملء جميع حقول المتجر.");
+            showToast("⚠️ يرجى ملء جميع حقول المتجر.", 3000, 'red');
             return;
         }
 
@@ -159,7 +159,7 @@ function saveStore() {
         setStores(stores);
         closeStoreModal();
         renderStores(); // تحديث القائمة المعروضة
-        alert("✅ تم حفظ المتجر بنجاح.");
+        showToast("✅ تم حفظ المتجر بنجاح.", 3000, 'green');
     } catch (e) {
         console.error("خطأ أثناء حفظ المتجر:", e);
         alert("❌ حدث خطأ أثناء الحفظ.");

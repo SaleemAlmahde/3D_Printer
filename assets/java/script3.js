@@ -187,7 +187,7 @@ function saveEdit(itemId) {
     const quantity = parseInt(qInput.value) || 1;
 
     if (!selectedColorData) {
-        alert("⚠️ يرجى اختيار لون للمنتج");
+        showToast("⚠️ يرجى اختيار لون للمنتج", 3000, 'orange');
         return;
     }
 
@@ -205,7 +205,7 @@ function saveEdit(itemId) {
     displayCartItems(); // إعادة عرض السلة لعكس التعديلات
     updateCartTotals()
 
-    alert(`✅ تم حفظ التعديلات بنجاح!`);
+    showToast(`✅ تم حفظ التعديلات بنجاح!`, 3000, 'green');
 }
 
 // ======================================================
@@ -379,7 +379,7 @@ function handleCheckout() {
     const checkoutBtn = document.getElementById("checkoutBtn");
     
     if (cartItems.length === 0) {
-        alert("❌ السلة فارغة! لا يمكن تأكيد الطلب.");
+        showToast("❌ السلة فارغة! لا يمكن تأكيد الطلب.", 5000, 'red');
         return;
     }
 
@@ -435,7 +435,8 @@ function handleCheckout() {
 
         // تطبيق الشرط: إذا كان هناك ستيكرات (الكمية > 0) وكانت الكمية الإجمالية أقل من 3
         if (totalStickerCount > 0 && totalStickerCount < 3) {
-            alert(`⚠️ عذراً، يجب طلب 3 ستيكرات على الأقل لإتمام عملية الشراء. (الكمية الحالية: ${totalStickerCount})`);
+            showToast(`⚠️ عذراً، يجب طلب 3 ستيكرات على الأقل لإتمام عملية الشراء. (الكمية الحالية: ${totalStickerCount})`, 5000, 'orange');
+
             return; // إيقاف العملية ومنع المتابعة
         }
         // -----------------------------------------------------
@@ -553,7 +554,7 @@ function validateCustomerInputs() {
     
     // التحقق من الحقول الإلزامية
     if (!name || !phone || !city || !details || !date) {
-        alert("⚠️ يرجى تعبئة جميع معلومات التواصل والموقع الإلزامية.");
+        showToast("⚠️ يرجى تعبئة جميع معلومات التواصل والموقع الإلزامية.", 3000, 'red');
         return false;
     }
 
@@ -567,7 +568,7 @@ function validateCustomerInputs() {
 
     // إذا كان التاريخ المدخل أصغر من أو يساوي اليوم الحالي (مقارنة بالمللي ثانية)
     if (inputDate.getTime() <= today.getTime()) {
-        alert("❌ يرجى اختيار تاريخ شحن مستقبلي (لا يمكن الشحن في نفس اليوم أو يوم سابق).");
+        showToast("❌ يرجى اختيار تاريخ شحن مستقبلي (لا يمكن الشحن في نفس اليوم أو يوم سابق).", 3000, 'red');
         document.getElementById("shippingDate").focus();
         return false;
     }
