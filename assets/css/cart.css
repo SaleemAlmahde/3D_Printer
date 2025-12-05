@@ -1,4 +1,6 @@
 @import url("nav.css");
+@import url("toast_notification.css");
+
 
 #cartSection{
   display: flex;

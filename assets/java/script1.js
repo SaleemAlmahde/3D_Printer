@@ -255,8 +255,6 @@ function showModal(id) {
     }
     // -----------------------------------------------------
 
-    console.log(stickerWarningHTML);
-
         // عرض الألوان كدوائر
         let colorsHTML = '';
         if (product.colors && product.colors.length > 0) {
@@ -339,7 +337,7 @@ function addToCart(productId) {
 
   const selectedColorData = colorContainer.dataset.selectedColor;
   if (!selectedColorData) {
-    alert("⚠️ يرجى اختيار لون للمنتج");
+    showToast("⚠️ يرجى اختيار لون للمنتج",3000, '#d32f2f');
     return;
   }
 
@@ -766,24 +764,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * إظهار رسالة التوست لفترة محددة.
+ * إظهار رسالة التوست لفترة محددة بلون خلفية مخصص.
  * @param {string} message - الرسالة المراد عرضها.
- * @param {number} duration - مدة عرض الرسالة بالمللي ثانية (افتراضياً 3000ms = 3 ثواني).
+ * @param {number} duration - مدة عرض الرسالة بالمللي ثانية (افتراضياً 3000ms).
+ * @param {string} bgColor - رمز اللون المراد استخدامه للخلفية (افتراضياً لون النجاح الأخضر).
  */
-function showToast(message, duration = 3000) {
+function showToast(message, duration = 3000, bgColor = '#43a047') {
     const toastElement = document.getElementById('toastNotification');
-const toastMessageElement = document.getElementById('toastMessage');
+    const toastMessageElement = document.getElementById('toastMessage');
 
     if (!toastElement || !toastMessageElement) return; // تحقق من وجود العناصر
 
-    // 1. تعيين الرسالة الجديدة
+    // 1. (تعديل جديد) تعيين لون الخلفية باستخدام متغير CSS
+    // يتم تمرير قيمة اللون مباشرة كمتغير CSS للعنصر.
+    toastElement.style.setProperty('--toast-bg-color', bgColor);
+    
+    // 2. تعيين الرسالة الجديدة
     toastMessageElement.textContent = message;
 
-    // 2. إظهار الـ Toast بإضافة الفئة (يتم تطبيق الترانزيشن)
+    // 3. إظهار الـ Toast بإضافة الفئة (يتم تطبيق الترانزيشن)
     toastElement.classList.remove('toast-hidden');
     toastElement.classList.add('toast-visible');
 
-    // 3. إعداد مؤقت لإخفاء الـ Toast
+    // 4. إعداد مؤقت لإخفاء الـ Toast
     setTimeout(() => {
         // إخفاء الـ Toast بعد انتهاء المدة (يتم تطبيق الترانزيشن)
         toastElement.classList.remove('toast-visible');
