@@ -372,8 +372,10 @@ function addToCart(productId) {
   const colorSelector = document.querySelector(".color-selector");
   if (colorSelector) colorSelector.remove();
 
-  // رسالة نجاح لطيفة
-  alert(`✅ تمت إضافة ${product.name} (${selectedColor.name}) إلى السلة!`);
+  closeModal();
+
+  console.log(`✅ تمت إضافة ${product.name} إلى السلة بنجاح!`);
+  showToast(`✅ تمت إضافة ${product.name} إلى السلة بنجاح!`);
 
   closeModal();
 }
@@ -656,17 +658,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ... باقي الكود ...
 });
 
-
-
-
-
-
-
-
-
-
-
-
 let currentAdIndex = 0;
 let adAutoSlideInterval = null;
 
@@ -699,28 +690,6 @@ function showAds() {
     
     // إضافة الأزرار إذا كان هناك أكثر من إعلان
     if (ads.length > 1) {
-        // const prevBtn = document.createElement('button');
-        // prevBtn.className = 'ad-prev';
-        // prevBtn.innerHTML = '&#10094;';
-        // prevBtn.onclick = () => {
-        //     currentAdIndex = (currentAdIndex - 1 + ads.length) % ads.length;
-        //     showAds();
-        //     resetAdAutoSlide();
-        // };
-        
-        // const nextBtn = document.createElement('button');
-        // nextBtn.className = 'ad-next';
-        // nextBtn.innerHTML = '&#10095;';
-        // nextBtn.onclick = () => {
-        //     currentAdIndex = (currentAdIndex + 1) % ads.length;
-        //     showAds();
-        //     resetAdAutoSlide();
-        // };
-        
-        // wrapper.appendChild(prevBtn);
-        // wrapper.appendChild(nextBtn);
-        
-        // إضافة النقاط
         const dotsContainer = document.createElement('div');
         dotsContainer.className = 'ad-dots-container';
         
@@ -753,20 +722,6 @@ function goToAd(index) {
     showAds();
     resetAdAutoSlide();
 }
-
-// إعلان سابق
-// function prevAd() {
-//     currentAdIndex = currentAdIndex === 0 ? ads.length - 1 : currentAdIndex - 1;
-//     showAds();
-//     resetAdAutoSlide();
-// }
-
-// // إعلان تالي
-// function nextAd() {
-//     currentAdIndex = currentAdIndex === ads.length - 1 ? 0 : currentAdIndex + 1;
-//     showAds();
-//     resetAdAutoSlide();
-// }
 
 // بدء التمرير التلقائي بين الإعلانات
 function startAdAutoSlide() {
@@ -809,3 +764,29 @@ document.addEventListener('DOMContentLoaded', () => {
         adSection.addEventListener('mouseleave', startAdAutoSlide);
     }
 });
+
+/**
+ * إظهار رسالة التوست لفترة محددة.
+ * @param {string} message - الرسالة المراد عرضها.
+ * @param {number} duration - مدة عرض الرسالة بالمللي ثانية (افتراضياً 3000ms = 3 ثواني).
+ */
+function showToast(message, duration = 3000) {
+    const toastElement = document.getElementById('toastNotification');
+const toastMessageElement = document.getElementById('toastMessage');
+
+    if (!toastElement || !toastMessageElement) return; // تحقق من وجود العناصر
+
+    // 1. تعيين الرسالة الجديدة
+    toastMessageElement.textContent = message;
+
+    // 2. إظهار الـ Toast بإضافة الفئة (يتم تطبيق الترانزيشن)
+    toastElement.classList.remove('toast-hidden');
+    toastElement.classList.add('toast-visible');
+
+    // 3. إعداد مؤقت لإخفاء الـ Toast
+    setTimeout(() => {
+        // إخفاء الـ Toast بعد انتهاء المدة (يتم تطبيق الترانزيشن)
+        toastElement.classList.remove('toast-visible');
+        toastElement.classList.add('toast-hidden');
+    }, duration);
+}
