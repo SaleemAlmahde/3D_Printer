@@ -5,16 +5,13 @@ let loadedCount = 0;
 const itemsPerLoad = 15; // عدد المنتجات التي تُعرض كل مرة
 let searchQuery = "";
 const scrollTopBtn = document.getElementById("scrollTopBtn"); // زر العودة للأعلى
-// ==========================
-// 🛒 مصفوفة السلة العامة
-// ==========================
 let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
 
 function showCat() {
     finalBaseProducts.forEach(product => {
         const firstCat = product.categories[0];
-        if (!importantCats.includes(firstCat)) {
+        if (!importantCats.includes(firstCat) && firstCat !=undefined) {
             importantCats.push(firstCat);
         }
         for (let i = 1; i < product.categories.length; i++) {
@@ -53,15 +50,24 @@ function showCat() {
 }
 
 function filterProducts(category, fromSelect = false) {
+    // 1. (تعديل جديد) استخراج المنتج المخصص
+    const customProduct = finalBaseProducts.find(product => product.isCustomOrder);
+
     // إعادة العد عند تغيير التصنيف
     loadedCount = 0;
-
+    
     if (category === "all" || category === "Other") {
-        filteredProducts = finalBaseProducts;
+        filteredProducts = finalBaseProducts.filter(product => !product.isCustomOrder);
     } else {
         filteredProducts = finalBaseProducts.filter(product =>
-            product.categories.includes(category)
+            product.categories.includes(category) && !product.isCustomOrder // نستثني المنتج المخصص من الفلترة حسب التصنيف
         );
+        }
+
+        // 2. (تعديل جديد) إعادة دمج المنتج المخصص في البداية
+    // سيتم إضافته دائماً إذا كان موجوداً، بغض النظر عن نتيجة الفلترة
+    if (customProduct) {
+        filteredProducts.unshift(customProduct); 
     }
 
     importantCats.forEach(cat => {
@@ -393,6 +399,9 @@ function searchProducts() {
     const input = document.getElementById("searchInput");
     searchQuery = input.value.trim().toLowerCase();
 
+    // 1. (تعديل جديد) استخراج المنتج المخصص أولاً
+    const customProduct = finalBaseProducts.find(p => p.isCustomOrder);
+
     // إعادة ضبط المنتجات المحملة
     loadedCount = 0;
     document.getElementById("products").innerHTML = "";
@@ -401,17 +410,30 @@ function searchProducts() {
     let category = document.getElementById("otherCat").value;
     if (category === "Other") category = "all";
 
-    let baseList = category === "all" ? finalBaseProducts : finalBaseProducts.filter(p => p.categories.includes(category));
+    // 2. (تعديل) بناء القائمة الأساسية: استبعاد المنتج المخصص من البداية
+    // فلترة المنتجات العادية فقط
+    let baseList = finalBaseProducts.filter(p => !p.isCustomOrder);
 
+    // تطبيق فلترة التصنيف على القائمة الأساسية (بدون المنتج المخصص)
+    if (category !== "all") {
+        baseList = baseList.filter(p => p.categories.includes(category));
+    }
+
+    // 3. تطبيق البحث على القائمة التي تم فلترتها حسب التصنيف
     if (searchQuery !== "") {
-    filteredProducts = baseList.filter(p => 
-        p.name.toLowerCase().includes(searchQuery) ||
-        (p.shortDisc && p.shortDisc.toLowerCase().includes(searchQuery)) ||
-        p.categories.some(cat => cat.toLowerCase().includes(searchQuery))
-    );
-} else {
-    filteredProducts = baseList;
-}
+        filteredProducts = baseList.filter(p => 
+            p.name.toLowerCase().includes(searchQuery) ||
+            (p.shortDisc && p.shortDisc.toLowerCase().includes(searchQuery)) ||
+            p.categories.some(cat => cat.toLowerCase().includes(searchQuery))
+        );
+    } else {
+        filteredProducts = baseList;
+    }
+
+    // 4. (تعديل جديد) إضافة المنتج المخصص إلى مقدمة النتائج
+    if (customProduct) {
+        filteredProducts.unshift(customProduct); 
+    }
 
     // إعادة تفعيل زر عرض المزيد
     const loadBtn = document.getElementById("loadMoreBtn");
