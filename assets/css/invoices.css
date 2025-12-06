@@ -1468,3 +1468,174 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
     width: 180px;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* تنسيقات للمنتج المخصص */
+.custom-product-item {
+  border-left: 4px solid #ff9800;
+  background-color: #fff8e1;
+}
+
+.custom-badge {
+  display: inline-block;
+  background: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  margin-right: 8px;
+}
+
+.custom-product-fields {
+  display: flex;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.field-group {
+  flex: 1;
+}
+
+.field-group label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.field-group input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.custom-description {
+  font-size: 13px;
+  color: #555;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.custom-product-badge {
+  background: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.custom-product-inputs {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.custom-product-inputs .form-group {
+  margin-bottom: 12px;
+}
+
+.custom-product-inputs label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.custom-product-inputs textarea,
+.custom-product-inputs input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.custom-product-inputs .form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.custom-product-inputs .form-row .form-group {
+  flex: 1;
+}

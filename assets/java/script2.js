@@ -769,31 +769,50 @@ function saveInvoice() {
   // جلب المنتجات المختارة
   const selectedProductsList = document.getElementById("selectedProductsList");
   const selectedProducts = Array.from(selectedProductsList.children).map(item => {
-    const nameEl = item.querySelector(".product-name");
-    const qtyEl = item.querySelector(".product-qty");
-    const priceEl = item.querySelector(".product-price");
-    
-    const name = nameEl.textContent;
-    const quantity = parseInt(qtyEl.textContent.replace("x", "")) || 1;
-    
-    // ✅ إصلاح #1: قراءة آمنة لسعر الليرة SYP لتجنب خطأ toLocaleString
-    const priceText = priceEl ? priceEl.textContent : ''; 
-    const priceSYP = parseInt(priceText.replace(/[^\d]/g, "")) || 0; 
-    
-    // البحث عن المنتج في finalBaseProducts للحصول على اللون
-    const product = finalBaseProducts.find(p => p.name === name) || null;
+    // 🛑 التعديل: تحديد ما إذا كان المنتج قياسياً أم مخصصاً 🛑
+        const isCustom = item.querySelector(".is-custom-flag")?.value === 'true';
+        
+        // قراءة الاسم المشترك بين الحالتين
+        const name = item.querySelector(".product-name")?.textContent || 'منتج غير معروف';
 
-    // حاول قراءة لون العنصر من DOM
-    const colorEl = item.querySelector('.selected-color');
-    const colorCode = colorEl ? (colorEl.style.backgroundColor || '') : '';
-    const colorName = colorEl ? (colorEl.title || '') : '';
+        if (isCustom) {
+            // --- قراءة المنتج المخصص (Active Inputs) ---
+            const qtyInput = item.querySelector(".product-qty-input");
+            const priceInput = item.querySelector(".product-price-input");
 
-    return {
-      name,
-      quantity,
-      priceSYP,
-      color: { name: colorName, code: colorCode }
-    };
+            const quantity = parseInt(qtyInput?.value) || 1;
+            const priceSYP = parseFloat(priceInput?.value) || 0;
+
+            // اللون الافتراضي للمنتج المخصص
+            return {
+                name: name,
+                quantity: quantity,
+                priceSYP: priceSYP,
+                isCustom: true, // ضروري للحفظ
+                color: { name: 'مخصص', code: '#FFFFFF' }
+            };
+            
+        } else {
+            // --- قراءة المنتج القياسي (Static Hidden Inputs) ---
+            
+            const qtyEl = item.querySelector(".product-qty-static");
+            const priceEl = item.querySelector(".product-price-static");
+            const colorNameEl = item.querySelector(".product-color-name");
+            const colorCodeEl = item.querySelector(".product-color-code");
+            
+            const quantity = parseInt(qtyEl?.value) || 1;
+            const priceSYP = parseFloat(priceEl?.value) || 0;
+            const colorName = colorNameEl?.value || '';
+            const colorCode = colorCodeEl?.value || '';
+
+            return {
+                name: name,
+                quantity: quantity,
+                priceSYP: priceSYP,
+                isCustom: false, // ضروري للحفظ
+                color: { name: colorName, code: colorCode }
+            };
+        }
   });
 
   // التحقق من صحة البيانات
@@ -815,6 +834,13 @@ function saveInvoice() {
   if (selectedProducts.length === 0) {
     showToast("⚠️ يرجى إضافة منتج واحد على الأقل", 3000, 'orange');
     return;
+  }
+
+  // 🛑 التعديل: التحقق من أن المدير قام بتسعير المنتجات المخصصة
+  const hasZeroPriceCustomItem = selectedProducts.some(p => p.isCustom && p.priceSYP === 0);
+  if (hasZeroPriceCustomItem) {
+      showToast("⚠️ يرجى تسعير جميع المنتجات المخصصة (قيمتها 0) قبل الحفظ.", 4000, 'red');
+      return;
   }
 
   const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
@@ -952,31 +978,52 @@ function renderProductsList(searchQuery = '') {
   });
 
   // إنشاء HTML للمنتجات
-  const productsHTML = filteredProducts.map(product => `
-    <div class="dropdown-item" onclick="selectProduct(${product.id})">
+  const productsHTML = filteredProducts.map(product => {
+    // 🔧 التصحيح: التعامل مع ID كنص
+    let onclickCode;
+    
+    if (typeof product.id === 'string' && product.id.includes("CUSTOM")) {
+      // للمنتج المخصص: استخدام الاسم مع علامات اقتباس
+      onclickCode = `selectProduct('${product.id}')`;
+    } else {
+      // للمنتج القياسي: تمرير الرقم
+      onclickCode = `selectProduct(${product.id})`;
+    }
+    
+    // 🔧 إضافة عرض خاص للمنتج المخصص
+    const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
+    
+    return `
+    <div class="dropdown-item" onclick="${onclickCode}">
       <img src="${product.images[0] || 'assets/imgs/placeholder.jpg'}" alt="${product.name}">
       <div class="product-info">
         <span class="product-name">${product.name}</span>
         <span class="product-price">
-          ${product.price.toLocaleString()} ل.س 
+          ${isCustom ? 'يحدد لاحقاً' : product.price.toLocaleString() + ' ل.س'}
         </span>
         ${product.shortDisc ? `<span class="product-desc">${product.shortDisc}</span>` : ''}
       </div>
-      <div class="color-dots">
-        ${product.colors?.slice(0, 5).map(color => `
-          <span class="color-dot" 
-                style="background-color: ${color.code}" 
-                title="${color.name}">
-          </span>
-        `).join('')}
-        ${product.colors?.length > 5 ? `
-          <span class="color-dot more-colors" title="المزيد من الألوان">
-            +${product.colors.length - 5}
-          </span>
-        ` : ''}
-      </div>
+      ${isCustom ? `
+        <div class="custom-product-badge">
+          🛠️ مخصص
+        </div>
+      ` : `
+        <div class="color-dots">
+          ${product.colors?.slice(0, 5).map(color => `
+            <span class="color-dot" 
+                  style="background-color: ${color.code}" 
+                  title="${color.name}">
+            </span>
+          `).join('')}
+          ${product.colors?.length > 5 ? `
+            <span class="color-dot more-colors" title="المزيد من الألوان">
+              +${product.colors.length - 5}
+            </span>
+          ` : ''}
+        </div>
+      `}
     </div>
-  `).join('');
+  `}).join('');
 
   dropdown.innerHTML = productsHTML || '<div class="no-results">لا توجد نتائج</div>';
 }
@@ -989,12 +1036,68 @@ function handleProductSearch(event) {
 
 // اختيار منتج
 function selectProduct(productId) {
-  const product = finalBaseProducts.find(p => p.id === productId);
+// 🔧 إصلاح: التعامل مع ID كنص أو رقم
+  const product = finalBaseProducts.find(p => 
+    p.id === productId || p.id.toString() === productId.toString()
+  ); 
+  
   if (!product) return;
 
   // إخفاء قائمة المنتجات وإظهار اختيار اللون
   document.getElementById("productDropdown").classList.add("hidden");
   document.getElementById("productInput").value = product.name;
+
+   // 🔧 تحسين: تحديد ما إذا كان منتج مخصص
+  const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
+
+  // 🔧 NEW: إذا كان منتج مخصص، لا نعرض الألوان
+  if (isCustom) {
+    // إزالة قائمة اختيار الألوان إن وجدت
+    const colorSelector = document.querySelector(".color-selector");
+    if (colorSelector) colorSelector.remove();
+    
+    // إضافة واجهة خاصة للمنتج المخصص
+    const customProductUI = document.createElement("div");
+    customProductUI.className = "custom-product-inputs";
+    customProductUI.innerHTML = `
+      <h4>إدخال تفاصيل المنتج المخصص</h4>
+      <div class="custom-form">
+        <div class="form-group">
+          <label>الوصف المخصص:</label>
+          <textarea id="customDescriptionInput" placeholder="أدخل وصف المنتج المخصص..." rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>الكمية:</label>
+            <input type="number" id="customProductQty" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label>السعر المبدئي (ل.س):</label>
+            <input type="number" id="customProductPrice" value="0" min="0">
+          </div>
+        </div>
+      </div>
+    `;
+
+    const bottomSheetContent = document.querySelector(".bottom-sheet-content");
+    const existingCustomUI = bottomSheetContent.querySelector(".custom-product-inputs");
+    const existingColorSelector = bottomSheetContent.querySelector(".color-selector");
+    
+    if (existingCustomUI) existingCustomUI.remove();
+    if (existingColorSelector) existingColorSelector.remove();
+    
+    // 🔧 التصحيح: إدراج في المكان الصحيح
+    const productQuantityContainer = document.getElementById("productQuantity").parentElement;
+    productQuantityContainer.insertBefore(
+      customProductUI,
+      document.getElementById("productQuantity")
+    );
+    
+    // إخفاء حقل الكمية القياسي للمنتج المخصص
+    document.getElementById("productQuantity").classList.add("hidden");
+    
+    return; // نخرج لأن المنتج المخصص لا يحتاج لاختيار لون
+  }
 
   // إنشاء قائمة اختيار اللون
   const colorSelector = document.createElement("div");
@@ -1064,16 +1167,9 @@ function selectColor(productId, colorName, colorCode) {
 function confirmAddProduct() {
   const productInput = document.getElementById("productInput");
   const productName = productInput.value;
-  const quantity = parseInt(document.getElementById("productQuantity").value) || 1;
-  const selectedColorData = productInput.dataset.selectedColor;
   
   if (!productName) {
     showToast("⚠️ يرجى اختيار منتج", 3000, 'orange');
-    return;
-  }
-
-  if (!selectedColorData) {
-    showToast("⚠️ يرجى اختيار لون للمنتج", 3000, 'orange');
     return;
   }
 
@@ -1083,47 +1179,127 @@ function confirmAddProduct() {
     return;
   }
 
-  const selectedColor = JSON.parse(selectedColorData);
+  const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
 
-  // إضافة المنتج لقائمة المنتجات المحددة
-  const selectedProductsList = document.getElementById("selectedProductsList");
-  const productElement = document.createElement("div");
-  productElement.className = "selected-product";
-  productElement.innerHTML = `
-    <div class="product-info">
-      <span class="product-name">${product.name}</span>
-      <span class="product-qty">x${quantity}</span>
-      <span class="product-price">${product.price.toLocaleString()} ل.س</span>
-      <div class="selected-color" style="background-color: ${selectedColor.code}" title="${selectedColor.name}"></div>
-    </div>
-    <button type="button" class="remove-product" onclick="this.closest('.selected-product').remove(); updateTotals();">
-      <i class="fa fa-times"></i>
-    </button>
-  `;
-  selectedProductsList.appendChild(productElement);
+  // 🔧 NEW: معالجة المنتج المخصص بشكل مختلف
+  if (isCustom) {
+    const descriptionInput = document.getElementById("customDescriptionInput");
+    const customQtyInput = document.getElementById("customProductQty");
+    const customPriceInput = document.getElementById("customProductPrice");
+    
+    if (!descriptionInput || !customQtyInput || !customPriceInput) {
+      showToast("⚠️ يرجى إدخال تفاصيل المنتج المخصص", 3000, 'orange');
+      return;
+    }
+    
+    const customDescription = descriptionInput.value.trim();
+    const quantity = parseInt(customQtyInput.value) || 1;
+    const priceSYP = parseFloat(customPriceInput.value) || 0;
+    
+    if (!customDescription) {
+      showToast("⚠️ يرجى إدخال وصف المنتج المخصص", 3000, 'orange');
+      return;
+    }
+    
+    // إضافة المنتج المخصص لقائمة المنتجات المحددة
+    const selectedProductsList = document.getElementById("selectedProductsList");
+    const productElement = document.createElement("div");
+    productElement.className = "selected-product custom-product-item";
+    productElement.innerHTML = `
+      <div class="product-info">
+        <span class="product-name">${product.name}</span>
+        <div class="custom-badge">🛠️ مخصص</div>
+      </div>
+      <div class="custom-product-fields">
+        <div class="field-group">
+          <label>الكمية:</label>
+          <input type="number" class="product-qty-input" value="${quantity}" min="1" 
+                 oninput="updateInvoiceTotals()">
+        </div>
+        <div class="field-group">
+          <label>السعر (ل.س):</label>
+          <input type="number" class="product-price-input" value="${priceSYP}" min="0" 
+                 oninput="updateInvoiceTotals()">
+        </div>
+      </div>
+      <div class="custom-description">
+        <strong>الوصف:</strong> ${customDescription}
+      </div>
+      <button type="button" class="remove-product" 
+              onclick="this.closest('.selected-product').remove(); updateInvoiceTotals();">
+        <i class="fa fa-times"></i>
+      </button>
+      <input type="hidden" class="is-custom-flag" value="true">
+      <input type="hidden" class="custom-description-text" value="${customDescription.replace(/"/g, '&quot;')}">
+    `;
+    selectedProductsList.appendChild(productElement);
+    
+  } else {
+    // المنتج القياسي (الكود الحالي مع تعديلات طفيفة)
+    const selectedColorData = productInput.dataset.selectedColor;
+    const quantity = parseInt(document.getElementById("productQuantity").value) || 1;
+    
+    if (!selectedColorData) {
+      showToast("⚠️ يرجى اختيار لون للمنتج", 3000, 'orange');
+      return;
+    }
+
+    const selectedColor = JSON.parse(selectedColorData);
+    
+    // إضافة المنتج للقائمة المنتجات المحددة
+    const selectedProductsList = document.getElementById("selectedProductsList");
+    const productElement = document.createElement("div");
+    productElement.className = "selected-product";
+    productElement.innerHTML = `
+      <div class="product-info">
+        <span class="product-name">${product.name}</span>
+        <span class="product-qty">x${quantity}</span>
+        <span class="product-price">${product.price.toLocaleString()} ل.س</span>
+        <div class="selected-color" style="background-color: ${selectedColor.code}" 
+             title="${selectedColor.name}"></div>
+      </div>
+      <button type="button" class="remove-product" 
+              onclick="this.closest('.selected-product').remove(); updateTotals();">
+        <i class="fa fa-times"></i>
+      </button>
+      <input type="hidden" class="is-custom-flag" value="false">
+      <input type="hidden" class="product-qty-static" value="${quantity}">
+      <input type="hidden" class="product-price-static" value="${product.price}">
+      <input type="hidden" class="product-color-name" value="${selectedColor.name}">
+      <input type="hidden" class="product-color-code" value="${selectedColor.code}">
+    `;
+    selectedProductsList.appendChild(productElement);
+  }
 
   // تحديث الإجماليات
-  updateTotals();
+  if (product.isCustomOrder) {
+    updateInvoiceTotals(); // لدالة جديدة للمنتجات المخصصة
+  } else {
+    updateTotals();
+  }
 
-  // إغلاق البوتم شيت وإعادة تعيين الحقول
-  // تأكد إغلاق البوتم شيت (force-close) لتجنب حالات بقاء الشيت مفتوح
+  // إغلاق وإعادة تعيين الحقول
   closeAddProductSheet();
   const addSheet = document.getElementById('addProductSheet');
   const overlay = document.getElementById('productSheetOverlay');
   const dropdown = document.getElementById('productDropdown');
+  
   if (addSheet) addSheet.classList.remove('active');
   if (overlay) overlay.classList.remove('active');
   if (dropdown) dropdown.classList.add('hidden');
+  
   productInput.value = "";
-  // إزالة الداتا من dataset بدلاً من محاولة إزالة attribute غير موجود
   delete productInput.dataset.selectedColor;
   document.getElementById("productQuantity").value = "";
-
-  // إزالة قائمة اختيار الألوان
+  
+  // تنظيف الواجهة
   const colorSelector = document.querySelector(".color-selector");
-  if (colorSelector) {
-    colorSelector.remove();
-  }
+  const customUI = document.querySelector(".custom-product-inputs");
+  if (colorSelector) colorSelector.remove();
+  if (customUI) customUI.remove();
+  
+  // إعادة إظهار حقل الكمية القياسي
+  document.getElementById("productQuantity").parentElement.classList.remove("hidden");
 }
 
 // تحديث إجماليات الفاتورة
@@ -1154,6 +1330,36 @@ function updateTotals() {
   const safeTotalSYP = totalSYP || 0;
   
   document.getElementById("totalSYP").textContent = safeTotalSYP.toLocaleString();
+}
+
+// 🔧 NEW: دالة جديدة لحساب إجمالي المنتجات المخصصة والقياسية
+function updateInvoiceTotals() {
+  const selectedProductsList = document.getElementById("selectedProductsList");
+  const products = Array.from(selectedProductsList.children);
+  
+  let totalSYP = 0;
+  
+  products.forEach(item => {
+    const isCustom = item.querySelector(".is-custom-flag")?.value === 'true';
+    
+    if (isCustom) {
+      // منتج مخصص: قراءة من حقول الإدخال
+      const qtyInput = item.querySelector(".product-qty-input");
+      const priceInput = item.querySelector(".product-price-input");
+      const qty = parseInt(qtyInput?.value) || 0;
+      const price = parseFloat(priceInput?.value) || 0;
+      totalSYP += qty * price;
+    } else {
+      // منتج قياسي: قراءة من الحقول المخفية
+      const qtyStatic = item.querySelector(".product-qty-static");
+      const priceStatic = item.querySelector(".product-price-static");
+      const qty = parseInt(qtyStatic?.value) || 0;
+      const price = parseFloat(priceStatic?.value) || 0;
+      totalSYP += qty * price;
+    }
+  });
+  
+  document.getElementById("totalSYP").textContent = totalSYP.toLocaleString();
 }
 
 // معالجة البحث عند الكتابة
@@ -1234,39 +1440,107 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   // المنتجات (نحتاج أن نعرضها داخل selectedProductsList)
   // ----------------------------------------------------
   const selList = document.getElementById('selectedProductsList');
+  const notesEl = document.getElementById('invoiceNotes');
+
+  // 💡 خطوة جديدة: تجميع الأوصاف المخصصة
+  let combinedCustomNotes = '';
+
   if (selList) {
     selList.innerHTML = ''; // تنظيف القائمة
     
     const productsArr = Array.isArray(invoice.products) ? invoice.products : [];
     
-    productsArr.forEach(p => {
+    // 🔧 إصلاح: إضافة index كمعامل ثاني في forEach
+    productsArr.forEach((p, index) => {
+      // قراءة حقل isCustom
+      const isCustom = p.isCustom === true;
+
       const name = p.name || p.productName || '';
       const qty = p.quantity || p.qty || 1;
       // نستخدم priceAtOrder من كائن الطلب إذا وُجد لضمان صحة السعر عند الطلب
       const price = p.priceAtOrder || p.priceSYP || p.price || 0; 
       const colorName = p.selectedColor?.name || p.color?.name || '';
       const colorCode = p.selectedColor?.code || p.color?.code || '';
+      const customDescription = p.customDescription || '';
 
       // ✅ إصلاح: استخدام القيمة الآمنة للسعر
       const safePrice = price || 0;
 
+      if (isCustom && customDescription) {
+          // 1. تجميع الوصف المخصص للملاحظات العامة (للتعديل اليدوي)
+          combinedCustomNotes += `[${name}]: ${customDescription} | الكمية القادمة: x${qty} | السعر المبدئي: ${safePrice.toLocaleString()} ل.س\n\n`;
+      }
+
       const item = document.createElement('div');
       item.className = 'selected-product';
-      item.innerHTML = `
-        <div class="selected-product-left">
-          <span class="product-name">${name}</span>
-          ${colorCode ? `
-            <span class="selected-color" 
-                  title="${colorName}" 
-                  style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle">
-            </span>
-          ` : ''}
-        </div>
-        <div class="selected-product-right">
-          <span class="product-qty">x${qty}</span>
-          <span class="product-price">${safePrice.toLocaleString()} ل.س</span>
-        </div>
-      `;
+      
+      if (isCustom) {
+          // 🔧 إصلاح: استخدام المتغير index من forEach
+          const tempProductId = `CUSTOM_${Date.now()}_${index}`;
+          
+          item.innerHTML = `
+              <div class="selected-product-left" style="background:#fff3e0; padding:5px; border-radius:4px;">
+                  <span class="product-name" style="font-weight:bold; color:#d9534f;">${name} (تسعير يدوي)</span>
+                  
+                  <span class="selected-color" 
+                        title="أبيض - قيمة افتراضية" 
+                        style="background-color:#FFFFFF;display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle; border:1px solid #ccc;">
+                  </span>
+                  
+                  <p style="font-size:12px; margin-top:5px;">${customDescription || 'بدون وصف'}</p>
+                  <input type="hidden" class="is-custom-flag" value="true">
+                  <input type="hidden" class="temp-product-id" value="${tempProductId}">
+                  <input type="hidden" class="custom-description-text" value="${customDescription.replace(/"/g, '&quot;')}">
+              </div>
+              <div class="selected-product-right">
+                  <div class="field-group">
+                      <label style="font-size:10px;">الكمية</label>
+                      <input type="number" class="product-qty-input" value="${qty}" min="1" oninput="updateInvoiceTotals()">
+                  </div>
+                  <div class="field-group">
+                      <label style="font-size:10px;">السعر (ل.س)</label>
+                      <input type="number" class="product-price-input" value="${safePrice}" min="0" oninput="updateInvoiceTotals()">
+                  </div>
+              </div>
+              <button type="button" class="remove-product" 
+                      onclick="this.closest('.selected-product').remove(); updateInvoiceTotals();">
+                <i class="fa fa-times"></i>
+              </button>
+          `;
+          item.classList.add('custom-product-item');
+          
+      } else {
+          // للمنتج القياسي: يبقى كما هو (Read-Only)
+          const colorName = p.selectedColor?.name || p.color?.name || '';
+          const colorCode = p.selectedColor?.code || p.color?.code || '';
+        
+          item.innerHTML = `
+              <div class="selected-product-left">
+                  <span class="product-name">${name}</span>
+                  ${colorCode ? `
+                      <span class="selected-color" 
+                            title="${colorName}" 
+                            style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle">
+                      </span>
+                  ` : ''}
+              </div>
+              <div class="selected-product-right">
+                  <span class="product-qty">x${qty}</span>
+                  <span class="product-price">${safePrice.toLocaleString()} ل.س</span>
+              </div>
+              <button type="button" class="remove-product" 
+                      onclick="this.closest('.selected-product').remove(); updateTotals();">
+                <i class="fa fa-times"></i>
+              </button>
+              <input type="hidden" class="is-custom-flag" value="false">
+              <input type="hidden" class="temp-product-id" value="${p.id || ''}">
+              <input type="hidden" class="product-qty-static" value="${qty}">
+              <input type="hidden" class="product-price-static" value="${safePrice}">
+              <input type="hidden" class="product-color-name" value="${colorName}">
+              <input type="hidden" class="product-color-code" value="${colorCode}">
+          `;
+      }
+      // ----------------------------------------------------
       selList.appendChild(item);
     });
   }
@@ -1296,19 +1570,35 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   }
 
   // حساب وتعبئة الإجمالي في الحقول/العناصر ذات الصلة
-  const productsForCalculation = Array.isArray(invoice.products) ? invoice.products : [];
-  const { totalSYP } = calculateTotals(productsForCalculation);
-  
-  // ✅ إصلاح: استخدام القيم الآمنة
-  const safeTotalSYP = totalSYP || 0;
-  
-  const totalDisplay = document.getElementById('totalSYP'); // عنصر عرض الإجمالي
-  
-  if (totalDisplay) totalDisplay.textContent = safeTotalSYP.toLocaleString();
+  // 🔧 إصلاح: استخدام دالة updateInvoiceTotals الجديدة للحساب
+  const selectedProductsList = document.getElementById("selectedProductsList");
+  if (selectedProductsList) {
+    // نستدعي updateInvoiceTotals مباشرة بدلاً من calculateTotals
+    setTimeout(updateInvoiceTotals, 0);
+  } else {
+    // Fallback إلى calculateTotals القديمة
+    const productsForCalculation = Array.isArray(invoice.products) ? invoice.products : [];
+    const { totalSYP } = calculateTotals(productsForCalculation);
+    const safeTotalSYP = totalSYP || 0;
+    const totalDisplay = document.getElementById('totalSYP');
+    if (totalDisplay) totalDisplay.textContent = safeTotalSYP.toLocaleString();
+  }
 
-  // ملاحظات
-  const notesEl = document.getElementById('invoiceNotes');
-  if (notesEl) notesEl.value = invoice.notes || '';
+  if (notesEl) { 
+    // ملاحظات الفاتورة الأصلية
+    let existingNotes = invoice.notes || ''; 
+
+    // إذا كان هناك أوصاف مخصصة، ندمجها
+    if (combinedCustomNotes) {
+        // نضيف خط فاصل إذا كانت الملاحظات الأصلية موجودة
+        if (existingNotes) {
+            existingNotes += "\n\n--- أوصاف مخصصة من الطلب ---\n\n";
+        }
+        existingNotes += combinedCustomNotes;
+    }
+
+    notesEl.value = existingNotes;
+  }
 
   // حفظ المعرف داخل الفورم لتمييز التعديل أو كمعرف مؤقت
   form.dataset.editingId = invoice.id;

@@ -19,6 +19,44 @@ function displayCartItems() {
     const product = finalBaseProducts.find(p => p.id == item.productId);
     if (!product) return; // لو المنتج الأصلي غير موجود في data.js
 
+    if (!product) return; // لو المنتج الأصلي غير موجود
+
+        // ----------------------------------------------------------------------------------
+        // 💡 منطق عرض الطلب المخصص 💡
+        // ----------------------------------------------------------------------------------
+        let detailsHTML = '';
+        let editButtonHTML = '';
+
+        if (item.isCustom) {
+            // للعرض المخصص: نعرض الوصف فقط
+            detailsHTML = `
+                <p>الكمية: 1 (طلب)</p>
+                <p style="font-weight: bold; color: #007bff; margin-top: 5px;">الوصف المخصص:</p>
+                <textarea readonly style="width: 100%; border: 1px solid #ccc; padding: 5px; border-radius: 4px; resize: none; height: 80px; font-size: 14px; background: #f9f9f9;">${item.customDescription || 'لا يوجد وصف.'}</textarea>
+            `;
+            // لا يوجد زر تعديل للطلبات المخصصة (لأن التعديل قد يتطلب تغيير السعر)
+            editButtonHTML = `<button class="edit-cart-btn" onclick="showToast('⚠️ لا يمكن تعديل الطلب المخصص من هنا. يرجى الحذف وإعادة الإضافة.', 3000, 'orange')">تعديل</button>`;
+            
+        } else {
+            // للمنتجات القياسية: نعرض اللون والكمية والسعر
+            const itemColorCode = item.selectedColor.code.toLowerCase().trim();
+            let colorStyle = `color:${itemColorCode}; font-weight:bold;`;
+
+            // إذا كان كود اللون فاتحاً، نطبق إطار أسود
+            if (itemColorCode === '#ffffff' || itemColorCode === '#fff' || itemColorCode === 'white' || itemColorCode === '#f5f5dc' || itemColorCode === '#5dadec' || itemColorCode === '#ffff00' || itemColorCode === '#40e0d0') {
+                 // نعدل النص Shadow ليصبح مناسباً للون الخلفية البيضاء (الافتراضية للبطاقة)
+                colorStyle += ` text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;`;
+            }
+            
+            detailsHTML = `
+                <p>اللون : <span style="${colorStyle}">${item.selectedColor.name}</span></p>
+                <p>الكمية : ${item.quantity}</p>
+                <p>السعر : ${product.price} ل.س</p>
+            `;
+            editButtonHTML = `<button class="edit-cart-btn" onclick="editCartItem(${item.id})">تعديل</button>`;
+        }
+        // ----------------------------------------------------------------------------------
+
     // 💡 المنطق الجديد: التحقق من اللون الأبيض
     const itemColorCode = item.selectedColor.code.toLowerCase().trim();
     let colorStyle = `color:${itemColorCode}; font-weight:bold;`;
@@ -93,6 +131,12 @@ function openEditModal(cartItem) {
     
     if (!product) {
         alert("⚠️ خطأ: المنتج الأصلي غير موجود.");
+        return;
+    }
+
+    // 💡 (تعديل جديد) منع التعديل للمنتجات المخصصة
+    if (cartItem.isCustom) {
+        showToast('⚠️ لا يمكن تعديل الطلب المخصص من صفحة السلة. يرجى الحذف وإعادة الإضافة.', 4000, '#d32f2f');
         return;
     }
 
@@ -502,13 +546,24 @@ function formatOrderDetails() {
     cartItems.forEach((item, index) => {
         const product = finalBaseProducts.find(p => p.id == item.productId);
         if (product) {
-            totalQuantity += item.quantity;
+            // 💡 (تعديل جديد) حساب الإجمالي والكمية بشكل صحيح
+            totalQuantity += item.quantity; 
             totalPrice += item.quantity * product.price;
 
             messageText += `${index + 1}. ${product.name}\n`;
-            messageText += `   - اللون: ${item.selectedColor.name}\n`;
-            messageText += `   - الكمية: ${item.quantity} قطعة\n`;
-            messageText += `   - السعر الإفرادي: ${product.price.toLocaleString()} ل.س\n`;
+
+            if (item.isCustom) {
+                // للمنتجات المخصصة: نعرض الوصف المخصص
+                messageText += `   - *نوع الطلب: مخصص*\n`;
+                messageText += `   - الوصف: ${item.customDescription || 'لا يوجد وصف.'}\n`;
+                messageText += `   - الكمية: 1 (طلب واحد)\n`; // نؤكد على أنه طلب واحد
+            } else {
+                // للمنتجات القياسية: نعرض اللون والكمية
+                messageText += `   - اللون: ${item.selectedColor.name}\n`;
+                messageText += `   - الكمية: ${item.quantity} قطعة\n`;
+            }
+            
+            messageText += `   - السعر الإفرادي: ${product.price.toLocaleString()} ل.س\n`;
             messageText += `------------------------------\n`;
         }
     });
@@ -593,22 +648,43 @@ function generateOrderCode() {
         const product = finalBaseProducts.find(p => p.id == item.productId);
         if (!product) return null;
 
-        // نفترض أن product.price هو السعر بالليرة السورية (SYP)
-        const priceSYP = parseFloat(product.price) || 0;
+        // 🛑 (التعديل يبدأ هنا) 🛑
+        if (item.isCustom) {
+            // التعامل مع المنتج المخصص
+            // السعر المبدئي = 0.0 ليرة سورية، لتحديده لاحقاً من قبل الأدمن
+            const priceSYP = 0.0; 
+            
+            // لا نحسبه في الإجمالي الكلي للطلب حالياً (سيبقى 0)
+            // totalSYP += item.quantity * priceSYP; 
 
-        totalSYP += item.quantity * priceSYP;
+            return {
+                name: product.name,
+                quantity: 1, // الكمية الافتراضية 1 (لأن الوصف يحتوي على الكمية الحقيقية)
+                priceSYP: priceSYP, 
+                priceAtOrder: priceSYP, // السعر وقت الطلب صفر
+                color: null, // لا يوجد لون
+                isCustom: true, // علامة مميزة
+                customDescription: item.customDescription || 'لا يوجد وصف مخصص.' // الوصف المباشر
+            };
+        }
 
-        return {
-            name: product.name,
-            quantity: item.quantity,
-            // 🛑 إضافة المفاتيح الصحيحة التي تحتاجها صفحة الفواتير
-            priceSYP: priceSYP, 
-            priceAtOrder: priceSYP,
-            color: item.selectedColor ? {
-                name: item.selectedColor.name || '',
-                code: item.selectedColor.code || ''
-            } : null
-        };
+        else {
+            // التعامل مع المنتج القياسي (دون تغيير)
+            const priceSYP = parseFloat(product.price) || 0;
+            totalSYP += item.quantity * priceSYP;
+
+            return {
+                name: product.name,
+                quantity: item.quantity,
+                priceSYP: priceSYP, 
+                priceAtOrder: priceSYP,
+                color: item.selectedColor ? {
+                    name: item.selectedColor.name || '',
+                    code: item.selectedColor.code || ''
+                } : null,
+                isCustom: false // علامة مميزة
+            };
+        }
     }).filter(Boolean);
 
     // 3. إنشاء كائن الفاتورة

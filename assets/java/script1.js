@@ -10,6 +10,9 @@ let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
 function showCat() {
     finalBaseProducts.forEach(product => {
+        // (تعديل جديد) تجاهل المنتج المخصص عند بناء قوائم التصنيفات
+        if (product.isCustomOrder) return;
+
         const firstCat = product.categories[0];
         if (!importantCats.includes(firstCat) && firstCat !=undefined) {
             importantCats.push(firstCat);
@@ -240,6 +243,31 @@ function showModal(id) {
     const product = finalBaseProducts.find(r => r.id == id);
     const modelContent = document.getElementById("modalContent");
 
+    // ----------------------------------------------------------------------------------
+    // 💡 (تعديل جديد) منطق عرض المودال للمنتج المخصص 💡
+    // ----------------------------------------------------------------------------------
+    if (product.isCustomOrder) {
+        modelContent.innerHTML = `
+            <button class="close-modal-btn" onclick="closeModal()">
+                <i class="fa fa-times"></i> 
+            </button>
+            <div class="container">
+                <h2 style="color:#007bff;">${product.name}</h2>
+                <p style="text-align:center; margin-bottom: 20px;">${product.shortDisc}</p>
+                <img src="./${product.images[0]}" alt="${product.name}" style="max-width: 150px; margin-bottom: 15px;">
+                
+                <label for="customDescInput" style="font-weight: bold; margin-bottom: 5px;">وصف المنتج والقياسات المطلوبة:</label>
+                <textarea id="customDescInput" rows="4" placeholder="اكتب هنا مواصفات طلبك (المقاسات، اللون، الوصف المفصل، الكمية المطلوبة، إلخ.)" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+                
+                <button onClick="addToCart('${id}')" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">إرسال طلب التخصيص</button>
+            </div>
+        `;
+        document.getElementById("modal").classList.remove("hidden");
+        document.getElementById("overlay").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        return; // إنهاء الدالة هنا للمنتج المخصص
+    }
+
     // -----------------------------------------------------
     // 💡 1. منطق التحقق من قاعدة الستيكرات 💡
     // -----------------------------------------------------
@@ -327,6 +355,38 @@ function selectColor(clickedElement, productId, colorName, colorCode) {
 
 function addToCart(productId) {
   const product = finalBaseProducts.find(p => p.id == productId);
+
+  // ----------------------------------------------------------------------------------
+    // 💡 (تعديل جديد) معالجة المنتج المخصص 💡
+    // ----------------------------------------------------------------------------------
+    if (product.isCustomOrder) {
+        const customDescInput = document.getElementById("customDescInput");
+        const customDescription = customDescInput.value.trim();
+
+        if (customDescription === "") {
+            showToast("⚠️ يرجى كتابة وصف لطلبك المخصص", 3000, '#d32f2f');
+            return;
+        }
+
+        // إضافة الطلب المخصص كعنصر جديد
+        cartItems.push({
+            id: Date.now(),
+            productId: product.id, // ID المنتج الوهمي
+            quantity: 1, // الكمية الافتراضية للطلب المخصص
+            customDescription: customDescription, // حفظ الوصف هنا
+            isCustom: true, // علامة مميزة للعرض في السلة
+            selectedColor: { name: "طلب مخصص", code: "" } // بيانات وهمية لحقول الألوان
+        });
+
+        // حفظ في localStorage وإظهار التوست
+        localStorage.setItem("cartItems", JSON.stringify(cartItems));
+        closeModal();
+        showToast(`✔️ تم اضافة طلبك المخصص الى السلة.!`);
+        console.log("✅ تم إضافة طلب مخصص بنجاح.");
+        return; // إنهاء الدالة
+    }
+    // ----------------------------------------------------------------------------------
+
   const qInput = document.getElementById("pQ");
   const colorContainer = document.getElementById("colorContainer");
 
