@@ -22,6 +22,8 @@
   background-color: transparent;
   border: none;
   border-radius: 25px;
+  color: white;
+  font-family: 'Bahij';
 }
 
 .active-cat{
@@ -40,7 +42,7 @@
   border: none;
   border-radius: 25px;
   background-color: transparent;
-  color: black;
+  color: white;
   font-size: 14px;
   outline: none;
   cursor: pointer;
@@ -48,6 +50,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   transition: all 0.3s ease;
+  font-family: 'Bahij';
 }
 
 /* تأثير عند التحويم */
@@ -90,7 +93,7 @@ select{
     align-items: center;
     padding: 10px 10px;
     border-radius: 25px;
-    background: hsl(169, 92%, 45%);
+    background: linear-gradient(to left, #09c4a4 0%, #049277 100%);
 }
 
 .cats-divider {

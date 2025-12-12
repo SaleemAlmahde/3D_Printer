@@ -164,6 +164,11 @@ function loadMoreProducts() {
     nextProducts.forEach((product, index) => {
     const card = document.createElement("div");
     card.classList.add("product-card");
+
+    // 🔧 أضف هذا الشرط هنا:
+    if (product.isCustomOrder) {
+        card.classList.add("custom-product-card");
+    }
     
     // استخدام الدالة الجديدة لتفعيل المنتج
     card.setAttribute("onclick", "activateProductCard(this)");

@@ -42,6 +42,18 @@
     transform: translateY(20px); /* حركة صاعدة بسيطة عند الظهور */
 }
 
+.custom-product-card {
+    background: linear-gradient(to left, #09c4a4 0%, #049277 100%) !important;
+}
+
+.custom-product-card h3{
+    color: white !important;
+}
+
+.custom-product-card p{
+    color: white !important;
+}
+
 .product-card.show {
     opacity: 1;
     transform: translateY(0);
@@ -103,30 +115,44 @@
 .product-card-bottom button {
     margin-top: 20px;
     padding: 10px 30px;
-    background: linear-gradient(to left, #09c4a4 0%, #049277 100%);
+    background: transparent;
     border: none;
-    border-radius: 20px;
-    color: white;
+    border-radius: 50px;
+    color: green;
     font-size: 30px;
     cursor: pointer;
     transition: background 0.3s ease, transform 0.3s, box-shadow 0.3s;
-    transform: translateY(3px);
+    transform: translateY(3px) scaleX(-1);
+}
+
+.custom-product-card .product-card-bottom button{
+    color: white;
 }
 
 /* pulsate للبوتون عند hover أو active */
 .product-card:hover .product-card-bottom button,
 .product-card.active-card .product-card-bottom button {
     animation: pulse 3s infinite;
+    transform: translateY(0) scaleX(-1);
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 rgba(9,196,164, 0.7); }
-    50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(9,196,164,0.6); }
-    100% { transform: scale(1); box-shadow: 0 0 0 rgba(9,196,164, 0.7); }
+    0% { 
+        transform: scaleX(-1) scale(1); /* 🔧 أضف scaleX(-1) */
+        box-shadow: 0 0 0 rgba(9,196,164, 0.7); 
+    }
+    50% { 
+        transform: scaleX(-1) scale(1.1); /* 🔧 أضف scaleX(-1) */
+        box-shadow: 0 0 15px rgba(9,196,164,0.6); 
+    }
+    100% { 
+        transform: scaleX(-1) scale(1); /* 🔧 أضف scaleX(-1) */
+        box-shadow: 0 0 0 rgba(9,196,164, 0.7); 
+    }
 }
 
 .product-card:hover .product-card-bottom button {
-    transform: translateY(0);
+    transform: translateY(0) translateX(-1);
     opacity: 1;
     box-shadow: 0 0 10px rgba(9,196,164,0.6);
 }
@@ -137,8 +163,6 @@
     50% { box-shadow: 0 0 20px rgba(0,255,150,0.4); }
     100% { box-shadow: 0 0 0 rgba(0,255,150,0); }
 }
-
-
 
 .hidden {
     display: none;

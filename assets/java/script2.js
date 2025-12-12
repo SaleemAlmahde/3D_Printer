@@ -269,16 +269,20 @@ if (startFilter || endFilter) {
       const colorCode = (product?.color?.code) || '';
       const colorTitle = (product?.color?.name) || '';
       const safePriceSYP = Number(product.priceSYP) || 0;
+
+      // 🔧 تحسين: التأكد من أن اللون صحيح
+      const displayColor = colorCode && colorCode !== 'undefined' ? colorCode : 'transparent';
+      const displayTitle = colorTitle && colorTitle !== 'undefined' ? colorTitle : 'بدون لون';
       
       productsHTML += `
-        <li class="product-item">
-          <span class="product-name">${product.name}</span>
-          <span class="product-color" title="${colorTitle}" style="background-color: ${colorCode}"></span>
-          <span class="product-qty">x${product.quantity}</span>
-          <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
-        </li>
-      `;
-    });
+    <li class="product-item">
+      <span class="product-name">${product.name}</span>
+      <span class="product-color" title="${displayTitle}" style="background-color: ${displayColor}"></span>
+      <span class="product-qty">x${product.quantity}</span>
+      <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
+    </li>
+  `;
+});
 
     const safeTotalSYP = Number(invoice.totalSYP) || 0;
 
@@ -601,26 +605,84 @@ function editInvoice(id) {
 
     // تعبئة المنتجات في القائمة
     const selectedProductsList = document.getElementById("selectedProductsList");
-  selectedProductsList.innerHTML = (Array.isArray(invoice.products) ? invoice.products : []).map(p => {
-    const colorCode = p && p.color && p.color.code ? p.color.code : '';
-    const colorName = p && p.color && p.color.name ? p.color.name : '';
-    // ✅ إصلاح: استخدام القيمة الآمنة
-        const priceSYP = p?.priceSYP || 0;
+    selectedProductsList.innerHTML = '';
+    
+    const productsArr = Array.isArray(invoice.products) ? invoice.products : [];
+    
+    productsArr.forEach((p, index) => {
+        const isCustom = p.isCustom === true;
+        const name = p.name || '';
+        const qty = p.quantity || 1;
+        const priceSYP = p.priceSYP || 0;
+        const colorName = p.color?.name || '';
+        const colorCode = p.color?.code || '';
+        const customDescription = p.customDescription || '';
         
-    return `
-    <div class="selected-product">
-      <div class="product-info">
-        <span class="product-name">${p.name}</span>
-        <div class="selected-color" title="${colorName}" style="background-color: ${colorCode}"></div>
-        <span class="product-qty">x${p.quantity}</span>
-        <span class="product-price">${p.priceSYP.toLocaleString()} ل.س</span>
-      </div>
-      <button type="button" class="remove-product" onclick="this.closest('.selected-product').remove(); updateTotals();">
-        <i class="fa fa-times"></i>
-      </button>
-    </div>
-  `;
-  }).join('');
+        const item = document.createElement('div');
+        item.className = 'selected-product';
+        
+        if (isCustom) {
+            // 🔧 للمنتجات المخصصة في التعديل
+            const tempProductId = `CUSTOM_${Date.now()}_${index}`;
+            item.innerHTML = `
+                <div class="selected-product-left" style="background:#fff3e0; padding:5px; border-radius:4px;">
+                    <span class="product-name" style="font-weight:bold; color:#d9534f;">${name} (تسعير يدوي)</span>
+                    <span class="selected-color" 
+                          title="أبيض - قيمة افتراضية" 
+                          style="background-color:#FFFFFF;display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle; border:1px solid #ccc;">
+                    </span>
+                    <p style="font-size:12px; margin-top:5px;">${customDescription || 'بدون وصف'}</p>
+                    <input type="hidden" class="is-custom-flag" value="true">
+                    <input type="hidden" class="temp-product-id" value="${tempProductId}">
+                    <input type="hidden" class="custom-description-text" value="${customDescription.replace(/"/g, '&quot;')}">
+                </div>
+                <div class="selected-product-right">
+                    <div class="field-group">
+                        <label style="font-size:10px;">الكمية</label>
+                        <input type="number" class="product-qty-input" value="${qty}" min="1" oninput="updateInvoiceTotals()">
+                    </div>
+                    <div class="field-group">
+                        <label style="font-size:10px;">السعر (ل.س)</label>
+                        <input type="number" class="product-price-input" value="${priceSYP}" min="0" oninput="updateInvoiceTotals()">
+                    </div>
+                </div>
+                <button type="button" class="remove-product" 
+                        onclick="this.closest('.selected-product').remove(); updateInvoiceTotals();">
+                    <i class="fa fa-times"></i>
+                </button>
+            `;
+            item.classList.add('custom-product-item');
+        } else {
+            // 🔧 🔧 🔧 التصحيح المهم: إضافة الحقول المخفية للون
+            item.innerHTML = `
+                <div class="selected-product-left">
+                    <span class="product-name">${name}</span>
+                    ${colorCode ? `
+                        <span class="selected-color" 
+                              title="${colorName}" 
+                              style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle">
+                        </span>
+                    ` : ''}
+                </div>
+                <div class="selected-product-right">
+                    <span class="product-qty">x${qty}</span>
+                    <span class="product-price">${priceSYP.toLocaleString()} ل.س</span>
+                </div>
+                <button type="button" class="remove-product" 
+                        onclick="this.closest('.selected-product').remove(); updateTotals();">
+                    <i class="fa fa-times"></i>
+                </button>
+                <!-- 🔧 🔧 🔧 الحقول المخفية المفقودة -->
+                <input type="hidden" class="is-custom-flag" value="false">
+                <input type="hidden" class="product-qty-static" value="${qty}">
+                <input type="hidden" class="product-price-static" value="${priceSYP}">
+                <input type="hidden" class="product-color-name" value="${colorName}">
+                <input type="hidden" class="product-color-code" value="${colorCode}">
+            `;
+        }
+        
+        selectedProductsList.appendChild(item);
+    });
 
   // تحديث الإجماليات
   const safeProducts = Array.isArray(invoice.products) ? invoice.products : [];
@@ -802,8 +864,27 @@ function saveInvoice() {
             
             const quantity = parseInt(qtyEl?.value) || 1;
             const priceSYP = parseFloat(priceEl?.value) || 0;
+
             const colorName = colorNameEl?.value || '';
             const colorCode = colorCodeEl?.value || '';
+
+            // إذا لم يكن هناك لون محدد، نستخدم القيمة الافتراضية
+            if (!colorName || colorName === 'undefined') {
+                colorName = 'بدون لون';
+            }
+            if (!colorCode || colorCode === 'undefined' || colorCode === 'transparent') {
+                colorCode = '#CCCCCC'; // رمادي فاتح كقيمة افتراضية
+            }
+            
+            // 🔧 تسجيل تحذير إذا كان اللون مفقوداً
+            if (!colorNameEl || !colorCodeEl) {
+                console.warn('⚠️ منتج بدون حقول لون مخفية:', {
+                    name: name,
+                    quantity: quantity,
+                    priceSYP: priceSYP,
+                    element: item
+                });
+            }
 
             return {
                 name: name,
@@ -2166,3 +2247,30 @@ document.addEventListener('DOMContentLoaded', () => {
         dividers.style.display = 'none';
     }
 });
+
+// 🔧 دالة لفحص ألوان المنتجات المخزنة
+function debugProductColors(invoiceId) {
+    const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
+    const invoice = allInvoices.find(inv => inv.id === invoiceId);
+    
+    if (!invoice) {
+        console.log('⚠️ الفاتورة غير موجودة');
+        return;
+    }
+    
+    console.log('=== فحص ألوان المنتجات للفاتورة ===');
+    console.log('رقم الفاتورة:', invoice.id);
+    
+    invoice.products.forEach((product, index) => {
+        console.log(`المنتج ${index + 1}:`, {
+            name: product.name,
+            quantity: product.quantity,
+            priceSYP: product.priceSYP,
+            color: product.color,
+            hasColor: !!product.color,
+            colorCode: product.color?.code,
+            colorName: product.color?.name,
+            isCustom: product.isCustom
+        });
+    });
+}

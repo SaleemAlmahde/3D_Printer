@@ -1,9 +1,9 @@
 /* global styles start */
 
 @font-face {
-    font-family: "lantx";
+    font-family: "Bahij";
     /* src: url(../plugins/fonts/alfont_com_LANTX-Regular.otf) format("opentype"); */
-    src: url(../plugins/fonts/AM-ZAIN-ORIGINAL.ttf) format("opentype");
+    src: url(../plugins/fonts/Bahij_TheSansArabic-Bold.ttf) format("opentype");
     font-weight: normal;
     font-style: normal;
 }
@@ -22,7 +22,7 @@
 body {
     padding: 0;
     margin: 0;
-     font-family: "lantx", Poppins, Arial, sans-serif;
+     font-family: "Bahij", Poppins, Arial, sans-serif;
 }
 
 a, button {
@@ -61,4 +61,12 @@ input:focus {
 
 .container {
     padding: 0 4%;
+}
+
+::placeholder{
+    font-family: 'Bahij';
+}
+
+button{
+    font-family: 'Bahij';
 }
