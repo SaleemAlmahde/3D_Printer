@@ -329,12 +329,23 @@ function renderInvoices(filterStoreId = null) {
 
       if (product.isCustom) {
         // Custom product: show wrench icon instead of color
+        // include a hidden description block that can be toggled when viewing the invoice
+        const customDesc = product.customDescription
+          ? String(product.customDescription)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+          : "";
         productsHTML += `
-    <li class="product-item">
-      <span class="product-name">${product.name}</span>
+      <li class="product-item" onclick="event.stopPropagation(); toggleCustomDesc(this)" style="cursor:pointer;">
+      <span class="product-name">منتج مخصص</span>
       <span class="product-custom-icon" title="منتج مخصص">🛠️</span>
       <span class="product-qty">x${product.quantity}</span>
       <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
+      ${
+        customDesc
+          ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${customDesc}</div>`
+          : ""
+      }
     </li>
   `;
       } else {
@@ -443,7 +454,7 @@ function renderInvoices(filterStoreId = null) {
           }
           </div>
           <div class="invoice-logo-wrap">
-            <img class="invoice-logo" src="./assets/imgs/logo.jpg" alt="logo">
+            <img class="invoice-logo" src="./assets/imgs/log_png-removebg-preview.png" alt="logo">
           </div>
           </div>
           <p><strong>موعد التسليم :</strong> ${formattedShippingDate || "-"}</p>
@@ -605,7 +616,37 @@ function renderInvoices(filterStoreId = null) {
       });
     }
   });
+
+  // Toggle custom product description inside invoice card (only used for rendered invoice lists)
+  function toggleCustomDesc(li) {
+    try {
+      const desc = li.querySelector(".invoice-custom-desc");
+      if (!desc) return;
+      if (desc.style.display === "none" || !desc.style.display) {
+        desc.style.display = "block";
+      } else {
+        desc.style.display = "none";
+      }
+    } catch (e) {
+      console.warn("toggleCustomDesc error:", e && e.message);
+    }
+  }
 }
+// expose a global toggle function so inline onclick handlers can call it
+window.toggleCustomDesc = function (li) {
+  try {
+    // if someone passed an event target instead of the LI, normalize
+    const el = li && li.nodeType ? li : li && li.target ? li.target : null;
+    const listItem = el && el.closest ? el.closest("li.product-item") : el;
+    const desc = listItem
+      ? listItem.querySelector(".invoice-custom-desc")
+      : null;
+    if (!desc) return;
+    desc.style.display = desc.style.display === "block" ? "none" : "block";
+  } catch (e) {
+    console.warn("window.toggleCustomDesc error:", e && e.message);
+  }
+};
 
 // دالة إعادة تعيين النموذج
 function resetForm() {

@@ -52,6 +52,33 @@
   box-shadow: 0 15px 30px rgba(0,0,0,0.25);
 }
 
+/* Ensure long text wraps and doesn't overflow invoice cards or modal fields
+   - use overflow-wrap/word-break to break long words/URLs
+   - keep white-space normal so text flows to new lines
+   - apply to common invoice/card elements and modal form fields */
+.invoice-card,
+.invoice-card h4,
+.invoice-card .invoice-date,
+.invoice-card .invoice-info p,
+.invoice-card .invoice-products,
+.invoice-card .invoice-products .product-item,
+.invoice-card .product-item .product-name,
+#selectedProductsList .selected-product .product-name,
+#invoiceForm input,
+#invoiceForm textarea {
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* For single-line inputs, prevent visual overflow out of their container
+   and show ellipsis when overflowing; if you want multiline input use a textarea. */
+#invoiceForm input {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .invoice-header {
   display: flex;
   justify-content: space-between;
@@ -101,6 +128,36 @@
   font-size: 1rem;
   /* allow multi-line names to align at the top of the row */
   align-items: start;
+}
+
+/* Custom product description: span the available grid columns up to the price column
+   so long descriptions can use the full space before wrapping. Apply to both
+   inline child or sibling placement (some templates render the desc inside the
+   item, others as the next element). */
+.product-item .invoice-custom-desc,
+.product-item + .invoice-custom-desc {
+  /* span from first column to the column before the last (price) */
+  grid-column: 1 / -2;
+  /* fallback explicit span for the current 4-column layout */
+  grid-column: 1 / 5;
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* If description is shown as a separate block under the product list, ensure it
+   still stays within the invoice card width. */
+.invoice-custom-desc {
+  box-sizing: border-box;
 }
 
 .product-item span {

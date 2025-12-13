@@ -65,6 +65,14 @@
                 <input type="tel" id="storePhone" placeholder="رقم هاتف المتجر" required>
                 <input type="text" id="storeLocation" placeholder="موقع المحل / المحافظة" required>
 
+                <!-- Logo (اختياري) - replaced visible label with placeholder-style field -->
+                <input type="file" id="storeLogoInput" accept="image/*" style="display:none">
+                <input type="text" id="storeLogoFake" placeholder="صورة المتجر (اختياري)" readonly />
+                <input type="hidden" id="storeLogoData" />
+                <div id="storeLogoPreviewWrap" style="margin-top:10px; display:none;">
+                    <img id="storeLogoPreview" src="" alt="معاينة الصورة" style="max-width:100%; max-height:90px; border-radius:8px; display:block;" />
+                </div>
+
                 <button type="button" class="save-invoice-btn" onclick="saveStore()">حفظ المتجر</button>
             </form>
         </div>

@@ -3,115 +3,199 @@ let storeModal;
 let storeOverlay;
 let storeForm;
 let deleteStoreBtn;
+let storeLogoInput;
+let storeLogoPreview;
 
 function getStores() {
-    // أولاً: جلب المتاجر المحفوظة في localStorage
-    let userStores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
-    
-    // ثانياً: دمج المتاجر الافتراضية مع متاجر المستخدم
-    // نبدأ بإنشاء نسخة من المتاجر الافتراضية
-    let combinedStores = [...defaultStores];
-    
-    // ندمج مع متاجر المستخدم (نستبدل المتاجر الافتراضية التي تم تعديلها)
-    userStores.forEach(userStore => {
-        // البحث إذا كان هذا المتجر موجوداً في الافتراضية (بنفس الـ id)
-        const index = combinedStores.findIndex(store => store.id === userStore.id);
-        
-        if (index !== -1) {
-            // إذا كان متجراً افتراضياً معدلاً، نستبدله
-            combinedStores[index] = userStore;
-        } else {
-            // إذا كان متجراً جديداً أضافه المستخدم، نضيفه
-            combinedStores.push(userStore);
-        }
-    });
-    
-    return combinedStores;
+  // أولاً: جلب المتاجر المحفوظة في localStorage
+  let userStores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
+
+  // ثانياً: دمج المتاجر الافتراضية مع متاجر المستخدم
+  // نبدأ بإنشاء نسخة من المتاجر الافتراضية
+  let combinedStores = [...defaultStores];
+
+  // ندمج مع متاجر المستخدم (نستبدل المتاجر الافتراضية التي تم تعديلها)
+  userStores.forEach((userStore) => {
+    // البحث إذا كان هذا المتجر موجوداً في الافتراضية (بنفس الـ id)
+    const index = combinedStores.findIndex(
+      (store) => store.id === userStore.id
+    );
+
+    if (index !== -1) {
+      // إذا كان متجراً افتراضياً معدلاً، نستبدله
+      combinedStores[index] = userStore;
+    } else {
+      // إذا كان متجراً جديداً أضافه المستخدم، نضيفه
+      combinedStores.push(userStore);
+    }
+  });
+
+  return combinedStores;
 }
 
 // دالة لحفظ قائمة المتاجر الجديدة في localStorage
 function setStores(stores) {
-    // نحدد المتاجر الافتراضية الأصلية
-    const defaultStoreIds = defaultStores.map(store => store.id);
-    
-    // نجهز مصفوفة المتاجر التي سنحفظها
-    let storesToSave = [];
-    
-    stores.forEach(store => {
-        // إذا كان المتجر غير افتراضي، نحفظه
-        if (!defaultStoreIds.includes(store.id)) {
-            storesToSave.push(store);
-        } else {
-            // إذا كان افتراضياً، نتحقق إذا كان مختلفاً عن الأصل
-            const originalStore = defaultStores.find(s => s.id === store.id);
-            
-            // مقارنة المتجر مع الأصل
-            if (JSON.stringify(store) !== JSON.stringify(originalStore)) {
-                // إذا كان مختلفاً (تم تعديله)، نحفظه
-                storesToSave.push(store);
-            }
-            // إذا كان مطابقاً للأصل، لا نحفظه (سيعرض من الافتراضيات)
-        }
-    });
-    
-    // حفظ في localStorage
-    localStorage.setItem("pointsOfSale", JSON.stringify(storesToSave));
+  // نحدد المتاجر الافتراضية الأصلية
+  const defaultStoreIds = defaultStores.map((store) => store.id);
+
+  // نجهز مصفوفة المتاجر التي سنحفظها
+  let storesToSave = [];
+
+  stores.forEach((store) => {
+    // إذا كان المتجر غير افتراضي، نحفظه
+    if (!defaultStoreIds.includes(store.id)) {
+      storesToSave.push(store);
+    } else {
+      // إذا كان افتراضياً، نتحقق إذا كان مختلفاً عن الأصل
+      const originalStore = defaultStores.find((s) => s.id === store.id);
+
+      // مقارنة المتجر مع الأصل
+      if (JSON.stringify(store) !== JSON.stringify(originalStore)) {
+        // إذا كان مختلفاً (تم تعديله)، نحفظه
+        storesToSave.push(store);
+      }
+      // إذا كان مطابقاً للأصل، لا نحفظه (سيعرض من الافتراضيات)
+    }
+  });
+
+  // حفظ في localStorage
+  localStorage.setItem("pointsOfSale", JSON.stringify(storesToSave));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. تهيئة المتغيرات: الآن فقط يتم البحث عن العناصر بعد تحميلها
-    storeModal = document.getElementById('newStoreModal');
-    storeOverlay = document.getElementById('newStoreOverlay');
-    storeForm = document.getElementById('storeForm');
-    deleteStoreBtn = document.getElementById('deleteStoreBtn');
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. تهيئة المتغيرات: الآن فقط يتم البحث عن العناصر بعد تحميلها
+  storeModal = document.getElementById("newStoreModal");
+  storeOverlay = document.getElementById("newStoreOverlay");
+  storeForm = document.getElementById("storeForm");
+  deleteStoreBtn = document.getElementById("deleteStoreBtn");
 
-    storeOverlay.addEventListener('click', closeStoreModal);
+  storeOverlay.addEventListener("click", closeStoreModal);
 
-    // تهيئة البحث
-    const searchInput = document.getElementById('storeSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', searchStores);
-        searchInput.addEventListener('keyup', searchStores);
-    }
+  // init logo inputs (optional)
+  storeLogoInput = document.getElementById("storeLogoInput");
+  storeLogoPreview = document.getElementById("storeLogoPreview");
+  const storeLogoDataField = document.getElementById("storeLogoData");
+  const storeLogoFake = document.getElementById("storeLogoFake");
+  if (storeLogoInput) {
+    storeLogoInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const dataUrl = evt.target.result;
+        if (storeLogoPreview) {
+          storeLogoPreview.src = dataUrl;
+          document.getElementById("storeLogoPreviewWrap").style.display =
+            "block";
+        }
+        if (storeLogoDataField) storeLogoDataField.value = dataUrl;
+        // also store in form dataset for easier access
+        if (storeForm) storeForm.dataset.logoData = dataUrl;
+        // update fake input value to show filename/selection
+        try {
+          if (storeLogoFake) storeLogoFake.value = file.name || "صورة مختارة";
+        } catch (err) {}
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  // click the visible placeholder-field to open file picker
+  if (storeLogoFake) {
+    storeLogoFake.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      if (storeLogoInput) storeLogoInput.click();
+    });
+  }
 
-    // 2. التحقق وبدء عرض المتاجر
-    if (document.getElementById('storesContainer')) {
-        renderStores();
-    }
-    // 💡 الآن، يمكن لبقية الدوال (مثل openStoreModal) استخدام هذه المتغيرات بشكل آمن.
+  // تهيئة البحث
+  const searchInput = document.getElementById("storeSearchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", searchStores);
+    searchInput.addEventListener("keyup", searchStores);
+  }
+
+  // 2. التحقق وبدء عرض المتاجر
+  if (document.getElementById("storesContainer")) {
+    renderStores();
+  }
+  // 💡 الآن، يمكن لبقية الدوال (مثل openStoreModal) استخدام هذه المتغيرات بشكل آمن.
 });
 
 // فتح مودال المتجر
 function openStoreModal(store = null) {
-    storeModal.classList.remove('hidden-store');
-    storeOverlay.classList.remove('hidden-store');
-    
-    // إعادة تعيين النموذج في كل مرة يفتح فيها
-    storeForm.reset();
-    delete storeForm.dataset.editingId;
-    deleteStoreBtn.classList.add('hidden');
+  storeModal.classList.remove("hidden-store");
+  storeOverlay.classList.remove("hidden-store");
 
-    if (store) {
-        // حالة التعديل
-        document.querySelector('#newStoreModal h2').textContent = "تعديل بيانات المتجر";
-        storeForm.dataset.editingId = store.id;
-        document.getElementById('storeName').value = store.name;
-        document.getElementById('storePhone').value = store.phone;
-        document.getElementById('storeLocation').value = store.location;
-        deleteStoreBtn.classList.remove('hidden');
-    } else {
-        // حالة الإضافة الجديدة
-        document.querySelector('#newStoreModal h2').textContent = "إضافة متجر جديد";
+  // إعادة تعيين النموذج في كل مرة يفتح فيها
+  storeForm.reset();
+  delete storeForm.dataset.editingId;
+  deleteStoreBtn.classList.add("hidden");
+
+  if (store) {
+    // حالة التعديل
+    document.querySelector("#newStoreModal h2").textContent =
+      "تعديل بيانات المتجر";
+    storeForm.dataset.editingId = store.id;
+    document.getElementById("storeName").value = store.name;
+    document.getElementById("storePhone").value = store.phone;
+    document.getElementById("storeLocation").value = store.location;
+    deleteStoreBtn.classList.remove("hidden");
+    // populate logo preview if exists and sync fake field
+    try {
+      const logoField = document.getElementById("storeLogoData");
+      if (store.logo) {
+        if (storeLogoPreview) {
+          storeLogoPreview.src = store.logo;
+          document.getElementById("storeLogoPreviewWrap").style.display =
+            "block";
+        }
+        if (logoField) logoField.value = store.logo;
+        if (storeForm) storeForm.dataset.logoData = store.logo;
+        if (storeLogoFake) storeLogoFake.value = "صورة موجودة";
+      } else {
+        if (storeLogoPreview) storeLogoPreview.src = "";
+        if (logoField) logoField.value = "";
+        if (storeForm) delete storeForm.dataset.logoData;
+        document.getElementById("storeLogoPreviewWrap").style.display = "none";
+        if (storeLogoFake) storeLogoFake.value = "";
+      }
+    } catch (err) {
+      console.warn("Logo preview init failed:", err && err.message);
     }
+  } else {
+    // حالة الإضافة الجديدة
+    document.querySelector("#newStoreModal h2").textContent = "إضافة متجر جديد";
+    // clear logo preview
+    try {
+      const logoField = document.getElementById("storeLogoData");
+      if (storeLogoPreview) storeLogoPreview.src = "";
+      if (logoField) logoField.value = "";
+      if (storeForm) delete storeForm.dataset.logoData;
+      document.getElementById("storeLogoPreviewWrap").style.display = "none";
+      if (storeLogoInput) storeLogoInput.value = "";
+      try {
+        if (storeLogoFake) storeLogoFake.value = "";
+      } catch (err) {}
+    } catch (err) {}
+  }
 }
 
 // إغلاق مودال المتجر
 function closeStoreModal() {
-    storeModal.classList.add('hidden-store');
-    storeOverlay.classList.add('hidden-store');
-    // إعادة تعيين حالة التعديل عند الإغلاق
-    storeForm.reset();
-    delete storeForm.dataset.editingId;
+  storeModal.classList.add("hidden-store");
+  storeOverlay.classList.add("hidden-store");
+  // إعادة تعيين حالة التعديل عند الإغلاق
+  storeForm.reset();
+  delete storeForm.dataset.editingId;
+  // clear logo preview and data
+  try {
+    const logoField = document.getElementById("storeLogoData");
+    if (storeLogoPreview) storeLogoPreview.src = "";
+    if (logoField) logoField.value = "";
+    if (storeLogoInput) storeLogoInput.value = "";
+    if (storeForm) delete storeForm.dataset.logoData;
+    document.getElementById("storeLogoPreviewWrap").style.display = "none";
+  } catch (err) {}
 }
 
 // ----------------------------------------------------------------------
@@ -119,56 +203,70 @@ function closeStoreModal() {
 // ----------------------------------------------------------------------
 
 function saveStore() {
-    try {
-        const name = document.getElementById('storeName').value.trim();
-        const phone = document.getElementById('storePhone').value.trim();
-        const location = document.getElementById('storeLocation').value.trim();
+  try {
+    const name = document.getElementById("storeName").value.trim();
+    const phone = document.getElementById("storePhone").value.trim();
+    const location = document.getElementById("storeLocation").value.trim();
 
-        if (!name || !phone || !location) {
-            showToast("⚠️ يرجى ملء جميع حقول المتجر.", 3000, 'red');
-            return;
-        }
-
-        let stores = getStores();
-        const editingId = storeForm.dataset.editingId;
-
-        if (editingId) {
-            // حالة التعديل
-            const id = parseInt(editingId);
-            const index = stores.findIndex(s => s.id === id);
-
-            if (index !== -1) {
-                stores[index] = {
-                    ...stores[index],
-                    name,
-                    phone,
-                    location
-                };
-            }
-        } else {
-            // حالة الإضافة الجديدة
-            const newStore = {
-                id: Date.now(),
-                name,
-                phone,
-                location
-            };
-            stores.push(newStore);
-        }
-
-        setStores(stores);
-        closeStoreModal();
-        renderStores(); // تحديث القائمة المعروضة
-        showToast("✅ تم حفظ المتجر بنجاح.", 3000, 'green');
-    } catch (e) {
-        console.error("خطأ أثناء حفظ المتجر:", e);
-        alert("❌ حدث خطأ أثناء الحفظ.");
+    if (!name || !phone || !location) {
+      showToast("⚠️ يرجى ملء جميع حقول المتجر.", 3000, "red");
+      return;
     }
+
+    let stores = getStores();
+    const editingId = storeForm.dataset.editingId;
+
+    if (editingId) {
+      // حالة التعديل
+      const id = parseInt(editingId);
+      const index = stores.findIndex((s) => s.id === id);
+
+      if (index !== -1) {
+        // include optional logo data if provided
+        const logoData =
+          (storeForm && storeForm.dataset && storeForm.dataset.logoData) ||
+          (document.getElementById("storeLogoData") &&
+            document.getElementById("storeLogoData").value) ||
+          stores[index].logo ||
+          "";
+        stores[index] = {
+          ...stores[index],
+          name,
+          phone,
+          location,
+          logo: logoData,
+        };
+      }
+    } else {
+      // حالة الإضافة الجديدة
+      const logoDataNew =
+        (storeForm && storeForm.dataset && storeForm.dataset.logoData) ||
+        (document.getElementById("storeLogoData") &&
+          document.getElementById("storeLogoData").value) ||
+        "";
+      const newStore = {
+        id: Date.now(),
+        name,
+        phone,
+        location,
+        logo: logoDataNew,
+      };
+      stores.push(newStore);
+    }
+
+    setStores(stores);
+    closeStoreModal();
+    renderStores(); // تحديث القائمة المعروضة
+    showToast("✅ تم حفظ المتجر بنجاح.", 3000, "green"); // No-op placeholder
+  } catch (e) {
+    console.error("خطأ أثناء حفظ المتجر:", e);
+    alert("❌ حدث خطأ أثناء الحفظ.");
+  }
 }
 
 // 💡 ملاحظة: يجب أن تكون لديك دالة getInvoices() لاسترجاع الفواتير
 function getInvoices() {
-    return JSON.parse(localStorage.getItem("invoices")) || [];
+  return JSON.parse(localStorage.getItem("invoices")) || [];
 }
 
 /**
@@ -177,22 +275,22 @@ function getInvoices() {
  * @returns {number} إجمالي المبلغ المتبقي بالليرة السورية.
  */
 function calculateStoreDebt(storeId) {
-    try {
-        const allInvoices = getInvoices();
-        let totalDebt = 0;
+  try {
+    const allInvoices = getInvoices();
+    let totalDebt = 0;
 
-        const storeInvoices = allInvoices.filter(inv => inv.posId === storeId);
+    const storeInvoices = allInvoices.filter((inv) => inv.posId === storeId);
 
-        storeInvoices.forEach(invoice => {
-            const remaining = (invoice.payment && invoice.payment.remainingSYP) || 0;
-            totalDebt += Number(remaining) || 0;
-        });
-        
-        return totalDebt;
-    } catch (error) {
-        console.error('Error calculating store debt:', error);
-        return 0;
-    }
+    storeInvoices.forEach((invoice) => {
+      const remaining = (invoice.payment && invoice.payment.remainingSYP) || 0;
+      totalDebt += Number(remaining) || 0;
+    });
+
+    return totalDebt;
+  } catch (error) {
+    console.error("Error calculating store debt:", error);
+    return 0;
+  }
 }
 
 // 💡 تذكر أن دالة getStores() و setStores(stores) تم تعريفها مسبقاً
@@ -201,102 +299,127 @@ function calculateStoreDebt(storeId) {
 // 🔍 دالة البحث (مطلوبة من حقل البحث في HTML)
 // ======================================================
 function searchStores() {
-    const searchInput = document.getElementById('storeSearchInput');
-    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    renderStores(searchTerm);
+  const searchInput = document.getElementById("storeSearchInput");
+  const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  renderStores(searchTerm);
 }
 
-function renderStores(searchTerm = '') {
-    const storesContainer = document.getElementById('storesContainer');
-    if (!storesContainer) return;
+function renderStores(searchTerm = "") {
+  const storesContainer = document.getElementById("storesContainer");
+  if (!storesContainer) return;
 
-    const stores = getStores();
-    storesContainer.innerHTML = ''; // مسح المحتوى القديم
+  const stores = getStores();
+  storesContainer.innerHTML = ""; // مسح المحتوى القديم
 
-    if (stores.length === 0) {
-        storesContainer.innerHTML = '<p class="empty-list-msg">لا يوجد نقاط بيع مُضافة حالياً.</p>';
-        return;
-    }
+  if (stores.length === 0) {
+    storesContainer.innerHTML =
+      '<p class="empty-list-msg">لا يوجد نقاط بيع مُضافة حالياً.</p>';
+    return;
+  }
 
-    // فلترة المتاجر بناءً على مصطلح البحث
-    const filteredStores = stores.filter(store => {
-        if (!searchTerm) return true; // لا فلترة إذا كان الحقل فارغاً
+  // فلترة المتاجر بناءً على مصطلح البحث
+  const filteredStores = stores.filter((store) => {
+    if (!searchTerm) return true; // لا فلترة إذا كان الحقل فارغاً
 
-        const totalDebt = calculateStoreDebt(store.id);
-        
-        // البحث في جميع الحقول النصية
-        const searchableText = [
-            store.name || '',
-            store.phone || '',
-            store.location || '',
-            totalDebt.toString()
-        ].join(' ').toLowerCase();
+    const totalDebt = calculateStoreDebt(store.id);
 
-        return searchableText.includes(searchTerm);
-    });
+    // البحث في جميع الحقول النصية
+    const searchableText = [
+      store.name || "",
+      store.phone || "",
+      store.location || "",
+      totalDebt.toString(),
+    ]
+      .join(" ")
+      .toLowerCase();
 
-    // التحقق من النتائج بعد الفلترة
-    if (filteredStores.length === 0) {
-        storesContainer.innerHTML = '<p class="empty-list-msg">لا يوجد نتائج تطابق معيار البحث.</p>';
-        return;
-    }
+    return searchableText.includes(searchTerm);
+  });
 
-    // عرض المتاجر المفلترة
-    filteredStores.forEach(store => {
-        const totalDebt = calculateStoreDebt(store.id);
-        const storeCard = document.createElement('div');
-        storeCard.className = 'store-card';
-        storeCard.setAttribute('onclick', `showStoreActions(${store.id})`);
+  // التحقق من النتائج بعد الفلترة
+  if (filteredStores.length === 0) {
+    storesContainer.innerHTML =
+      '<p class="empty-list-msg">لا يوجد نتائج تطابق معيار البحث.</p>';
+    return;
+  }
 
-        let hasLogo = store.logo === "" ? false : true;
+  // عرض المتاجر المفلترة
+  filteredStores.forEach((store) => {
+    const totalDebt = calculateStoreDebt(store.id);
+    const storeCard = document.createElement("div");
+    storeCard.className = "store-card";
+    storeCard.setAttribute("onclick", `showStoreActions(${store.id})`);
 
+    let hasLogo = store.logo === "" ? false : true;
 
-        const topCardStyle = hasLogo 
-            ? 'display: flex; justify-content: space-around; align-items: center; width: 100%;' 
-            : '';
+    const topCardStyle = hasLogo
+      ? "display: flex; justify-content: space-around; align-items: center; width: 100%;"
+      : "";
 
-        storeCard.innerHTML = `
+    storeCard.innerHTML = `
         <div class="top-store-card" style="${topCardStyle}">
-            <h2>${store.name || 'بدون اسم'}</h2>
-            ${hasLogo ? `<img src="${store.logo}" alt="store logo">` : ''}
+            <h2>${store.name || "بدون اسم"}</h2>
+            ${hasLogo ? `<img src="${store.logo}" alt="store logo">` : ""}
             </div>
             
             <div class="bottom-store-card">
                 <div class="store-details">
-                    <p><strong> <i class="fa fa-phone"></i> الهاتف :</strong> ${store.phone || 'غير محدد'}</p>
-                    <p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${store.location || 'غير محدد'}</p>
-                    ${isAdmin() ? `<p class="store-debt-info">
+                    <p><strong> <i class="fa fa-phone"></i> الهاتف :</strong> ${
+                      store.phone || "غير محدد"
+                    }</p>
+                    <p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${
+                      store.location || "غير محدد"
+                    }</p>
+                    ${
+                      isAdmin()
+                        ? `<p class="store-debt-info">
                         <strong> <i class="fa fa-money"></i> المديونية المتبقية :</strong> 
-                        <span class="${totalDebt > 0 ? 'debt-due' : 'debt-clear'}">
+                        <span class="${
+                          totalDebt > 0 ? "debt-due" : "debt-clear"
+                        }">
                             ${totalDebt.toLocaleString()} ل.س
                         </span>
-                    </p>` : ''}
+                    </p>`
+                        : ""
+                    }
                     
                 </div>
             </div>
             
-            <div class="store-actions-overlay hidden" data-store-id="${store.id}" 
-                 onclick="event.stopPropagation(); hideStoreActions(${store.id})">
+            <div class="store-actions-overlay hidden" data-store-id="${
+              store.id
+            }" 
+                 onclick="event.stopPropagation(); hideStoreActions(${
+                   store.id
+                 })">
                 
-                <button class="close-overlay-btn" onclick="hideStoreActions(${store.id})">&times;</button>
+                <button class="close-overlay-btn" onclick="hideStoreActions(${
+                  store.id
+                })">&times;</button>
 
-                <button class="action-btn add-invoice" onclick="openInvoiceForStore(${store.id})">
+                <button class="action-btn add-invoice" onclick="openInvoiceForStore(${
+                  store.id
+                })">
                     <i class="fa fa-plus-circle"></i> إضافة فاتورة
                 </button>
-                <button class="action-btn view-invoices" onclick="filterInvoicesByStore(${store.id})">
+                <button class="action-btn view-invoices" onclick="filterInvoicesByStore(${
+                  store.id
+                })">
                     <i class="fa fa-list-alt"></i> عرض الفواتير
                 </button>
-                <button class="action-btn edit-store" onclick="editStore(${store.id})">
+                <button class="action-btn edit-store" onclick="editStore(${
+                  store.id
+                })">
                     <i class="fa fa-pencil"></i> تعديل
                 </button>
             </div>
         `;
 
-        if(hasLogo){
-        }
+    if (hasLogo) {
+    }
 
-        storesContainer.appendChild(storeCard);
-    });
+    storesContainer.appendChild(storeCard);
+  });
 }
 
 /**
@@ -304,15 +427,15 @@ function renderStores(searchTerm = '') {
  * @param {number} storeId - معرّف المتجر.
  */
 function editStore(storeId) {
-    const stores = getStores();
-    const storeToEdit = stores.find(s => s.id === storeId);
+  const stores = getStores();
+  const storeToEdit = stores.find((s) => s.id === storeId);
 
-    if (storeToEdit) {
-        // دالة openStoreModal تتولى تعبئة الحقول ووضع storeId في dataset.editingId
-        openStoreModal(storeToEdit);
-    } else {
-        alert("❌ لم يتم العثور على المتجر للتعديل.");
-    }
+  if (storeToEdit) {
+    // دالة openStoreModal تتولى تعبئة الحقول ووضع storeId في dataset.editingId
+    openStoreModal(storeToEdit);
+  } else {
+    alert("❌ لم يتم العثور على المتجر للتعديل.");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -321,64 +444,67 @@ function editStore(storeId) {
 
 // لفتح نافذة تأكيد حذف المتجر
 function showStoreDeleteConfirm() {
-    document.getElementById('storeConfirmOverlay').classList.remove('hidden');
-    document.getElementById('storeConfirmModal').classList.remove('hidden');
+  document.getElementById("storeConfirmOverlay").classList.remove("hidden");
+  document.getElementById("storeConfirmModal").classList.remove("hidden");
 }
 
 // لإلغاء الحذف
 function cancelStoreDelete() {
-    document.getElementById('storeConfirmOverlay').classList.add('hidden');
-    document.getElementById('storeConfirmModal').classList.add('hidden');
+  document.getElementById("storeConfirmOverlay").classList.add("hidden");
+  document.getElementById("storeConfirmModal").classList.add("hidden");
 }
 
 // لتنفيذ عملية الحذف
 function confirmStoreDelete() {
-    const stores = getStores();
-    const storeIdToDelete = parseInt(storeForm.dataset.editingId);
+  const stores = getStores();
+  const storeIdToDelete = parseInt(storeForm.dataset.editingId);
 
-    // فلترة المتاجر لإزالة المتجر المراد حذفه
-    const updatedStores = stores.filter(s => s.id !== storeIdToDelete);
+  // فلترة المتاجر لإزالة المتجر المراد حذفه
+  const updatedStores = stores.filter((s) => s.id !== storeIdToDelete);
 
-    setStores(updatedStores);
-    cancelStoreDelete();
-    closeStoreModal();
-    renderStores(); // إعادة عرض القائمة
+  setStores(updatedStores);
+  cancelStoreDelete();
+  closeStoreModal();
+  renderStores(); // إعادة عرض القائمة
 }
 
 const scrollTopBtn = document.getElementById("scrollTopBtn"); // زر العودة للأعلى
 
 function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 window.addEventListener("scroll", () => {
-    const scrollBtn = document.getElementById("scrollTopBtn");
-    if (window.scrollY > 300) {
-        scrollBtn.classList.add("show");
-        scrollBtn.classList.remove("hide");
-    } else {
-        scrollBtn.classList.remove("show");
-        scrollBtn.classList.add("hide");
-        setTimeout(() => scrollBtn.classList.remove("hide"), 300);
-    }})
+  const scrollBtn = document.getElementById("scrollTopBtn");
+  if (window.scrollY > 300) {
+    scrollBtn.classList.add("show");
+    scrollBtn.classList.remove("hide");
+  } else {
+    scrollBtn.classList.remove("show");
+    scrollBtn.classList.add("hide");
+    setTimeout(() => scrollBtn.classList.remove("hide"), 300);
+  }
+});
 
-    /**
+/**
  * إظهار أوفرلاي الإجراءات الخاصة بالكارد
  * @param {number} storeId - معرّف المتجر
  */
 function showStoreActions(storeId) {
-    if(isAdmin()){
+  if (isAdmin()) {
     // إخفاء أي أوفرلاي آخر مفتوح حالياً (إذا كنت تريد فتح واحد فقط في كل مرة)
-    document.querySelectorAll('.store-actions-overlay').forEach(overlay => {
-        overlay.classList.add('hidden');
+    document.querySelectorAll(".store-actions-overlay").forEach((overlay) => {
+      overlay.classList.add("hidden");
     });
 
     // إظهار الأوفرلاي المطلوب
-    const overlay = document.querySelector(`.store-actions-overlay[data-store-id="${storeId}"]`);
+    const overlay = document.querySelector(
+      `.store-actions-overlay[data-store-id="${storeId}"]`
+    );
     if (overlay) {
-        overlay.classList.remove('hidden');
+      overlay.classList.remove("hidden");
     }
-    }
+  }
 }
 
 /**
@@ -386,11 +512,13 @@ function showStoreActions(storeId) {
  * @param {number} storeId - معرّف المتجر
  */
 function hideStoreActions(storeId) {
-    const overlay = document.querySelector(`.store-actions-overlay[data-store-id="${storeId}"]`);
-    if (overlay) {
-        // نستخدم stopPropagation في HTML لمنع النقر على الأوفرلاي من إخفائه
-        overlay.classList.add('hidden');
-    }
+  const overlay = document.querySelector(
+    `.store-actions-overlay[data-store-id="${storeId}"]`
+  );
+  if (overlay) {
+    // نستخدم stopPropagation في HTML لمنع النقر على الأوفرلاي من إخفائه
+    overlay.classList.add("hidden");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -402,59 +530,53 @@ function hideStoreActions(storeId) {
  * @param {number} storeId - معرّف المتجر.
  */
 function openInvoiceForStore(storeId) {
-    // بناء رابط URL: action=add (لفتح المودال) و storeId (لتحديد المتجر)
-    const url = `invoices.html?action=add&storeId=${storeId}`;
+  // بناء رابط URL: action=add (لفتح المودال) و storeId (لتحديد المتجر)
+  const url = `invoices.html?action=add&storeId=${storeId}`;
 
-    // الانتقال إلى صفحة الفواتير
-    window.location.href = url;
+  // الانتقال إلى صفحة الفواتير
+  window.location.href = url;
 }
 
 /**
  * تجهز للانتقال إلى صفحة الفواتير لغرض تصفية الفواتير وعرض فواتير هذا المتجر فقط.
  * @param {number} storeId - معرّف المتجر. 👈 تم تغيير نوع المدخل
  */
-function filterInvoicesByStore(storeId) { 
-    // بناء رابط URL: action=filter و storeId (الذي يجب أن يكون رقمياً)
-    // 💡 الآن نرسل ID المتجر
-    const url = `invoices.html?action=filter&storeId=${storeId}`;
+function filterInvoicesByStore(storeId) {
+  // بناء رابط URL: action=filter و storeId (الذي يجب أن يكون رقمياً)
+  // 💡 الآن نرسل ID المتجر
+  const url = `invoices.html?action=filter&storeId=${storeId}`;
 
-    // الانتقال إلى صفحة الفواتير
-    window.location.href = url;
+  // الانتقال إلى صفحة الفواتير
+  window.location.href = url;
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const addBtn = document.getElementById("addStoreBtn");
+  const scrollBtn = document.getElementById("scrollTopBtn");
+  const invoicesLink = document.getElementById("invoicesLink");
 
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const addBtn = document.getElementById('addStoreBtn'); 
-    const scrollBtn = document.getElementById("scrollTopBtn");
-    const invoicesLink = document.getElementById('invoicesLink'); 
-    
-    // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
-    if (!isAdmin()){
-        addBtn.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
-        scrollBtn.style.left='20px';
-        scrollBtn.style.bottom='20px';
-        invoicesLink.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
-    }
+  // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
+  if (!isAdmin()) {
+    addBtn.style.display = "none"; // إذا لم يكن مديراً، يتم إخفاء الزر
+    scrollBtn.style.left = "20px";
+    scrollBtn.style.bottom = "20px";
+    invoicesLink.style.display = "none"; // إذا لم يكن مديراً، يتم إخفاء الزر
+  }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ... الكود الأساسي ...
+document.addEventListener("DOMContentLoaded", () => {
+  // ... الكود الأساسي ...
 
-    // 💡 إخفاء أو إظهار زر الإضافة بناءً على الصلاحية
-    const invoicesLink = document.getElementById('invoicesLink'); 
-    const dividers = document.getElementById('firstDivider');
-    
-    // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
-    if (isAdmin()) {
-        
-    } else {
-        invoicesLink.style.display = 'none';  // إذا لم يكن مديراً، يتم إخفاء الزر
-        dividers.style.display = 'none';
+  // 💡 إخفاء أو إظهار زر الإضافة بناءً على الصلاحية
+  const invoicesLink = document.getElementById("invoicesLink");
+  const dividers = document.getElementById("firstDivider");
 
-    }
-    
-    // ... باقي الكود ...
+  // التحقق يتم بواسطة الدالة isAdmin() الموجودة في utility.js
+  if (isAdmin()) {
+  } else {
+    invoicesLink.style.display = "none"; // إذا لم يكن مديراً، يتم إخفاء الزر
+    dividers.style.display = "none";
+  }
+
+  // ... باقي الكود ...
 });
