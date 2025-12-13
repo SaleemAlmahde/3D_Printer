@@ -182,7 +182,7 @@ function loadMoreProducts() {
              onmouseout="${!isSingleImage ? `stopAutoSlideForProduct(this)` : ''}">
             <div class="slider">
                 ${product.images.map((imgSrc, index) => `
-                    <div class="slide"><img src="${imgSrc}" alt="Image ${index+1}"></div>
+                    <div class="slide"><img src="${imgSrc}" alt="Image ${index+1}" loading="lazy"></div>
                 `).join('')}
             </div>
             ${!isSingleImage ? `
@@ -259,7 +259,7 @@ function showModal(id) {
             <div class="container">
                 <h2 style="color:#007bff;">${product.name}</h2>
                 <p style="text-align:center; margin-bottom: 20px;">${product.shortDisc}</p>
-                <img src="./${product.images[0]}" alt="${product.name}" style="max-width: 150px; margin-bottom: 15px;">
+                <img src="./${product.images[0]}" alt="${product.name}" style="max-width: 150px; margin-bottom: 15px;" loading="lazy">
                 
                 <label for="customDescInput" style="font-weight: bold; margin-bottom: 5px;">وصف المنتج والقياسات المطلوبة:</label>
                 <textarea id="customDescInput" rows="4" placeholder="اكتب هنا مواصفات طلبك (المقاسات، اللون، الوصف المفصل، الكمية المطلوبة، إلخ.)" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;"></textarea>

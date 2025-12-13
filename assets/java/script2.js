@@ -1,38 +1,67 @@
 // ======================================================
 // ⚙️ إعدادات البحث الحالي (Global State)
 // ======================================================
-let currentSearchQuery = ''; // متغير جديد لحفظ نص البحث السريع
+let currentSearchQuery = ""; // متغير جديد لحفظ نص البحث السريع
 const DEFAULT_FILTERS = {
-    paymentStatus: 'all',        
-    store: 'all',                
-    sortOption: 'date_desc',
-    startDate: '', // 👈 القيمة الافتراضية فارغة
-    endDate: ''    // 👈 القيمة الافتراضية فارغة
+  paymentStatus: "all",
+  store: "all",
+  sortOption: "date_desc",
+  startDate: "", // 👈 القيمة الافتراضية فارغة
+  endDate: "", // 👈 القيمة الافتراضية فارغة
 };
 
 // تأكد من أن currentFilters يبدأ بالحالة الافتراضية
 let currentFilters = { ...DEFAULT_FILTERS };
 
 function calculateTotals(products) {
-    if (!Array.isArray(products)) {
-        console.error('calculateTotals: products is not an array', products);
-        return { totalSYP: 0};
-    }
-    
-    try {
-        return products.reduce((totals, p) => {
-            // التحقق من وجود القيم المطلوبة
-            const priceSYP = Number(p.priceSYP) || 0;
-            const quantity = Number(p.quantity) || 0;
-            
-            return {
-                totalSYP: totals.totalSYP + (priceSYP * quantity)
-            };
-        }, { totalSYP: 0});
-    } catch (error) {
-        console.error('Error in calculateTotals:', error, products);
-        return { totalSYP: 0};
-    }
+  if (!Array.isArray(products)) {
+    console.error("calculateTotals: products is not an array", products);
+    return { totalSYP: 0 };
+  }
+
+  try {
+    return products.reduce(
+      (totals, p) => {
+        // التحقق من وجود القيم المطلوبة
+        const priceSYP = Number(p.priceSYP) || 0;
+        const quantity = Number(p.quantity) || 0;
+
+        return {
+          totalSYP: totals.totalSYP + priceSYP * quantity,
+        };
+      },
+      { totalSYP: 0 }
+    );
+  } catch (error) {
+    console.error("Error in calculateTotals:", error, products);
+    return { totalSYP: 0 };
+  }
+}
+
+// تطبيق الخصم/الزيادة على قيمة إجمالي
+function applyAdjustment(total, type, value) {
+  const v = parseFloat(value);
+  if (!type || isNaN(v) || v === 0) return total;
+  let adjusted = total;
+  switch (type) {
+    case "+":
+      adjusted = total + v;
+      break;
+    case "-":
+      adjusted = total - v;
+      break;
+    case "+%":
+      adjusted = total + (total * v) / 100;
+      break;
+    case "-%":
+      adjusted = total - (total * v) / 100;
+      break;
+    default:
+      adjusted = total;
+  }
+  // لا نريد قيمة سالبة على الإجمالي
+  if (isNaN(adjusted) || adjusted < 0) return 0;
+  return Math.round(adjusted * 100) / 100; // دقة بسيطة إلى سنت
 }
 
 // تحقق إن الفاتورة تطابق نص البحث (يتحقق عبر أغلب الحقول: المعرف، العميل، الهاتف، المحافظة، الشحن، التواريخ، المنتجات، الإجماليات)
@@ -47,7 +76,8 @@ function invoiceMatches(invoice, query) {
   };
 
   // id (as number or padded)
-  if (includes(invoice.id) || includes(invoice.id?.toString().padStart(3, '0'))) return true;
+  if (includes(invoice.id) || includes(invoice.id?.toString().padStart(3, "0")))
+    return true;
 
   // basic invoice fields
   const fields = [
@@ -60,15 +90,20 @@ function invoiceMatches(invoice, query) {
     invoice.shippingDate,
     invoice.totalSYP,
   ];
-  if (fields.some(f => includes(f))) return true;
+  if (fields.some((f) => includes(f))) return true;
 
   // shipping flag
-  if (typeof invoice.shipping === 'boolean' && String(invoice.shipping).includes(q)) return true;
+  if (
+    typeof invoice.shipping === "boolean" &&
+    String(invoice.shipping).includes(q)
+  )
+    return true;
 
   // products (name, color name, color code)
   if (Array.isArray(invoice.products)) {
     for (const p of invoice.products) {
-      if (includes(p.name) || includes(p.quantity) || includes(p.priceSYP)) return true;
+      if (includes(p.name) || includes(p.quantity) || includes(p.priceSYP))
+        return true;
       if (p.color) {
         if (includes(p.color.name) || includes(p.color.code)) return true;
       }
@@ -80,18 +115,18 @@ function invoiceMatches(invoice, query) {
 
 // قراءة قيمة البحث من الحقل واستدعاء العرض مع الفلتر
 function searchInvoices() {
-    try {
-        const input = document.getElementById('searchInput');
-        const q = input ? input.value.toString().trim() : '';
-        
-        // 💡 1. تحديث المتغير العالمي لنص البحث
-        currentSearchQuery = q; 
+  try {
+    const input = document.getElementById("searchInput");
+    const q = input ? input.value.toString().trim() : "";
 
-        // 💡 2. استدعاء دالة عرض الفواتير بدون وسائط
-        renderInvoices(); 
-    } catch (e) {
-        console.error('searchInvoices error:', e);
-    }
+    // 💡 1. تحديث المتغير العالمي لنص البحث
+    currentSearchQuery = q;
+
+    // 💡 2. استدعاء دالة عرض الفواتير بدون وسائط
+    renderInvoices();
+  } catch (e) {
+    console.error("searchInvoices error:", e);
+  }
 }
 
 function renderInvoices(filterStoreId = null) {
@@ -102,7 +137,10 @@ function renderInvoices(filterStoreId = null) {
   let processedInvoices = [...allInvoices];
 
   // 🚨 الخطوة التشخيصية رقم 2: هل يوجد فواتير أساساً؟
-  console.log('عدد الفواتير التي تم جلبها من localStorage:', allInvoices.length);
+  console.log(
+    "عدد الفواتير التي تم جلبها من localStorage:",
+    allInvoices.length
+  );
 
   // 💡 تحديد القيمة التي سنستخدمها للفلترة: ID المُمرر أو القيمة المحفوظة
   // إذا كان هناك ID مُمرر من الـ URL، نستخدمه ونحفظه في currentFilters.store
@@ -110,171 +148,207 @@ function renderInvoices(filterStoreId = null) {
     currentFilters.store = filterStoreId; // حفظ القيمة لتطبيقها ولظهور زر الإلغاء
   }
 
-  processedInvoices = processedInvoices.filter(invoice => {
-        // أ. فلترة حالة الدفع
-        const paymentFilter = currentFilters.paymentStatus;
-        const invoiceStatus = invoice.payment?.status || 'unpaid'; 
-        
-        if (paymentFilter !== 'all' && invoiceStatus !== paymentFilter) {
-            return false;
-        }
+  processedInvoices = processedInvoices.filter((invoice) => {
+    // أ. فلترة حالة الدفع
+    const paymentFilter = currentFilters.paymentStatus;
+    const invoiceStatus = invoice.payment?.status || "unpaid";
 
-        // ب. فلترة المتجر 
-        const storeFilter = currentFilters.store;
-        const invoiceStoreName = invoice.customerName; 
+    if (paymentFilter !== "all" && invoiceStatus !== paymentFilter) {
+      return false;
+    }
 
-        if (storeFilter && storeFilter !== 'all') {
-            
-            // 💡 ملاحظة: يجب أن نستخدم ID المتجر المخزن في الفاتورة للمقارنة
-            // أنا أستخدم storeId هنا، قم بتغييره إذا كان المفتاح مختلفاً لديك (مثل posId)
-            const invoiceStoreId = invoice.posId; 
-            
-            const numericFilterId = parseInt(storeFilter);
-            const numericInvoiceId = parseInt(invoiceStoreId);
+    // ب. فلترة المتجر
+    const storeFilter = currentFilters.store;
+    const invoiceStoreName = invoice.customerName;
 
-            // 🚨 الخطوة التشخيصية رقم 1: طباعة القِيَم للمقارنة
-        console.log(`
+    if (storeFilter && storeFilter !== "all") {
+      // 💡 ملاحظة: يجب أن نستخدم ID المتجر المخزن في الفاتورة للمقارنة
+      // أنا أستخدم storeId هنا، قم بتغييره إذا كان المفتاح مختلفاً لديك (مثل posId)
+      const invoiceStoreId = invoice.posId;
+
+      const numericFilterId = parseInt(storeFilter);
+      const numericInvoiceId = parseInt(invoiceStoreId);
+
+      // 🚨 الخطوة التشخيصية رقم 1: طباعة القِيَم للمقارنة
+      console.log(`
             ID الفاتورة: ${invoice.id}
             ID مُفلتر (URL): ${numericFilterId}
             ID المتجر في الفاتورة: ${numericInvoiceId}
-            المقارنة: ${numericInvoiceId === numericFilterId ? '✅ تطابق' : '❌ لا تطابق'}
+            المقارنة: ${
+              numericInvoiceId === numericFilterId ? "✅ تطابق" : "❌ لا تطابق"
+            }
         `);
 
-            // المقارنة بين IDs
-            if (!isNaN(numericFilterId) && numericInvoiceId !== numericFilterId) {
-                return false;
-            }
-        }
-        
-        // 🚨 إضافة فلترة نطاق التاريخ المفقودة
-const startFilter = currentFilters.startDate;
-const endFilter = currentFilters.endDate;
+      // المقارنة بين IDs
+      if (!isNaN(numericFilterId) && numericInvoiceId !== numericFilterId) {
+        return false;
+      }
+    }
 
-if (startFilter || endFilter) {
-    try {
-        // 1. تحويل تاريخ الفاتورة إلى Date object
-        let invoiceDate;
-        if (invoice.date instanceof Date) {
-            invoiceDate = invoice.date;
-        } else if (typeof invoice.date === 'string') {
-            // معالجة التواريخ المخزنة كنص عربي
-            invoiceDate = parseArabicDate(invoice.date);
+    // 🚨 إضافة فلترة نطاق التاريخ المفقودة
+    const startFilter = currentFilters.startDate;
+    const endFilter = currentFilters.endDate;
+
+    if (startFilter || endFilter) {
+      try {
+        // 1. تحويل تاريخ الفاتورة إلى Timestamp
+        // نفضل الحقل الرقمي `timestamp` إن وُجد لأنه موثوق
+        let invoiceDateTimestamp = null;
+        if (typeof invoice.timestamp === "number") {
+          invoiceDateTimestamp = invoice.timestamp;
+        } else if (invoice.date instanceof Date) {
+          invoiceDateTimestamp = invoice.date.getTime();
+        } else if (typeof invoice.date === "string") {
+          // معالجة التواريخ المخزنة كنص عربي
+          const pd = parseArabicDate(invoice.date);
+          invoiceDateTimestamp =
+            pd && !isNaN(pd.getTime()) ? pd.getTime() : NaN;
         } else {
-            invoiceDate = new Date(invoice.date);
+          const d = new Date(invoice.date);
+          invoiceDateTimestamp = !isNaN(d.getTime()) ? d.getTime() : NaN;
         }
-        
-        const invoiceDateTimestamp = invoiceDate.getTime();
-        
+
         // 2. تحويل تاريخ البداية إلى Timestamp (بداية اليوم: 00:00:00)
-        const startDateTimestamp = startFilter 
-            ? new Date(startFilter).setHours(0, 0, 0, 0) 
-            : 0; 
-        
+        const startDateTimestamp = startFilter
+          ? new Date(startFilter).setHours(0, 0, 0, 0)
+          : 0;
+
         // 3. تحويل تاريخ النهاية إلى Timestamp (نهاية اليوم: 23:59:59)
-        const endDateTimestamp = endFilter 
-            ? new Date(endFilter).setHours(23, 59, 59, 999) 
-            : Infinity; 
-        
+        const endDateTimestamp = endFilter
+          ? new Date(endFilter).setHours(23, 59, 59, 999)
+          : Infinity;
+
         // 4. تطبيق المقارنة
-        if (invoiceDateTimestamp < startDateTimestamp || invoiceDateTimestamp > endDateTimestamp) {
-            return false;
+        if (
+          (isFinite(invoiceDateTimestamp) &&
+            invoiceDateTimestamp < startDateTimestamp) ||
+          (isFinite(invoiceDateTimestamp) &&
+            invoiceDateTimestamp > endDateTimestamp)
+        ) {
+          return false;
         }
-    } catch (error) {
-        console.warn('خطأ في معالجة تاريخ الفاتورة:', invoice.date, error);
+      } catch (error) {
+        console.warn("خطأ في معالجة تاريخ الفاتورة:", invoice.date, error);
         // في حالة الخطأ، نعرض الفاتورة لتجنب فقدان البيانات
-    }
-}
-        
-        // 💡 ج. تطبيق فلترة البحث السريع
-        if (currentSearchQuery && !invoiceMatches(invoice, currentSearchQuery)) {
-            return false;
-        }
-        return true; // إذا نجحت في جميع الفلاتر
-    });
-
-    processedInvoices.sort((a, b) => {
-        const sortOption = currentFilters.sortOption;
-
-        // دالة مساعدة للحصول على القيمة الآمنة للمقارنة
-        const getVal = (invoice, key) => {
-            switch (key) {
-                case 'date':
-                    // نحول التاريخ إلى قيمة يمكن مقارنتها (مثل Timestamp)
-                    return new Date(invoice.date).getTime();
-                case 'total':
-                    // نحصل على الإجمالي الكلي بالليرة السورية
-                    return Number(invoice.totalSYP) || 0;
-                case 'remaining':
-                    // نحصل على المبلغ المتبقي
-                    return Number(invoice.payment?.remainingSYP) || 0;
-                default:
-                    return 0;
-            }
-        };
-
-        const [key, direction] = sortOption.split('_'); // مثال: 'date_desc' -> ['date', 'desc']
-        
-        const valA = getVal(a, key);
-        const valB = getVal(b, key);
-
-        if (valA < valB) {
-            return direction === 'asc' ? -1 : 1;
-        }
-        if (valA > valB) {
-            return direction === 'asc' ? 1 : -1;
-        }
-        return 0; // متساوون
-    });
-
-    // ===================================
-    // 💡 5. التحكم بزر إلغاء الفلترة (resetFabBtn)
-    // ===================================
-    const isFilteredOrSorted = (
-        currentFilters.paymentStatus !== DEFAULT_FILTERS.paymentStatus ||
-        currentFilters.store !== DEFAULT_FILTERS.store ||
-        currentFilters.sortOption !== DEFAULT_FILTERS.sortOption ||
-        // 💡 الجديد: إضافة فلاتر التاريخ للتحقق
-        currentFilters.startDate !== DEFAULT_FILTERS.startDate ||
-        currentFilters.endDate !== DEFAULT_FILTERS.endDate ||
-        (currentSearchQuery && currentSearchQuery.length > 0) 
-    );
-
-    const resetBtn = document.getElementById('resetFabBtn');
-
-    if (resetBtn) {
-        if (isFilteredOrSorted) {
-            resetBtn.classList.remove('hidden');
-        } else {
-            resetBtn.classList.add('hidden');
-        }
-    }
-    // -----------------------------------
-
-    if (processedInvoices.length === 0) {
-        invoicesDiv.innerHTML = `<div class="no-invoices-message">لا توجد فواتير مطابقة لخيارات الفلترة الحالية.</div>`;
-        return;
+      }
     }
 
-  processedInvoices.forEach(invoice => {
+    // 💡 ج. تطبيق فلترة البحث السريع
+    if (currentSearchQuery && !invoiceMatches(invoice, currentSearchQuery)) {
+      return false;
+    }
+    return true; // إذا نجحت في جميع الفلاتر
+  });
+
+  processedInvoices.sort((a, b) => {
+    const sortOption = currentFilters.sortOption;
+
+    // دالة مساعدة للحصول على القيمة الآمنة للمقارنة
+    const getVal = (invoice, key) => {
+      switch (key) {
+        case "date":
+          // نفضّل الحقل الرقمي `timestamp` إن وُجد لأنه أكثر ثباتاً
+          if (typeof invoice.timestamp === "number") return invoice.timestamp;
+          // نحول التاريخ إلى قيمة يمكن مقارنتها (مثل Timestamp)
+          let t = new Date(invoice.date).getTime();
+          if (isNaN(t)) {
+            const pd = parseArabicDate(invoice.date);
+            t = pd && pd.getTime && !isNaN(pd.getTime()) ? pd.getTime() : NaN;
+          }
+          return isNaN(t) ? 0 : t;
+        case "total":
+          // نحصل على الإجمالي الكلي بالليرة السورية
+          return Number(invoice.totalSYP) || 0;
+        case "remaining":
+          // نحصل على المبلغ المتبقي
+          return Number(invoice.payment?.remainingSYP) || 0;
+        default:
+          return 0;
+      }
+    };
+
+    const [key, direction] = sortOption.split("_"); // مثال: 'date_desc' -> ['date', 'desc']
+
+    const valA = getVal(a, key);
+    const valB = getVal(b, key);
+
+    if (valA < valB) {
+      return direction === "asc" ? -1 : 1;
+    }
+    if (valA > valB) {
+      return direction === "asc" ? 1 : -1;
+    }
+    return 0; // متساوون
+  });
+
+  // ===================================
+  // 💡 5. التحكم بزر إلغاء الفلترة (resetFabBtn)
+  // ===================================
+  const isFilteredOrSorted =
+    currentFilters.paymentStatus !== DEFAULT_FILTERS.paymentStatus ||
+    currentFilters.store !== DEFAULT_FILTERS.store ||
+    currentFilters.sortOption !== DEFAULT_FILTERS.sortOption ||
+    // 💡 الجديد: إضافة فلاتر التاريخ للتحقق
+    currentFilters.startDate !== DEFAULT_FILTERS.startDate ||
+    currentFilters.endDate !== DEFAULT_FILTERS.endDate ||
+    (currentSearchQuery && currentSearchQuery.length > 0);
+
+  const resetBtn = document.getElementById("resetFabBtn");
+
+  if (resetBtn) {
+    if (isFilteredOrSorted) {
+      resetBtn.classList.remove("hidden");
+    } else {
+      resetBtn.classList.add("hidden");
+    }
+  }
+  // -----------------------------------
+
+  if (processedInvoices.length === 0) {
+    invoicesDiv.innerHTML = `<div class="no-invoices-message">لا توجد فواتير مطابقة لخيارات الفلترة الحالية.</div>`;
+    return;
+  }
+
+  processedInvoices.forEach((invoice) => {
     const invoiceCard = document.createElement("div");
     invoiceCard.classList.add("invoice-card");
 
     let productsHTML = "";
     const productsArr = Array.isArray(invoice.products) ? invoice.products : [];
     if (!Array.isArray(invoice.products)) {
-      console.warn('فاتورة بدون قائمة منتجات أو بقيمة غير صحيحة (سيتم عرضها فارغة):', invoice.id);
+      console.warn(
+        "فاتورة بدون قائمة منتجات أو بقيمة غير صحيحة (سيتم عرضها فارغة):",
+        invoice.id
+      );
     }
 
-    productsArr.forEach(product => {
-      const colorCode = (product?.color?.code) || '';
-      const colorTitle = (product?.color?.name) || '';
+    productsArr.forEach((product) => {
       const safePriceSYP = Number(product.priceSYP) || 0;
 
-      // 🔧 تحسين: التأكد من أن اللون صحيح
-      const displayColor = colorCode && colorCode !== 'undefined' ? colorCode : 'transparent';
-      const displayTitle = colorTitle && colorTitle !== 'undefined' ? colorTitle : 'بدون لون';
-      
-      productsHTML += `
+      if (product.isCustom) {
+        // Custom product: show wrench icon instead of color
+        productsHTML += `
+    <li class="product-item">
+      <span class="product-name">${product.name}</span>
+      <span class="product-custom-icon" title="منتج مخصص">🛠️</span>
+      <span class="product-qty">x${product.quantity}</span>
+      <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
+    </li>
+  `;
+      } else {
+        const colorCodeRaw = product?.color?.code || "";
+        const colorTitleRaw = product?.color?.name || "";
+        // Normalize color: prefer hex-like values, fallback to light gray
+        const displayColor =
+          colorCodeRaw && colorCodeRaw !== "undefined"
+            ? colorCodeRaw
+            : "#CCCCCC";
+        const displayTitle =
+          colorTitleRaw && colorTitleRaw !== "undefined"
+            ? colorTitleRaw
+            : "بدون لون";
+
+        productsHTML += `
     <li class="product-item">
       <span class="product-name">${product.name}</span>
       <span class="product-color" title="${displayTitle}" style="background-color: ${displayColor}"></span>
@@ -282,67 +356,104 @@ if (startFilter || endFilter) {
       <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
     </li>
   `;
-});
+      }
+    });
 
     const safeTotalSYP = Number(invoice.totalSYP) || 0;
+    const origTotalSYP = Number(invoice.totalOriginalSYP) || 0;
+    const showOrigTotal = origTotalSYP && origTotalSYP !== safeTotalSYP;
 
-    const payment = invoice.payment || { status: 'unpaid', paidSYP: 0, remainingSYP: safeTotalSYP };
-    if (payment.remainingSYP === undefined) payment.remainingSYP = safeTotalSYP - (payment.paidSYP || 0);
-    const notes = invoice.notes || '';
+    const payment = invoice.payment || {
+      status: "unpaid",
+      paidSYP: 0,
+      remainingSYP: safeTotalSYP,
+    };
+    if (payment.remainingSYP === undefined)
+      payment.remainingSYP = safeTotalSYP - (payment.paidSYP || 0);
+    const notes = invoice.notes || "";
 
-    const statusClass = `status-${payment.status || 'unpaid'}`;
+    const statusClass = `status-${payment.status || "unpaid"}`;
     invoiceCard.classList.add(statusClass);
 
-    const formattedShippingDate = invoice.shippingDate 
-    ? formatDateToYYYYMMDD(invoice.shippingDate) 
-    : '-';
+    const formattedShippingDate = invoice.shippingDate
+      ? formatDateToYYYYMMDD(invoice.shippingDate)
+      : "-";
 
     invoiceCard.innerHTML = `
       <div class="invoice-header invoice-toggle-area">
-        <h4>فاتورة #${invoice.id.toString().padStart(3, '0')}</h4>
+        <h4>فاتورة #${invoice.id.toString().padStart(3, "0")}</h4>
         <span class="invoice-date">${invoice.date}</span>
       </div>
 
       <div class="invoice-summary">
         <div class="summary-line-1">
-            <span class="summary-customer"><strong >المشتري : </strong> ${invoice.customerName}</span>
-            <span class="summary-total"><strong class="summary-total" >الإجمالي : </strong> ${safeTotalSYP.toLocaleString()} ل.س</span>
-            </div>
+          <span class="summary-customer"><strong >المشتري : </strong> ${
+            invoice.customerName
+          }</span>
+          ${
+            showOrigTotal
+              ? `<span class="summary-total"><strong class="summary-total">المبلغ الكلي : </strong>
+                <span class="original-total" style="text-decoration:line-through;color:#999;display:block">${origTotalSYP.toLocaleString()} ل.س</span>
+                <span class="adjusted-total" style="font-weight:bold;display:block">${safeTotalSYP.toLocaleString()} ل.س</span>
+               </span>`
+              : `<span class="summary-total"><strong class="summary-total" >المبلغ الكلي : </strong> ${safeTotalSYP.toLocaleString()} ل.س</span>`
+          }
+          </div>
 
-            <div class="summary-line-2">
-        ${payment.status === 'paid-partial' ? `
-      <p><strong>المبلغ المدفوع :</strong> ${(payment.paidSYP || 0).toLocaleString()} ل.س</p>
-      <p><strong>المتبقي :</strong> ${(payment.remainingSYP || (safeTotalSYP - (payment.paidSYP || 0))).toLocaleString()} ل.س</p>
-    ` : ''}
-    </div>
+          <div class="summary-line-2">
+        ${
+          payment.status === "paid-partial"
+            ? `
+        <p><strong>المبلغ المدفوع :</strong> ${(
+          payment.paidSYP || 0
+        ).toLocaleString()} ل.س</p>
+        <p><strong>المتبقي :</strong> ${(
+          payment.remainingSYP || safeTotalSYP - (payment.paidSYP || 0)
+        ).toLocaleString()} ل.س</p>
+      `
+            : ""
+        }
+      </div>
         </div>
 
       <div class="invoice-body hidden">
         <div class="invoice-info">
           <p><strong>المشتري :</strong> ${invoice.customerName}</p>
           <div class="invoice-contacts-logo">
-          <div>
+          <div class="invoice-contacts">
           <p><strong>هاتف :</strong> ${invoice.phone}</p>
           <p><strong>محافظة :</strong> ${invoice.city}</p>
-          <p><strong>نوع التسليم :</strong> ${invoice.shipping ? 'شحن' : 'ضمن حمص' }</p>
-          ${invoice.shipping ? (`<p><strong>شركة الشحن :</strong> ${invoice.shippingCompany || '-'}</p>
-          <p><strong>معلومات الشحن :</strong> ${invoice.shippingInfo || '-'}</p>`) : (`<p><strong>الموقع:</strong> ${invoice.shippingInfo || '-'}</p>`)}
-          </div>
-          <img class="invoice-logo" src="./assets/imgs/log_png-removebg-preview.png">
-          </div>
-          <p><strong>موعد التسليم :</strong> ${formattedShippingDate || '-'}</p>
-
+          <p><strong>نوع التسليم :</strong> ${
+            invoice.shipping ? "شحن" : "ضمن حمص"
+          }</p>
           ${
-            `<p><strong>حالة الدفع :</strong>
-            ${payment.status === 'unpaid' ? 
-            `لم يدفع <i class="fa fa-times-circle" style="color: red;"></i>` : 
-            payment.status === 'paid-partial' ? 
-            `دُفع جزئياً <i class="fa fa-adjust" style="color: yellow;"></i>` : 
-            `دُفع كامل <i class="fa fa-check-circle" style="color: green;"></i>`}
-            `
-          }      
+            invoice.shipping
+              ? `<p><strong>شركة الشحن :</strong> ${
+                  invoice.shippingCompany || "-"
+                }</p>
+          <p><strong>معلومات الشحن :</strong> ${
+            invoice.shippingInfo || "-"
+          }</p>`
+              : `<p><strong>الموقع:</strong> ${invoice.shippingInfo || "-"}</p>`
+          }
+          </div>
+          <div class="invoice-logo-wrap">
+            <img class="invoice-logo" src="./assets/imgs/logo.jpg" alt="logo">
+          </div>
+          </div>
+          <p><strong>موعد التسليم :</strong> ${formattedShippingDate || "-"}</p>
 
-          ${notes ? `<p><strong>ملاحظات :</strong> ${notes}</p>` : ''}
+          ${`<p><strong>حالة الدفع :</strong>
+            ${
+              payment.status === "unpaid"
+                ? `لم يدفع <i class="fa fa-times-circle" style="color: red;"></i>`
+                : payment.status === "paid-partial"
+                ? `دُفع جزئياً <i class="fa fa-adjust" style="color: yellow;"></i>`
+                : `دُفع كامل <i class="fa fa-check-circle" style="color: green;"></i>`
+            }
+            `}      
+
+          ${notes ? `<p><strong>ملاحظات :</strong> ${notes}</p>` : ""}
 
           <div class="invoice-products-toggle">
             <p><strong>المنتجات :</strong></p>
@@ -356,20 +467,32 @@ if (startFilter || endFilter) {
         </div>
 
         <div class="invoice-footer">
-  <div class="invoice-info">
-    <span class="total">الإجمالي : ${safeTotalSYP.toLocaleString()} ل.س </span>
+      <div class="invoice-info">
+        ${
+          showOrigTotal
+            ? `<span class="total">الإجمالي : <span class="original-total" style="text-decoration:line-through;color:#999;display:block">${origTotalSYP.toLocaleString()} ل.س</span><span class="adjusted-total" style="font-weight:bold;display:block">${safeTotalSYP.toLocaleString()} ل.س</span></span>`
+            : `<span class="total">الإجمالي : ${safeTotalSYP.toLocaleString()} ل.س </span>`
+        }
 
-    ${payment.status === 'paid-partial' ? `
-      <p><strong>المبلغ المدفوع :</strong> ${(payment.paidSYP || 0).toLocaleString()} ل.س</p>
-      <p><strong>المتبقي :</strong> ${(payment.remainingSYP || (safeTotalSYP - (payment.paidSYP || 0))).toLocaleString()} ل.س</p>
-    ` : ''}
+    ${
+      payment.status === "paid-partial"
+        ? `
+      <p><strong>المبلغ المدفوع :</strong> ${(
+        payment.paidSYP || 0
+      ).toLocaleString()} ل.س</p>
+      <p><strong>المتبقي :</strong> ${(
+        payment.remainingSYP || safeTotalSYP - (payment.paidSYP || 0)
+      ).toLocaleString()} ل.س</p>
+    `
+        : ""
+    }
   </div>
-  <button class="btn-view" onclick="editInvoice(${invoice.id})">تعديل الفاتورة</button>
+  <button class="btn-view" onclick="editInvoice(${
+    invoice.id
+  })">تعديل الفاتورة</button>
 </div>
       </div>
     `;
-
-    
 
     invoicesDiv.appendChild(invoiceCard);
 
@@ -378,42 +501,53 @@ if (startFilter || endFilter) {
     // ------------------------------------------------------------------
 
     const toggleArea = invoiceCard.querySelector(".invoice-toggle-area");
-const summaryContainer = invoiceCard.querySelector(".invoice-summary");
-const detailsContainer = invoiceCard.querySelector(".invoice-body");
+    const summaryContainer = invoiceCard.querySelector(".invoice-summary");
+    const detailsContainer = invoiceCard.querySelector(".invoice-body");
 
-// 2. معالج الحدث الجديد (التعديل الرئيسي يكمن هنا)
-toggleArea.addEventListener("click", (e) => {
-    // نتحقق من أن النقر ليس على زر المنتجات الداخلية
-    if (e.target.closest(".btn-toggle-products")) return;
+    // 2. معالج الحدث الجديد (التعديل الرئيسي يكمن هنا)
+    toggleArea.addEventListener("click", (e) => {
+      // نتحقق من أن النقر ليس على زر المنتجات الداخلية
+      if (e.target.closest(".btn-toggle-products")) return;
 
-    // تبديل حالة الإظهار/الإخفاء بين الملخص والتفاصيل:
-    // إذا كان الملخص ظاهراً، سنخفيه. وإذا كان مخفياً، سنظهره.
-    summaryContainer.classList.toggle("hidden"); 
-    
-    // إذا كان البودي (التفاصيل) مخفياً، سنظهره. وإذا كان ظاهراً، سنخفيه.
-    detailsContainer.classList.toggle("hidden"); 
+      // تبديل حالة الإظهار/الإخفاء بين الملخص والتفاصيل:
+      // إذا كان الملخص ظاهراً، سنخفيه. وإذا كان مخفياً، سنظهره.
+      summaryContainer.classList.toggle("hidden");
 
-    // ✅ منطق طي المنتجات (لضمان التناسق)
-    if (detailsContainer.classList.contains("hidden")) {
+      // إذا كان البودي (التفاصيل) مخفياً، سنظهره. وإذا كان ظاهراً، سنخفيه.
+      detailsContainer.classList.toggle("hidden");
+
+      // ✅ منطق طي المنتجات (لضمان التناسق)
+      if (detailsContainer.classList.contains("hidden")) {
         // إذا كان البودي مُخفى (أي الفاتورة مطوية الآن)، يجب طي المنتجات الداخلية.
         const productsDiv = invoiceCard.querySelector(".invoice-products");
-        const toggleProductsBtn = invoiceCard.querySelector(".btn-toggle-products");
-        const toggleProductsIcon = toggleProductsBtn ? toggleProductsBtn.querySelector("i") : null;
-        
+        const toggleProductsBtn = invoiceCard.querySelector(
+          ".btn-toggle-products"
+        );
+        const toggleProductsIcon = toggleProductsBtn
+          ? toggleProductsBtn.querySelector("i")
+          : null;
+
         // نطوي المنتجات إذا كانت مفتوحة
         if (productsDiv && !productsDiv.classList.contains("hidden")) {
-            productsDiv.classList.add("hidden"); 
-            if (toggleProductsIcon) {
-                toggleProductsIcon.classList.replace("fa-chevron-up", "fa-chevron-down");
-            }
+          productsDiv.classList.add("hidden");
+          if (toggleProductsIcon) {
+            toggleProductsIcon.classList.replace(
+              "fa-chevron-up",
+              "fa-chevron-down"
+            );
+          }
         }
-    }
-});
+      }
+    });
 
     // ✅ إظهار/إخفاء زر تعديل الفاتورة
     invoiceCard.addEventListener("click", (e) => {
-      if (e.target.classList.contains("btn-view") || e.target.closest(".btn-toggle-products")) return;
-      document.querySelectorAll(".btn-view.visible-btn").forEach(btn => {
+      if (
+        e.target.classList.contains("btn-view") ||
+        e.target.closest(".btn-toggle-products")
+      )
+        return;
+      document.querySelectorAll(".btn-view.visible-btn").forEach((btn) => {
         if (btn !== invoiceCard.querySelector(".btn-view")) {
           btn.classList.remove("visible-btn");
         }
@@ -422,70 +556,76 @@ toggleArea.addEventListener("click", (e) => {
     });
 
     // ✅ إظهار/إخفاء قائمة المنتجات + تغيير الأيقونة
-    const toggleBtn = invoiceCard.querySelector(".btn-toggle-products");
+    const productsToggleBtn = invoiceCard.querySelector(".btn-toggle-products");
     const productsDiv = invoiceCard.querySelector(".invoice-products");
-    toggleBtn.addEventListener("click", () => {
-      productsDiv.classList.toggle("hidden");
-      const icon = toggleBtn.querySelector("i");
-      if (productsDiv.classList.contains("hidden")) {
-        icon.classList.remove("fa-chevron-up");
-        icon.classList.add("fa-chevron-down");
-      } else {
-        icon.classList.remove("fa-chevron-down");
-        icon.classList.add("fa-chevron-up");
-      }
-    });
+    if (productsToggleBtn) {
+      productsToggleBtn.addEventListener("click", () => {
+        productsDiv.classList.toggle("hidden");
+        const icon = productsToggleBtn.querySelector("i");
+        if (productsDiv.classList.contains("hidden")) {
+          icon.classList.remove("fa-chevron-up");
+          icon.classList.add("fa-chevron-down");
+        } else {
+          icon.classList.remove("fa-chevron-down");
+          icon.classList.add("fa-chevron-up");
+        }
+      });
+    }
   });
 }
 
-
 // دالة إعادة تعيين النموذج
 function resetForm() {
-    const form = document.getElementById("invoiceForm");
-    form.reset(); // إعادة تعيين الحقول الأساسية
+  const form = document.getElementById("invoiceForm");
+  form.reset(); // إعادة تعيين الحقول الأساسية
 
-    // إعادة تعيين حقول الشحن
+  // إعادة تعيين حقول الشحن
   // إعادة تعيين حقول الشحن (شركة الشحن + معلومات الشحن)
   const shippingCompanyEl = document.getElementById("shippingCompany");
   if (shippingCompanyEl) shippingCompanyEl.value = "";
   const shippingInfoEl = document.getElementById("shippingInfo");
   if (shippingInfoEl) shippingInfoEl.value = "";
-    document.getElementById("localShippingInfo").value = "";
-    // إعادة تعيين تاريخ التسليم
-    const deliveryDateEl = document.getElementById("deliveryDate");
-    if (deliveryDateEl) deliveryDateEl.value = "";
+  document.getElementById("localShippingInfo").value = "";
+  // إعادة تعيين تاريخ التسليم
+  const deliveryDateEl = document.getElementById("deliveryDate");
+  if (deliveryDateEl) deliveryDateEl.value = "";
 
-    // إعادة تعيين قائمة المنتجات
-    document.getElementById("selectedProductsList").innerHTML = "";
+  // إعادة تعيين قائمة المنتجات
+  document.getElementById("selectedProductsList").innerHTML = "";
 
-    // إعادة تعيين الإجماليات
-    document.getElementById("totalSYP").textContent = "0";
+  // إعادة تعيين الإجماليات
+  document.getElementById("totalSYP").textContent = "0";
 
-    // إخفاء حقول الشحن والموقع
-    document.getElementById("shippingFields").classList.add("hidden");
-    document.getElementById("localFields").classList.add("hidden");
+  // إخفاء حقول الشحن والموقع
+  document.getElementById("shippingFields").classList.add("hidden");
+  document.getElementById("localFields").classList.add("hidden");
 
-    // حذف معرف التعديل
-    delete form.dataset.editingId;
+  // حذف معرف التعديل
+  delete form.dataset.editingId;
   // إخفاء زر الحذف عند إعادة التهيئة (فقط يظهر أثناء التعديل)
   const delBtn = document.getElementById("deleteInvoiceBtn");
-  if (delBtn) delBtn.classList.add('hidden');
-    // تأكد أن حقل اختيار طريقة التسليم فارغ ويُخفي الحقول المرتبطة
-    const deliverySelect = document.getElementById("deliveryType");
-    if (deliverySelect) {
-      deliverySelect.value = "";
-      toggleShippingFields();
-    }
-    // إعادة تعيين حقول الدفع والملاحظات
-    const paymentSelect = document.getElementById('paymentStatus');
-    if (paymentSelect) paymentSelect.value = 'unpaid';
-    const paymentAmountEl = document.getElementById('paymentAmountPaid');
-    if (paymentAmountEl) {
-      paymentAmountEl.value = '';
-      paymentAmountEl.classList.add('hidden');
-    }
-    const notesEl = document.getElementById('invoiceNotes');
-    if (notesEl) notesEl.value = '';
+  if (delBtn) delBtn.classList.add("hidden");
+  // تأكد أن حقل اختيار طريقة التسليم فارغ ويُخفي الحقول المرتبطة
+  const deliverySelect = document.getElementById("deliveryType");
+  if (deliverySelect) {
+    deliverySelect.value = "";
+    toggleShippingFields();
+  }
+  // إعادة تعيين حقول الدفع والملاحظات
+  const paymentSelect = document.getElementById("paymentStatus");
+  if (paymentSelect) paymentSelect.value = "unpaid";
+  const paymentAmountEl = document.getElementById("paymentAmountPaid");
+  if (paymentAmountEl) {
+    paymentAmountEl.value = "";
+    paymentAmountEl.classList.add("hidden");
+  }
+  const notesEl = document.getElementById("invoiceNotes");
+  if (notesEl) notesEl.value = "";
+  // إعادة تعيين حقل التعديل (الخصم/الزيادة)
+  const adjVal = document.getElementById("adjustmentValue");
+  const adjType = document.getElementById("adjustmentType");
+  if (adjVal) adjVal.value = "";
+  if (adjType) adjType.value = "+";
 }
 
 /**
@@ -493,23 +633,22 @@ function resetForm() {
  * @param {number | null} targetStoreId - معرّف المتجر الذي يجب اختياره مسبقًا عند الإضافة.
  */
 
-function openNewInvoiceModel(targetStoreId=null) {
-    // إعادة تعيين النموذج فقط إذا كنا نضيف فاتورة جديدة
-    if (!document.getElementById("invoiceForm").dataset.editingId) {
-        resetForm();
-    }
+function openNewInvoiceModel(targetStoreId = null) {
+  // إعادة تعيين النموذج فقط إذا كنا نضيف فاتورة جديدة
+  if (!document.getElementById("invoiceForm").dataset.editingId) {
+    resetForm();
+  }
 
-    invoiceFormOpen = true;
+  invoiceFormOpen = true;
 
-       closeFabMenu();
+  closeFabMenu();
 
-    mainFab.classList.add("hidden");
-    
-    
-    // 2. 💡 استدعاء populateStoreSelect هنا
-    populateStoreSelect(targetStoreId);
+  mainFab.classList.add("hidden");
 
-    // فتح المودال
+  // 2. 💡 استدعاء populateStoreSelect هنا
+  populateStoreSelect(targetStoreId);
+
+  // فتح المودال
   const modal = document.getElementById("newInvoiceModal");
   const overlay = document.getElementById("newInvoiceOverlay");
   modal.classList.remove("hidden");
@@ -519,7 +658,6 @@ function openNewInvoiceModel(targetStoreId=null) {
 
   document.body.style.overflow = "hidden";
 }
-
 
 function closeModal() {
   const modal = document.getElementById("newInvoiceModal");
@@ -540,59 +678,63 @@ function closeModal() {
 
 // دالة التبديل بين حقول الشحن
 function toggleShippingFields() {
-    const deliveryType = document.getElementById("deliveryType").value;
-    const shippingFields = document.getElementById("shippingFields");
-    const localFields = document.getElementById("localFields");
+  const deliveryType = document.getElementById("deliveryType").value;
+  const shippingFields = document.getElementById("shippingFields");
+  const localFields = document.getElementById("localFields");
 
-    if (deliveryType === "shipping") {
-        shippingFields.classList.remove("hidden");
-        localFields.classList.add("hidden");
-    } else if (deliveryType === "local") {
-        shippingFields.classList.add("hidden");
-        localFields.classList.remove("hidden");
-    } else {
-        shippingFields.classList.add("hidden");
-        localFields.classList.add("hidden");
-    }
+  if (deliveryType === "shipping") {
+    shippingFields.classList.remove("hidden");
+    localFields.classList.add("hidden");
+  } else if (deliveryType === "local") {
+    shippingFields.classList.add("hidden");
+    localFields.classList.remove("hidden");
+  } else {
+    shippingFields.classList.add("hidden");
+    localFields.classList.add("hidden");
+  }
 }
 
 // تبديل عرض حقل المبلغ المدفوع عند اختيار حالة الدفع
 function togglePaymentFields() {
-  const status = document.getElementById('paymentStatus')?.value;
-  const paymentAmountEl = document.getElementById('paymentAmountPaid');
+  const status = document.getElementById("paymentStatus")?.value;
+  const paymentAmountEl = document.getElementById("paymentAmountPaid");
   if (!paymentAmountEl) return;
-  if (status === 'paid-partial') {
-    paymentAmountEl.classList.remove('hidden');
+  if (status === "paid-partial") {
+    paymentAmountEl.classList.remove("hidden");
   } else {
-    paymentAmountEl.classList.add('hidden');
+    paymentAmountEl.classList.add("hidden");
     // إذا كانت دُفع كامل، نضع القيمة مساوية للإجمالي (سيتم ضبطها عند الحفظ)
-    if (status === 'paid-full') {
+    if (status === "paid-full") {
       // leave empty here; during save we'll set paid = total
     } else {
-      paymentAmountEl.value = '';
+      paymentAmountEl.value = "";
     }
   }
 }
 
 // 🟩 دالة تعديل الفاتورة
 function editInvoice(id) {
-    const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
-    const invoice = allInvoices.find(inv => inv.id === id);
-    if (!invoice) return alert("⚠️ لم يتم العثور على الفاتورة");
+  const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
+  const invoice = allInvoices.find((inv) => inv.id === id);
+  if (!invoice) return alert("⚠️ لم يتم العثور على الفاتورة");
 
-    // تعبئة الحقول بالقيم الحالية
-    document.getElementById("buyerName").value = invoice.customerName;
-    document.getElementById("buyerPhone").value = invoice.phone;
-    document.getElementById("buyerProvince").value = invoice.city;
-    document.getElementById("deliveryType").value = invoice.shipping ? "shipping" : "local";
+  // تعبئة الحقول بالقيم الحالية
+  document.getElementById("buyerName").value = invoice.customerName;
+  document.getElementById("buyerPhone").value = invoice.phone;
+  document.getElementById("buyerProvince").value = invoice.city;
+  document.getElementById("deliveryType").value = invoice.shipping
+    ? "shipping"
+    : "local";
 
-    // تعبئة حقول الشحن
+  // تعبئة حقول الشحن
   if (invoice.shipping) {
     // نعرض حقل شركة الشحن ومعلومات الشحن
-    document.getElementById("shippingCompany").value = invoice.shippingCompany || '';
-    document.getElementById("shippingInfo").value = invoice.shippingInfo || '';
+    document.getElementById("shippingCompany").value =
+      invoice.shippingCompany || "";
+    document.getElementById("shippingInfo").value = invoice.shippingInfo || "";
   } else {
-    document.getElementById("localShippingInfo").value = invoice.shippingInfo || '';
+    document.getElementById("localShippingInfo").value =
+      invoice.shippingInfo || "";
   }
   // تعبئة تاريخ التسليم إن وُجد
   if (invoice.shippingDate) {
@@ -600,69 +742,74 @@ function editInvoice(id) {
     if (deliveryDateEl) deliveryDateEl.value = invoice.shippingDate;
   }
 
-    // تحديث حقول الشحن المرئية
-    toggleShippingFields();
+  // تحديث حقول الشحن المرئية
+  toggleShippingFields();
 
-    // تعبئة المنتجات في القائمة
-    const selectedProductsList = document.getElementById("selectedProductsList");
-    selectedProductsList.innerHTML = '';
-    
-    const productsArr = Array.isArray(invoice.products) ? invoice.products : [];
-    
-    productsArr.forEach((p, index) => {
-        const isCustom = p.isCustom === true;
-        const name = p.name || '';
-        const qty = p.quantity || 1;
-        const priceSYP = p.priceSYP || 0;
-        const colorName = p.color?.name || '';
-        const colorCode = p.color?.code || '';
-        const customDescription = p.customDescription || '';
-        
-        const item = document.createElement('div');
-        item.className = 'selected-product';
-        
-        if (isCustom) {
-            // 🔧 للمنتجات المخصصة في التعديل
-            const tempProductId = `CUSTOM_${Date.now()}_${index}`;
-            item.innerHTML = `
-                <div class="selected-product-left" style="background:#fff3e0; padding:5px; border-radius:4px;">
-                    <span class="product-name" style="font-weight:bold; color:#d9534f;">${name} (تسعير يدوي)</span>
-                    <span class="selected-color" 
-                          title="أبيض - قيمة افتراضية" 
-                          style="background-color:#FFFFFF;display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle; border:1px solid #ccc;">
-                    </span>
-                    <p style="font-size:12px; margin-top:5px;">${customDescription || 'بدون وصف'}</p>
-                    <input type="hidden" class="is-custom-flag" value="true">
-                    <input type="hidden" class="temp-product-id" value="${tempProductId}">
-                    <input type="hidden" class="custom-description-text" value="${customDescription.replace(/"/g, '&quot;')}">
-                </div>
-                <div class="selected-product-right">
-                    <div class="field-group">
-                        <label style="font-size:10px;">الكمية</label>
-                        <input type="number" class="product-qty-input" value="${qty}" min="1" oninput="updateInvoiceTotals()">
-                    </div>
-                    <div class="field-group">
-                        <label style="font-size:10px;">السعر (ل.س)</label>
-                        <input type="number" class="product-price-input" value="${priceSYP}" min="0" oninput="updateInvoiceTotals()">
-                    </div>
-                </div>
-                <button type="button" class="remove-product" 
-                        onclick="this.closest('.selected-product').remove(); updateInvoiceTotals();">
-                    <i class="fa fa-times"></i>
-                </button>
-            `;
-            item.classList.add('custom-product-item');
-        } else {
-            // 🔧 🔧 🔧 التصحيح المهم: إضافة الحقول المخفية للون
-            item.innerHTML = `
+  // تعبئة المنتجات في القائمة
+  const selectedProductsList = document.getElementById("selectedProductsList");
+  selectedProductsList.innerHTML = "";
+
+  const productsArr = Array.isArray(invoice.products) ? invoice.products : [];
+
+  productsArr.forEach((p, index) => {
+    const isCustom = p.isCustom === true;
+    const name = p.name || "";
+    const qty = p.quantity || 1;
+    const priceSYP = p.priceSYP || 0;
+    const colorName = p.color?.name || "";
+    const colorCode = p.color?.code || "";
+    const customDescription = p.customDescription || "";
+
+    const item = document.createElement("div");
+    item.className = "selected-product";
+
+    if (isCustom) {
+      // Custom product in edit modal: no color, no "تسعير يدوي" label, editable description
+      const tempProductId = `CUSTOM_${Date.now()}_${index}`;
+      item.innerHTML = `
+          <div class="selected-product-left" style="background:#fff3e0; padding:5px; border-radius:4px;">
+            <span class="product-name" style="font-weight:bold; color:#d9534f;">${name}</span>
+            <textarea class="custom-description-input" placeholder="وصف المنتج المخصص..." style="width:100%; margin-top:6px; min-height:48px;">${
+              customDescription || ""
+            }</textarea>
+            <input type="hidden" class="is-custom-flag" value="true">
+            <input type="hidden" class="temp-product-id" value="${tempProductId}">
+            <input type="hidden" class="custom-description-text" value="${customDescription.replace(
+              /"/g,
+              "&quot;"
+            )}">
+          </div>
+          <div class="selected-product-right">
+            <div class="field-group">
+              <label style="font-size:10px;">الكمية</label>
+              <input type="number" class="product-qty-input" value="${qty}" min="1" oninput="updateInvoiceTotals()">
+            </div>
+            <div class="field-group">
+              <label style="font-size:10px;">السعر (ل.س)</label>
+              <input type="number" class="product-price-input" value="${priceSYP}" min="0" oninput="updateInvoiceTotals()">
+            </div>
+          </div>
+          <button type="button" class="remove-product" 
+              onclick="this.closest('.selected-product').remove(); updateInvoiceTotals();">
+            <i class="fa fa-times"></i>
+          </button>
+        `;
+      item.classList.add("custom-product-item");
+    } else {
+      // 🔧 🔧 🔧 التصحيح المهم: إضافة الحقول المخفية للون
+      item.innerHTML = `
                 <div class="selected-product-left">
                     <span class="product-name">${name}</span>
-                    ${colorCode ? `
+                    ${
+                      colorCode
+                        ? `
                         <span class="selected-color" 
                               title="${colorName}" 
                               style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle">
                         </span>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                 </div>
                 <div class="selected-product-right">
                     <span class="product-qty">x${qty}</span>
@@ -679,101 +826,102 @@ function editInvoice(id) {
                 <input type="hidden" class="product-color-name" value="${colorName}">
                 <input type="hidden" class="product-color-code" value="${colorCode}">
             `;
-        }
-        
-        selectedProductsList.appendChild(item);
-    });
+    }
+
+    selectedProductsList.appendChild(item);
+  });
 
   // تحديث الإجماليات
   const safeProducts = Array.isArray(invoice.products) ? invoice.products : [];
   const { totalSYP } = calculateTotals(safeProducts);
-  
 
-    // ✅ إصلاح: استخدام القيم الآمنة
-    const safeTotalSYP = totalSYP || 0;
+  // ✅ إصلاح: استخدام القيم الآمنة
+  const safeTotalSYP = totalSYP || 0;
 
-    document.getElementById("totalSYP").textContent = safeTotalSYP.toLocaleString();
+  document.getElementById("totalSYP").textContent =
+    safeTotalSYP.toLocaleString();
 
-    // تعبئة حالة الدفع والملاحظات إن وجدت
-    const paymentStatusEl = document.getElementById('paymentStatus');
-    const paymentAmountEl = document.getElementById('paymentAmountPaid');
-    if (paymentStatusEl && invoice.payment) {
-      paymentStatusEl.value = invoice.payment.status || 'unpaid';
-      if (invoice.payment.status === 'paid-partial') {
-        if (paymentAmountEl) {
-          paymentAmountEl.value = invoice.payment.paidSYP || 0;
-          paymentAmountEl.classList.remove('hidden');
-        }
-      } else if (invoice.payment.status === 'paid-full') {
-        if (paymentAmountEl) {
-          paymentAmountEl.value = invoice.payment.paidSYP || safeTotalSYP || 0;
-          paymentAmountEl.classList.add('hidden');
-        }
-      } else {
-        if (paymentAmountEl) paymentAmountEl.classList.add('hidden');
+  // تعبئة حالة الدفع والملاحظات إن وجدت
+  const paymentStatusEl = document.getElementById("paymentStatus");
+  const paymentAmountEl = document.getElementById("paymentAmountPaid");
+  if (paymentStatusEl && invoice.payment) {
+    paymentStatusEl.value = invoice.payment.status || "unpaid";
+    if (invoice.payment.status === "paid-partial") {
+      if (paymentAmountEl) {
+        paymentAmountEl.value = invoice.payment.paidSYP || 0;
+        paymentAmountEl.classList.remove("hidden");
       }
+    } else if (invoice.payment.status === "paid-full") {
+      if (paymentAmountEl) {
+        paymentAmountEl.value = invoice.payment.paidSYP || safeTotalSYP || 0;
+        paymentAmountEl.classList.add("hidden");
+      }
+    } else {
+      if (paymentAmountEl) paymentAmountEl.classList.add("hidden");
     }
+  }
 
-    const notesEl = document.getElementById('invoiceNotes');
-    if (notesEl) notesEl.value = invoice.notes || '';
+  const notesEl = document.getElementById("invoiceNotes");
+  if (notesEl) notesEl.value = invoice.notes || "";
 
-    // 💡 الجديد: تعبئة قائمة المتجر يدوياً (للتأكد من الاختيار الصحيح عند الفتح)
-    const storeSelectEl = document.getElementById("linkedStores");
-    if (storeSelectEl) {
-        // إذا كان هناك posId في الفاتورة، نقوم بتعيينه كقيمة للـ Select
-        storeSelectEl.value = invoice.posId ? String(invoice.posId) : ""; 
-    }
+  // 💡 الجديد: تعبئة قائمة المتجر يدوياً (للتأكد من الاختيار الصحيح عند الفتح)
+  const storeSelectEl = document.getElementById("linkedStores");
+  if (storeSelectEl) {
+    // إذا كان هناك posId في الفاتورة، نقوم بتعيينه كقيمة للـ Select
+    storeSelectEl.value = invoice.posId ? String(invoice.posId) : "";
+  }
 
-    // تخزين المعرف داخل الفورم
-    document.getElementById("invoiceForm").dataset.editingId = id;
+  // تخزين المعرف داخل الفورم
+  document.getElementById("invoiceForm").dataset.editingId = id;
 
   // إظهار زر الحذف لأننا في وضع التعديل
   const delBtn = document.getElementById("deleteInvoiceBtn");
-  if (delBtn) delBtn.classList.remove('hidden');
+  if (delBtn) delBtn.classList.remove("hidden");
 
-    // فتح المودال
-    openNewInvoiceModel(invoice.posId || null);
+  // فتح المودال
+  openNewInvoiceModel(invoice.posId || null);
 }
 
 // تحديث: استخدام حوار تأكيد مخصص بدلاً من confirm/alert الافتراضي
 function showDeleteConfirm() {
-  const form = document.getElementById('invoiceForm');
+  const form = document.getElementById("invoiceForm");
   const id = form && form.dataset.editingId;
   if (!id) {
-    console.warn('لم يتم تحديد فاتورة للحذف.');
+    console.warn("لم يتم تحديد فاتورة للحذف.");
     return;
   }
 
-  const overlay = document.getElementById('confirmOverlay');
-  const modal = document.getElementById('confirmModal');
-  const msg = document.getElementById('confirmModalMessage');
-  if (msg) msg.textContent = `هل أنت متأكد من حذف الفاتورة رقم ${id}؟ هذا الإجراء لا يمكن التراجع عنه.`;
+  const overlay = document.getElementById("confirmOverlay");
+  const modal = document.getElementById("confirmModal");
+  const msg = document.getElementById("confirmModalMessage");
+  if (msg)
+    msg.textContent = `هل أنت متأكد من حذف الفاتورة رقم ${id}؟ هذا الإجراء لا يمكن التراجع عنه.`;
 
   if (overlay) {
-    overlay.classList.remove('hidden');
-    overlay.classList.add('active');
+    overlay.classList.remove("hidden");
+    overlay.classList.add("active");
   }
   if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('active');
+    modal.classList.remove("hidden");
+    modal.classList.add("active");
   }
 }
 
 function cancelDelete() {
-  const overlay = document.getElementById('confirmOverlay');
-  const modal = document.getElementById('confirmModal');
+  const overlay = document.getElementById("confirmOverlay");
+  const modal = document.getElementById("confirmModal");
   if (overlay) {
-    overlay.classList.remove('active');
-    overlay.classList.add('hidden');
+    overlay.classList.remove("active");
+    overlay.classList.add("hidden");
   }
   if (modal) {
-    modal.classList.remove('active');
-    modal.classList.add('hidden');
+    modal.classList.remove("active");
+    modal.classList.add("hidden");
   }
 }
 
 function confirmDelete() {
-  const form = document.getElementById('invoiceForm');
+  const form = document.getElementById("invoiceForm");
   const id = form && form.dataset.editingId;
   if (!id) {
     cancelDelete();
@@ -781,9 +929,9 @@ function confirmDelete() {
   }
 
   try {
-    const invoices = JSON.parse(localStorage.getItem('invoices')) || [];
-    const filtered = invoices.filter(inv => inv.id !== Number(id));
-    localStorage.setItem('invoices', JSON.stringify(filtered));
+    const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+    const filtered = invoices.filter((inv) => inv.id !== Number(id));
+    localStorage.setItem("invoices", JSON.stringify(filtered));
 
     // اغلاق نافذة التأكيد + المودال الرئيسي واعادة عرض القائمة
     cancelDelete();
@@ -791,7 +939,7 @@ function confirmDelete() {
     renderInvoices();
     // لا نستخدم alert هنا — التصميم يعتمد على حوار أنيق
   } catch (e) {
-    console.error('خطأ أثناء حذف الفاتورة:', e);
+    console.error("خطأ أثناء حذف الفاتورة:", e);
     cancelDelete();
   }
 }
@@ -800,158 +948,241 @@ function confirmDelete() {
 // 🟨 دالة الحفظ (إضافة أو تعديل) - تم تحديثها لـ: (1) حل خطأ toLocaleString، (2) حساب الدولار بشكل صحيح.
 function saveInvoice() {
   try {
-  const form = document.getElementById("invoiceForm");
-  const buyerName = document.getElementById("buyerName").value;
-  const buyerPhone = document.getElementById("buyerPhone").value;
-  const buyerProvince = document.getElementById("buyerProvince").value;
-  const deliveryType = document.getElementById("deliveryType").value;
+    const form = document.getElementById("invoiceForm");
+    const buyerName = document.getElementById("buyerName").value;
+    const buyerPhone = document.getElementById("buyerPhone").value;
+    const buyerProvince = document.getElementById("buyerProvince").value;
+    const deliveryType = document.getElementById("deliveryType").value;
 
-  // 💡 التعديل #1: قراءة ID المتجر المختار من الـ Select
-    const linkedStoresSelect = document.getElementById('linkedStores');
+    // 💡 التعديل #1: قراءة ID المتجر المختار من الـ Select
+    const linkedStoresSelect = document.getElementById("linkedStores");
     let posId = null; // القيمة الافتراضية تكون null (بدون متجر)
     // إذا تم اختيار قيمة (وهي store ID)، نحولها لرقم
     if (linkedStoresSelect && linkedStoresSelect.value !== "") {
-        posId = parseInt(linkedStoresSelect.value);
+      posId = parseInt(linkedStoresSelect.value);
     }
-  
-  // معلومات الشحن: شركة الشحن + معلومات الشحن
-  let shippingCompany = '';
-  let shippingInfo = '';
-  let shippingDate = '';
-  if (deliveryType === "shipping") {
-    shippingCompany = document.getElementById("shippingCompany").value;
-    shippingInfo = document.getElementById("shippingInfo").value;
-  } else if (deliveryType === "local") {
-    shippingInfo = document.getElementById("localShippingInfo").value;
-  }
-  // قراءة تاريخ التسليم إن وُجد
-  const deliveryDateEl = document.getElementById("deliveryDate");
-  if (deliveryDateEl) shippingDate = deliveryDateEl.value;
 
-  // جلب المنتجات المختارة
-  const selectedProductsList = document.getElementById("selectedProductsList");
-  const selectedProducts = Array.from(selectedProductsList.children).map(item => {
-    // 🛑 التعديل: تحديد ما إذا كان المنتج قياسياً أم مخصصاً 🛑
-        const isCustom = item.querySelector(".is-custom-flag")?.value === 'true';
-        
+    // معلومات الشحن: شركة الشحن + معلومات الشحن
+    let shippingCompany = "";
+    let shippingInfo = "";
+    let shippingDate = "";
+    if (deliveryType === "shipping") {
+      shippingCompany = document.getElementById("shippingCompany").value;
+      shippingInfo = document.getElementById("shippingInfo").value;
+    } else if (deliveryType === "local") {
+      shippingInfo = document.getElementById("localShippingInfo").value;
+    }
+    // قراءة تاريخ التسليم إن وُجد
+    const deliveryDateEl = document.getElementById("deliveryDate");
+    if (deliveryDateEl) shippingDate = deliveryDateEl.value;
+
+    // جلب المنتجات المختارة
+    const selectedProductsList = document.getElementById(
+      "selectedProductsList"
+    );
+    const selectedProducts = Array.from(selectedProductsList.children).map(
+      (item) => {
+        // 🛑 التعديل: تحديد ما إذا كان المنتج قياسياً أم مخصصاً 🛑
+        const isCustom =
+          item.querySelector(".is-custom-flag")?.value === "true";
+
         // قراءة الاسم المشترك بين الحالتين
-        const name = item.querySelector(".product-name")?.textContent || 'منتج غير معروف';
+        const name =
+          item.querySelector(".product-name")?.textContent || "منتج غير معروف";
 
         if (isCustom) {
-            // --- قراءة المنتج المخصص (Active Inputs) ---
-            const qtyInput = item.querySelector(".product-qty-input");
-            const priceInput = item.querySelector(".product-price-input");
+          // --- قراءة المنتج المخصص (Active Inputs) ---
+          const qtyInput = item.querySelector(".product-qty-input");
+          const priceInput = item.querySelector(".product-price-input");
 
-            const quantity = parseInt(qtyInput?.value) || 1;
-            const priceSYP = parseFloat(priceInput?.value) || 0;
+          const quantity = parseInt(qtyInput?.value) || 1;
+          const priceSYP = parseFloat(priceInput?.value) || 0;
 
-            // اللون الافتراضي للمنتج المخصص
-            return {
-                name: name,
-                quantity: quantity,
-                priceSYP: priceSYP,
-                isCustom: true, // ضروري للحفظ
-                color: { name: 'مخصص', code: '#FFFFFF' }
-            };
-            
+          // description may be in textarea (editable) or hidden field
+          const customDesc =
+            item.querySelector(".custom-description-input")?.value ||
+            item.querySelector(".custom-description-text")?.value ||
+            "";
+          return {
+            name: name,
+            quantity: quantity,
+            priceSYP: priceSYP,
+            isCustom: true, // ضروري للحفظ
+            color: { name: "مخصص", code: "#FFFFFF" },
+            customDescription: customDesc,
+          };
         } else {
-            // --- قراءة المنتج القياسي (Static Hidden Inputs) ---
-            
-            const qtyEl = item.querySelector(".product-qty-static");
-            const priceEl = item.querySelector(".product-price-static");
-            const colorNameEl = item.querySelector(".product-color-name");
-            const colorCodeEl = item.querySelector(".product-color-code");
-            
-            const quantity = parseInt(qtyEl?.value) || 1;
-            const priceSYP = parseFloat(priceEl?.value) || 0;
+          // --- قراءة المنتج القياسي (Static Hidden Inputs) ---
 
-            const colorName = colorNameEl?.value || '';
-            const colorCode = colorCodeEl?.value || '';
+          const qtyEl = item.querySelector(".product-qty-static");
+          const priceEl = item.querySelector(".product-price-static");
+          const colorNameEl = item.querySelector(".product-color-name");
+          const colorCodeEl = item.querySelector(".product-color-code");
 
-            // إذا لم يكن هناك لون محدد، نستخدم القيمة الافتراضية
-            if (!colorName || colorName === 'undefined') {
-                colorName = 'بدون لون';
-            }
-            if (!colorCode || colorCode === 'undefined' || colorCode === 'transparent') {
-                colorCode = '#CCCCCC'; // رمادي فاتح كقيمة افتراضية
-            }
-            
-            // 🔧 تسجيل تحذير إذا كان اللون مفقوداً
-            if (!colorNameEl || !colorCodeEl) {
-                console.warn('⚠️ منتج بدون حقول لون مخفية:', {
-                    name: name,
-                    quantity: quantity,
-                    priceSYP: priceSYP,
-                    element: item
-                });
-            }
+          const quantity = parseInt(qtyEl?.value) || 1;
+          const priceSYP = parseFloat(priceEl?.value) || 0;
 
-            return {
-                name: name,
-                quantity: quantity,
-                priceSYP: priceSYP,
-                isCustom: false, // ضروري للحفظ
-                color: { name: colorName, code: colorCode }
-            };
+          const colorName = colorNameEl?.value || "";
+          const colorCode = colorCodeEl?.value || "";
+
+          // إذا لم يكن هناك لون محدد، نستخدم القيمة الافتراضية
+          if (!colorName || colorName === "undefined") {
+            colorName = "بدون لون";
+          }
+          if (
+            !colorCode ||
+            colorCode === "undefined" ||
+            colorCode === "transparent"
+          ) {
+            colorCode = "#CCCCCC"; // رمادي فاتح كقيمة افتراضية
+          }
+
+          // 🔧 تسجيل تحذير إذا كان اللون مفقوداً
+          if (!colorNameEl || !colorCodeEl) {
+            console.warn("⚠️ منتج بدون حقول لون مخفية:", {
+              name: name,
+              quantity: quantity,
+              priceSYP: priceSYP,
+              element: item,
+            });
+          }
+
+          return {
+            name: name,
+            quantity: quantity,
+            priceSYP: priceSYP,
+            isCustom: false, // ضروري للحفظ
+            color: { name: colorName, code: colorCode },
+          };
         }
-  });
+      }
+    );
 
-  // التحقق من صحة البيانات
-  if (!buyerName || !buyerPhone || !buyerProvince || !deliveryType) {
-    showToast("⚠️ يرجى ملء جميع الحقول المطلوبة", 3000, 'orange');
-    return;
-  }
-
-  if (deliveryType === "shipping" && (!shippingCompany || !shippingInfo)) {
-    showToast("⚠️ يرجى ملء شركة الشحن ومعلومات الشحن", 3000, 'orange');
-    return;
-  }
-
-  if (deliveryType === "local" && !shippingInfo) {
-    showToast("⚠️ يرجى إدخال الموقع", 3000, 'orange');
-    return;
-  }
-
-  if (selectedProducts.length === 0) {
-    showToast("⚠️ يرجى إضافة منتج واحد على الأقل", 3000, 'orange');
-    return;
-  }
-
-  // 🛑 التعديل: التحقق من أن المدير قام بتسعير المنتجات المخصصة
-  const hasZeroPriceCustomItem = selectedProducts.some(p => p.isCustom && p.priceSYP === 0);
-  if (hasZeroPriceCustomItem) {
-      showToast("⚠️ يرجى تسعير جميع المنتجات المخصصة (قيمتها 0) قبل الحفظ.", 4000, 'red');
+    // التحقق من صحة البيانات
+    if (!buyerName || !buyerPhone || !buyerProvince || !deliveryType) {
+      showToast("⚠️ يرجى ملء جميع الحقول المطلوبة", 3000, "orange");
       return;
-  }
+    }
 
-  const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+    if (deliveryType === "shipping" && (!shippingCompany || !shippingInfo)) {
+      showToast("⚠️ يرجى ملء شركة الشحن ومعلومات الشحن", 3000, "orange");
+      return;
+    }
 
-  // حساب الإجمالي من المنتجات المختارة
-  const { totalSYP} = calculateTotals(selectedProducts);
+    if (deliveryType === "local" && !shippingInfo) {
+      showToast("⚠️ يرجى إدخال الموقع", 3000, "orange");
+      return;
+    }
 
-  // استخدام القيم الآمنة (مع أنها أصبحت آمنة بالفعل في calculateTotals)
+    if (selectedProducts.length === 0) {
+      showToast("⚠️ يرجى إضافة منتج واحد على الأقل", 3000, "orange");
+      return;
+    }
+
+    // 🛑 التعديل: التحقق من أن المدير قام بتسعير المنتجات المخصصة
+    const hasZeroPriceCustomItem = selectedProducts.some(
+      (p) => p.isCustom && p.priceSYP === 0
+    );
+    if (hasZeroPriceCustomItem) {
+      showToast(
+        "⚠️ يرجى تسعير جميع المنتجات المخصصة (قيمتها 0) قبل الحفظ.",
+        4000,
+        "red"
+      );
+      return;
+    }
+
+    const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+
+    // حساب الإجمالي من المنتجات المختارة
+    const { totalSYP } = calculateTotals(selectedProducts);
+
+    // استخدام القيم الآمنة (مع أنها أصبحت آمنة بالفعل في calculateTotals)
     const safeTotalSYP = totalSYP || 0;
 
-  if (form.dataset.editingId) {
-    // تعديل فاتورة
-    const id = parseInt(form.dataset.editingId);
-    const index = invoices.findIndex(inv => inv.id === id);
-    if (index !== -1) {
-      // قراءة حالة الدفع والملاحظات
-      const paymentStatus = document.getElementById('paymentStatus') ? document.getElementById('paymentStatus').value : 'unpaid';
-      const paymentAmountVal = document.getElementById('paymentAmountPaid') ? parseInt(document.getElementById('paymentAmountPaid').value || '0') : 0;
-      let paidSYP = 0;
-      if (paymentStatus === 'paid-full') paidSYP = safeTotalSYP;
-      else if (paymentStatus === 'paid-partial') paidSYP = isNaN(paymentAmountVal) ? 0 : paymentAmountVal;
-      const paymentObj = {
-        status: paymentStatus,
-        paidSYP: paidSYP,
-        remainingSYP: Math.max(0, safeTotalSYP - paidSYP)
-      };
-      const notes = (document.getElementById('invoiceNotes') ? document.getElementById('invoiceNotes').value.trim() : '') || '';
+    // قراءة إعدادات التعديل (إن وُجدت) وتطبيقها على الإجمالي
+    const adjValGlobal = document.getElementById("adjustmentValue")?.value;
+    const adjTypeGlobal = document.getElementById("adjustmentType")?.value;
+    const adjustedGlobal = applyAdjustment(
+      safeTotalSYP,
+      adjTypeGlobal,
+      adjValGlobal
+    );
 
-      invoices[index] = {
-        ...invoices[index],
+    if (form.dataset.editingId) {
+      // تعديل فاتورة
+      const id = parseInt(form.dataset.editingId);
+      const index = invoices.findIndex((inv) => inv.id === id);
+      if (index !== -1) {
+        // قراءة حالة الدفع والملاحظات
+        const paymentStatus = document.getElementById("paymentStatus")
+          ? document.getElementById("paymentStatus").value
+          : "unpaid";
+        const paymentAmountVal = document.getElementById("paymentAmountPaid")
+          ? parseInt(document.getElementById("paymentAmountPaid").value || "0")
+          : 0;
+        let paidSYP = 0;
+        if (paymentStatus === "paid-full") paidSYP = adjustedGlobal;
+        else if (paymentStatus === "paid-partial")
+          paidSYP = isNaN(paymentAmountVal) ? 0 : paymentAmountVal;
+        const paymentObj = {
+          status: paymentStatus,
+          paidSYP: paidSYP,
+          remainingSYP: Math.max(0, adjustedGlobal - paidSYP),
+        };
+        const notes =
+          (document.getElementById("invoiceNotes")
+            ? document.getElementById("invoiceNotes").value.trim()
+            : "") || "";
+
+        invoices[index] = {
+          ...invoices[index],
+          customerName: buyerName,
+          phone: buyerPhone,
+          city: buyerProvince,
+          shipping: deliveryType === "shipping",
+          shippingCompany,
+          shippingInfo,
+          shippingDate,
+          products: selectedProducts,
+          totalOriginalSYP: safeTotalSYP,
+          totalSYP: adjustedGlobal,
+          adjustment:
+            adjValGlobal && adjTypeGlobal
+              ? { type: adjTypeGlobal, value: parseFloat(adjValGlobal) }
+              : null,
+          payment: paymentObj,
+          notes,
+          posId: posId,
+          // لا نغيّر الطابع الزمني الأصلي عند التعديل إن وُجد، وإلا ندرجه
+          timestamp: invoices[index].timestamp || Date.now(),
+        };
+      }
+    } else {
+      // إضافة فاتورة جديدة
+      // قراءة حالة الدفع والملاحظات
+      const paymentStatusNew = document.getElementById("paymentStatus")
+        ? document.getElementById("paymentStatus").value
+        : "unpaid";
+      const paymentAmountValNew = document.getElementById("paymentAmountPaid")
+        ? parseInt(document.getElementById("paymentAmountPaid").value || "0")
+        : 0;
+      let paidSYPNew = 0;
+      if (paymentStatusNew === "paid-full") paidSYPNew = adjustedGlobal;
+      else if (paymentStatusNew === "paid-partial")
+        paidSYPNew = isNaN(paymentAmountValNew) ? 0 : paymentAmountValNew;
+      const paymentObjNew = {
+        status: paymentStatusNew,
+        paidSYP: paidSYPNew,
+        remainingSYP: Math.max(0, adjustedGlobal - paidSYPNew),
+      };
+      const notesNew =
+        (document.getElementById("invoiceNotes")
+          ? document.getElementById("invoiceNotes").value.trim()
+          : "") || "";
+      const newInvoice = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString("ar-SY"),
         customerName: buyerName,
         phone: buyerPhone,
         city: buyerProvince,
@@ -960,53 +1191,28 @@ function saveInvoice() {
         shippingInfo,
         shippingDate,
         products: selectedProducts,
-        totalSYP:safeTotalSYP,
-        payment: paymentObj,
-        notes,
-        posId: posId
+        totalOriginalSYP: safeTotalSYP,
+        totalSYP: adjustedGlobal,
+        adjustment:
+          adjValGlobal && adjTypeGlobal
+            ? { type: adjTypeGlobal, value: parseFloat(adjValGlobal) }
+            : null,
+        payment: paymentObjNew,
+        notes: notesNew,
+        posId: posId,
+        // canonical timestamp for reliable sorting/filtering
+        timestamp: Date.now(),
       };
+
+      invoices.push(newInvoice);
     }
-  } else {
-    // إضافة فاتورة جديدة
-    // قراءة حالة الدفع والملاحظات
-    const paymentStatusNew = document.getElementById('paymentStatus') ? document.getElementById('paymentStatus').value : 'unpaid';
-    const paymentAmountValNew = document.getElementById('paymentAmountPaid') ? parseInt(document.getElementById('paymentAmountPaid').value || '0') : 0;
-    let paidSYPNew = 0;
-    if (paymentStatusNew === 'paid-full') paidSYPNew = safeTotalSYP;
-    else if (paymentStatusNew === 'paid-partial') paidSYPNew = isNaN(paymentAmountValNew) ? 0 : paymentAmountValNew;
-    const paymentObjNew = {
-      status: paymentStatusNew,
-      paidSYP: paidSYPNew,
-      remainingSYP: Math.max(0, safeTotalSYP - paidSYPNew)
-    };
-    const notesNew = (document.getElementById('invoiceNotes') ? document.getElementById('invoiceNotes').value.trim() : '') || '';
 
-    const newInvoice = {
-      id: Date.now(),
-      date: new Date().toLocaleDateString("ar-SY"),
-      customerName: buyerName,
-      phone: buyerPhone,
-      city: buyerProvince,
-      shipping: deliveryType === "shipping",
-      shippingCompany,
-      shippingInfo,
-      shippingDate,
-      products: selectedProducts,
-      totalSYP:safeTotalSYP,
-      payment: paymentObjNew,
-      notes: notesNew,
-      posId: posId
-    };
+    delete form.dataset.editingId;
 
-  invoices.push(newInvoice);
-  }
-
-  delete form.dataset.editingId;
-
-  localStorage.setItem("invoices", JSON.stringify(invoices));
-  closeModal();
-  form.reset();
-  renderInvoices();
+    localStorage.setItem("invoices", JSON.stringify(invoices));
+    closeModal();
+    form.reset();
+    renderInvoices();
   } catch (e) {
     console.error(e);
     alert("حدث خطأ أثناء الحفظ: " + (e && e.message ? e.message : e));
@@ -1014,7 +1220,17 @@ function saveInvoice() {
 }
 
 // Ensure we call renderInvoices without passing the DOMContentLoaded event as the filter
-window.addEventListener("DOMContentLoaded", function() { renderInvoices(); });
+window.addEventListener("DOMContentLoaded", function () {
+  // Ensure older invoices get a canonical numeric timestamp for reliable date handling
+  if (typeof migrateInvoicesTimestamps === "function") {
+    try {
+      migrateInvoicesTimestamps();
+    } catch (e) {
+      console.warn("migrateInvoicesTimestamps failed:", e);
+    }
+  }
+  renderInvoices();
+});
 
 function openAddProductSheet() {
   document.getElementById("addProductSheet").classList.add("active");
@@ -1024,11 +1240,11 @@ function openAddProductSheet() {
     sheetOverlay.classList.remove("hidden");
     sheetOverlay.classList.add("active");
   }
-  
+
   // إعادة تعيين حقل البحث
   const productInput = document.getElementById("productInput");
   productInput.value = "";
-  
+
   // عرض كل المنتجات عند فتح الشيت
   renderProductsList();
 }
@@ -1041,72 +1257,113 @@ function closeAddProductSheet() {
     sheetOverlay.classList.add("hidden");
   }
   document.getElementById("productDropdown").classList.add("hidden");
+
+  // Defensive: ensure quantity input is visible again and custom UI removed
+  const prodQtyEl = document.getElementById("productQuantity");
+  if (prodQtyEl) {
+    prodQtyEl.classList.remove("hidden");
+    if (prodQtyEl.parentElement)
+      prodQtyEl.parentElement.classList.remove("hidden");
+  }
+  const customUI = document.querySelector(".custom-product-inputs");
+  if (customUI) customUI.remove();
 }
 
 // عرض قائمة المنتجات
-function renderProductsList(searchQuery = '') {
+function renderProductsList(searchQuery = "") {
   const dropdown = document.getElementById("productDropdown");
   dropdown.classList.remove("hidden");
-  
+
+  const useStorePrices = document.getElementById("useStorePrices")?.checked;
+
   // فلترة المنتجات حسب البحث
-  const filteredProducts = finalBaseProducts.filter(product => {
+  const filteredProducts = finalBaseProducts.filter((product) => {
     const searchLower = searchQuery.toLowerCase();
     return (
       product.name.toLowerCase().includes(searchLower) ||
-      (product.shortDisc && product.shortDisc.toLowerCase().includes(searchLower)) ||
+      (product.shortDisc &&
+        product.shortDisc.toLowerCase().includes(searchLower)) ||
       product.price.toString().includes(searchLower)
     );
   });
 
   // إنشاء HTML للمنتجات
-  const productsHTML = filteredProducts.map(product => {
-    // 🔧 التصحيح: التعامل مع ID كنص
-    let onclickCode;
-    
-    if (typeof product.id === 'string' && product.id.includes("CUSTOM")) {
-      // للمنتج المخصص: استخدام الاسم مع علامات اقتباس
-      onclickCode = `selectProduct('${product.id}')`;
-    } else {
-      // للمنتج القياسي: تمرير الرقم
-      onclickCode = `selectProduct(${product.id})`;
-    }
-    
-    // 🔧 إضافة عرض خاص للمنتج المخصص
-    const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
-    
-    return `
+  const productsHTML = filteredProducts
+    .map((product) => {
+      // 🔧 التصحيح: التعامل مع ID كنص
+      let onclickCode;
+
+      if (typeof product.id === "string" && product.id.includes("CUSTOM")) {
+        // للمنتج المخصص: استخدام الاسم مع علامات اقتباس
+        onclickCode = `selectProduct('${product.id}')`;
+      } else {
+        // للمنتج القياسي: تمرير الرقم
+        onclickCode = `selectProduct(${product.id})`;
+      }
+
+      // 🔧 إضافة عرض خاص للمنتج المخصص
+      const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
+
+      const priceToShow =
+        useStorePrices && typeof product.storePrice === "number"
+          ? product.storePrice
+          : product.price;
+
+      return `
     <div class="dropdown-item" onclick="${onclickCode}">
-      <img src="${product.images[0] || 'assets/imgs/placeholder.jpg'}" alt="${product.name}">
+      <img src="${product.images[0] || "assets/imgs/placeholder.jpg"}" alt="${
+        product.name
+      }">
       <div class="product-info">
         <span class="product-name">${product.name}</span>
-        <span class="product-price">
-          ${isCustom ? 'يحدد لاحقاً' : product.price.toLocaleString() + ' ل.س'}
-        </span>
-        ${product.shortDisc ? `<span class="product-desc">${product.shortDisc}</span>` : ''}
+          <span class="product-price">
+            ${isCustom ? "يحدد لاحقاً" : priceToShow.toLocaleString() + " ل.س"}
+          </span>
+        ${
+          product.shortDisc
+            ? `<span class="product-desc">${product.shortDisc}</span>`
+            : ""
+        }
       </div>
-      ${isCustom ? `
+      ${
+        isCustom
+          ? `
         <div class="custom-product-badge">
           🛠️ مخصص
         </div>
-      ` : `
+      `
+          : `
         <div class="color-dots">
-          ${product.colors?.slice(0, 5).map(color => `
+          ${product.colors
+            ?.slice(0, 5)
+            .map(
+              (color) => `
             <span class="color-dot" 
                   style="background-color: ${color.code}" 
                   title="${color.name}">
             </span>
-          `).join('')}
-          ${product.colors?.length > 5 ? `
+          `
+            )
+            .join("")}
+          ${
+            product.colors?.length > 5
+              ? `
             <span class="color-dot more-colors" title="المزيد من الألوان">
               +${product.colors.length - 5}
             </span>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
-      `}
+      `
+      }
     </div>
-  `}).join('');
+  `;
+    })
+    .join("");
 
-  dropdown.innerHTML = productsHTML || '<div class="no-results">لا توجد نتائج</div>';
+  dropdown.innerHTML =
+    productsHTML || '<div class="no-results">لا توجد نتائج</div>';
 }
 
 // معالجة البحث في المنتجات
@@ -1117,18 +1374,18 @@ function handleProductSearch(event) {
 
 // اختيار منتج
 function selectProduct(productId) {
-// 🔧 إصلاح: التعامل مع ID كنص أو رقم
-  const product = finalBaseProducts.find(p => 
-    p.id === productId || p.id.toString() === productId.toString()
-  ); 
-  
+  // 🔧 إصلاح: التعامل مع ID كنص أو رقم
+  const product = finalBaseProducts.find(
+    (p) => p.id === productId || p.id.toString() === productId.toString()
+  );
+
   if (!product) return;
 
   // إخفاء قائمة المنتجات وإظهار اختيار اللون
   document.getElementById("productDropdown").classList.add("hidden");
   document.getElementById("productInput").value = product.name;
 
-   // 🔧 تحسين: تحديد ما إذا كان منتج مخصص
+  // 🔧 تحسين: تحديد ما إذا كان منتج مخصص
   const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
 
   // 🔧 NEW: إذا كان منتج مخصص، لا نعرض الألوان
@@ -1136,7 +1393,7 @@ function selectProduct(productId) {
     // إزالة قائمة اختيار الألوان إن وجدت
     const colorSelector = document.querySelector(".color-selector");
     if (colorSelector) colorSelector.remove();
-    
+
     // إضافة واجهة خاصة للمنتج المخصص
     const customProductUI = document.createElement("div");
     customProductUI.className = "custom-product-inputs";
@@ -1161,22 +1418,26 @@ function selectProduct(productId) {
     `;
 
     const bottomSheetContent = document.querySelector(".bottom-sheet-content");
-    const existingCustomUI = bottomSheetContent.querySelector(".custom-product-inputs");
-    const existingColorSelector = bottomSheetContent.querySelector(".color-selector");
-    
+    const existingCustomUI = bottomSheetContent.querySelector(
+      ".custom-product-inputs"
+    );
+    const existingColorSelector =
+      bottomSheetContent.querySelector(".color-selector");
+
     if (existingCustomUI) existingCustomUI.remove();
     if (existingColorSelector) existingColorSelector.remove();
-    
+
     // 🔧 التصحيح: إدراج في المكان الصحيح
-    const productQuantityContainer = document.getElementById("productQuantity").parentElement;
+    const productQuantityContainer =
+      document.getElementById("productQuantity").parentElement;
     productQuantityContainer.insertBefore(
       customProductUI,
       document.getElementById("productQuantity")
     );
-    
+
     // إخفاء حقل الكمية القياسي للمنتج المخصص
     document.getElementById("productQuantity").classList.add("hidden");
-    
+
     return; // نخرج لأن المنتج المخصص لا يحتاج لاختيار لون
   }
 
@@ -1186,13 +1447,17 @@ function selectProduct(productId) {
   colorSelector.innerHTML = `
     <h4>اختر اللون المناسب:</h4>
     <div class="color-grid">
-      ${product.colors.map(color => `
+      ${product.colors
+        .map(
+          (color) => `
         <div class="color-option" 
              onclick="selectColor(${productId}, '${color.name}', '${color.code}')"
              style="background-color: ${color.code}"
              title="${color.name}">
         </div>
-      `).join('')}
+      `
+        )
+        .join("")}
     </div>
   `;
 
@@ -1201,38 +1466,44 @@ function selectProduct(productId) {
   if (existingSelector) {
     existingSelector.remove();
   }
-  document.getElementById("productQuantity").parentElement.insertBefore(
-    colorSelector,
-    document.getElementById("productQuantity")
-  );
+  document
+    .getElementById("productQuantity")
+    .parentElement.insertBefore(
+      colorSelector,
+      document.getElementById("productQuantity")
+    );
 }
 
 // اختيار اللون
 function selectColor(productId, colorName, colorCode) {
-  const product = finalBaseProducts.find(p => p.id === productId);
+  const product = finalBaseProducts.find((p) => p.id === productId);
   if (!product) return;
 
   // تخزين اللون المحدد
-  document.getElementById("productInput").dataset.selectedColor = JSON.stringify({
-    name: colorName,
-    code: colorCode
-  });
+  document.getElementById("productInput").dataset.selectedColor =
+    JSON.stringify({
+      name: colorName,
+      code: colorCode,
+    });
 
   // تحديث المظهر المرئي
   const colorOptions = document.querySelectorAll(".color-option");
-  colorOptions.forEach(opt => {
+  colorOptions.forEach((opt) => {
     opt.classList.remove("selected");
-    opt.style.borderColor = '';
+    opt.style.borderColor = "";
   });
 
   // نحاول أن نجد العنصر المطابق ثم نضع له ستايل بوردر مطابق للون المختار
-  const selectedOption = Array.from(colorOptions)
-    .find(opt => {
-      // القيم قد تكون بصيغ مختلفة (rgb/hex) لذلك نطابق الجزء الأخير من الكود إن أمكن
-      const bg = (opt.style.backgroundColor || '').toLowerCase();
-      const cc = colorCode.toLowerCase();
-      return bg === cc || bg.includes(cc.replace('#', '')) || cc.includes(bg.replace(/\s/g, ''));
-    });
+  const selectedOption = Array.from(colorOptions).find((opt) => {
+    // القيم قد تكون بصيغ مختلفة (rgb/hex) لذلك نطابق الجزء الأخير من الكود إن أمكن
+    const bg = (opt.style.backgroundColor || "").toLowerCase();
+    const cc = colorCode.toLowerCase();
+    return (
+      bg === cc ||
+      bg.includes(cc.replace("#", "")) ||
+      cc.includes(bg.replace(/\s/g, ""))
+    );
+  });
   if (selectedOption) {
     selectedOption.classList.add("selected");
     // ضبط لون البوردر ليطابق اللون المختار (يوضح للمستخدم الاختيار)
@@ -1248,13 +1519,13 @@ function selectColor(productId, colorName, colorCode) {
 function confirmAddProduct() {
   const productInput = document.getElementById("productInput");
   const productName = productInput.value;
-  
+
   if (!productName) {
-    showToast("⚠️ يرجى اختيار منتج", 3000, 'orange');
+    showToast("⚠️ يرجى اختيار منتج", 3000, "orange");
     return;
   }
 
-  const product = finalBaseProducts.find(p => p.name === productName);
+  const product = finalBaseProducts.find((p) => p.name === productName);
   if (!product) {
     alert("⚠️ المنتج غير موجود");
     return;
@@ -1267,23 +1538,25 @@ function confirmAddProduct() {
     const descriptionInput = document.getElementById("customDescriptionInput");
     const customQtyInput = document.getElementById("customProductQty");
     const customPriceInput = document.getElementById("customProductPrice");
-    
+
     if (!descriptionInput || !customQtyInput || !customPriceInput) {
-      showToast("⚠️ يرجى إدخال تفاصيل المنتج المخصص", 3000, 'orange');
+      showToast("⚠️ يرجى إدخال تفاصيل المنتج المخصص", 3000, "orange");
       return;
     }
-    
+
     const customDescription = descriptionInput.value.trim();
     const quantity = parseInt(customQtyInput.value) || 1;
     const priceSYP = parseFloat(customPriceInput.value) || 0;
-    
+
     if (!customDescription) {
-      showToast("⚠️ يرجى إدخال وصف المنتج المخصص", 3000, 'orange');
+      showToast("⚠️ يرجى إدخال وصف المنتج المخصص", 3000, "orange");
       return;
     }
-    
+
     // إضافة المنتج المخصص لقائمة المنتجات المحددة
-    const selectedProductsList = document.getElementById("selectedProductsList");
+    const selectedProductsList = document.getElementById(
+      "selectedProductsList"
+    );
     const productElement = document.createElement("div");
     productElement.className = "selected-product custom-product-item";
     productElement.innerHTML = `
@@ -1311,32 +1584,46 @@ function confirmAddProduct() {
         <i class="fa fa-times"></i>
       </button>
       <input type="hidden" class="is-custom-flag" value="true">
-      <input type="hidden" class="custom-description-text" value="${customDescription.replace(/"/g, '&quot;')}">
+      <input type="hidden" class="custom-description-text" value="${customDescription.replace(
+        /"/g,
+        "&quot;"
+      )}">
     `;
     selectedProductsList.appendChild(productElement);
-    
   } else {
     // المنتج القياسي (الكود الحالي مع تعديلات طفيفة)
     const selectedColorData = productInput.dataset.selectedColor;
-    const quantity = parseInt(document.getElementById("productQuantity").value) || 1;
-    
+    const quantity =
+      parseInt(document.getElementById("productQuantity").value) || 1;
+
     if (!selectedColorData) {
-      showToast("⚠️ يرجى اختيار لون للمنتج", 3000, 'orange');
+      showToast("⚠️ يرجى اختيار لون للمنتج", 3000, "orange");
       return;
     }
 
     const selectedColor = JSON.parse(selectedColorData);
-    
+
+    // Determine which price to use (store price when checkbox checked)
+    const useStorePrices = document.getElementById("useStorePrices")?.checked;
+    const priceToUse =
+      useStorePrices && typeof product.storePrice === "number"
+        ? product.storePrice
+        : product.price;
+
     // إضافة المنتج للقائمة المنتجات المحددة
-    const selectedProductsList = document.getElementById("selectedProductsList");
+    const selectedProductsList = document.getElementById(
+      "selectedProductsList"
+    );
     const productElement = document.createElement("div");
     productElement.className = "selected-product";
     productElement.innerHTML = `
       <div class="product-info">
         <span class="product-name">${product.name}</span>
         <span class="product-qty">x${quantity}</span>
-        <span class="product-price">${product.price.toLocaleString()} ل.س</span>
-        <div class="selected-color" style="background-color: ${selectedColor.code}" 
+        <span class="product-price">${priceToUse.toLocaleString()} ل.س</span>
+        <div class="selected-color" style="background-color: ${
+          selectedColor.code
+        }" 
              title="${selectedColor.name}"></div>
       </div>
       <button type="button" class="remove-product" 
@@ -1345,9 +1632,13 @@ function confirmAddProduct() {
       </button>
       <input type="hidden" class="is-custom-flag" value="false">
       <input type="hidden" class="product-qty-static" value="${quantity}">
-      <input type="hidden" class="product-price-static" value="${product.price}">
-      <input type="hidden" class="product-color-name" value="${selectedColor.name}">
-      <input type="hidden" class="product-color-code" value="${selectedColor.code}">
+      <input type="hidden" class="product-price-static" value="${priceToUse}">
+      <input type="hidden" class="product-color-name" value="${
+        selectedColor.name
+      }">
+      <input type="hidden" class="product-color-code" value="${
+        selectedColor.code
+      }">
     `;
     selectedProductsList.appendChild(productElement);
   }
@@ -1361,68 +1652,123 @@ function confirmAddProduct() {
 
   // إغلاق وإعادة تعيين الحقول
   closeAddProductSheet();
-  const addSheet = document.getElementById('addProductSheet');
-  const overlay = document.getElementById('productSheetOverlay');
-  const dropdown = document.getElementById('productDropdown');
-  
-  if (addSheet) addSheet.classList.remove('active');
-  if (overlay) overlay.classList.remove('active');
-  if (dropdown) dropdown.classList.add('hidden');
-  
+  const addSheet = document.getElementById("addProductSheet");
+  const overlay = document.getElementById("productSheetOverlay");
+  const dropdown = document.getElementById("productDropdown");
+
+  if (addSheet) addSheet.classList.remove("active");
+  if (overlay) overlay.classList.remove("active");
+  if (dropdown) dropdown.classList.add("hidden");
+
   productInput.value = "";
   delete productInput.dataset.selectedColor;
-  document.getElementById("productQuantity").value = "";
-  
+
+  // تأكد من إعادة قيمة حقل الكمية وإظهاره (قد تم إخفاؤه عند اختيار منتج مخصص)
+  const prodQtyEl = document.getElementById("productQuantity");
+  if (prodQtyEl) {
+    prodQtyEl.value = "";
+    prodQtyEl.classList.remove("hidden");
+    if (prodQtyEl.parentElement)
+      prodQtyEl.parentElement.classList.remove("hidden");
+  }
+
   // تنظيف الواجهة
   const colorSelector = document.querySelector(".color-selector");
   const customUI = document.querySelector(".custom-product-inputs");
   if (colorSelector) colorSelector.remove();
   if (customUI) customUI.remove();
-  
-  // إعادة إظهار حقل الكمية القياسي
-  document.getElementById("productQuantity").parentElement.classList.remove("hidden");
 }
 
 // تحديث إجماليات الفاتورة
 function updateTotals() {
-  const selectedProducts = Array.from(document.getElementById("selectedProductsList").children).map(item => {
+  const selectedProducts = Array.from(
+    document.getElementById("selectedProductsList").children
+  ).map((item) => {
+    // If this item is a custom product it uses different DOM structure
+    const isCustom = item.querySelector(".is-custom-flag")?.value === "true";
+
+    if (isCustom) {
+      const name = item.querySelector(".product-name")?.textContent || "مخصص";
+      const qtyInput = item.querySelector(".product-qty-input");
+      const priceInput = item.querySelector(".product-price-input");
+      const quantity = parseInt(qtyInput?.value) || 1;
+      const priceSYP = parseFloat(priceInput?.value) || 0;
+      return {
+        name,
+        quantity,
+        color: { name: "مخصص", code: "" },
+        priceSYP,
+      };
+    }
+
+    // Standard product path (safe access)
     const nameEl = item.querySelector(".product-name");
     const qtyEl = item.querySelector(".product-qty");
     const colorEl = item.querySelector(".selected-color");
-    
-    const name = nameEl.textContent;
-    const quantity = parseInt(qtyEl.textContent.replace("x", "")) || 1;
-    const colorName = colorEl.title;
-    const colorCode = colorEl.style.backgroundColor;
-    
-    // البحث عن المنتج في finalBaseProducts للحصول على الأسعار
-    const product = finalBaseProducts.find(p => p.name === name);
+
+    const name = nameEl?.textContent || "";
+    const quantity = parseInt(qtyEl?.textContent.replace("x", "") || "") || 1;
+    const colorName = colorEl?.title || "";
+    const colorCode = colorEl?.style?.backgroundColor || "";
+
+    // البحث عن السعر: نحبذ السعر المخزن في الحقل المخفي (product-price-static)
+    const priceStaticEl = item.querySelector(".product-price-static");
+    const priceFromHidden = parseFloat(priceStaticEl?.value);
+    const product = finalBaseProducts.find((p) => p.name === name);
+    const fallbackPrice = product ? product.price : 0;
+    const priceSYP = Number.isFinite(priceFromHidden)
+      ? priceFromHidden
+      : fallbackPrice;
     return {
       name,
       quantity,
       color: { name: colorName, code: colorCode },
-      priceSYP: product ? product.price : 0,
+      priceSYP,
     };
   });
 
   const { totalSYP } = calculateTotals(selectedProducts);
-  
+
   // ✅ إصلاح: استخدام القيم الآمنة
   const safeTotalSYP = totalSYP || 0;
-  
-  document.getElementById("totalSYP").textContent = safeTotalSYP.toLocaleString();
+
+  // تحقق من وجود تعديل (خصم/زيادة)
+  const adjVal = document.getElementById("adjustmentValue")?.value;
+  const adjType = document.getElementById("adjustmentType")?.value;
+  const adjusted = applyAdjustment(safeTotalSYP, adjType, adjVal);
+
+  // عرض الإجماليات في المودال
+  const totalEl = document.getElementById("totalSYP");
+  const origRow = document.getElementById("originalTotalRow");
+  const adjRow = document.getElementById("adjustedTotalRow");
+  const origEl = document.getElementById("originalTotalSYP");
+  const adjEl = document.getElementById("adjustedTotalSYP");
+
+  if (adjVal && !isNaN(parseFloat(adjVal)) && adjType) {
+    // حين يوجد تعديل: أظهر الأصلي والمعدّل
+    if (origRow) origRow.classList.remove("hidden");
+    if (adjRow) adjRow.classList.remove("hidden");
+    if (origEl) origEl.textContent = safeTotalSYP.toLocaleString();
+    if (adjEl) adjEl.textContent = adjusted.toLocaleString();
+    if (totalEl) totalEl.textContent = adjusted.toLocaleString();
+  } else {
+    // لا تعديل: إظهار الإجمالي فقط
+    if (origRow) origRow.classList.add("hidden");
+    if (adjRow) adjRow.classList.add("hidden");
+    if (totalEl) totalEl.textContent = safeTotalSYP.toLocaleString();
+  }
 }
 
 // 🔧 NEW: دالة جديدة لحساب إجمالي المنتجات المخصصة والقياسية
 function updateInvoiceTotals() {
   const selectedProductsList = document.getElementById("selectedProductsList");
   const products = Array.from(selectedProductsList.children);
-  
+
   let totalSYP = 0;
-  
-  products.forEach(item => {
-    const isCustom = item.querySelector(".is-custom-flag")?.value === 'true';
-    
+
+  products.forEach((item) => {
+    const isCustom = item.querySelector(".is-custom-flag")?.value === "true";
+
     if (isCustom) {
       // منتج مخصص: قراءة من حقول الإدخال
       const qtyInput = item.querySelector(".product-qty-input");
@@ -1439,57 +1785,92 @@ function updateInvoiceTotals() {
       totalSYP += qty * price;
     }
   });
-  
-  document.getElementById("totalSYP").textContent = totalSYP.toLocaleString();
+  // بعد حساب الإجمالي الأصلي، تحقق من وجود تعديل
+  const adjVal = document.getElementById("adjustmentValue")?.value;
+  const adjType = document.getElementById("adjustmentType")?.value;
+  const adjusted = applyAdjustment(totalSYP, adjType, adjVal);
+
+  const totalEl = document.getElementById("totalSYP");
+  const origRow = document.getElementById("originalTotalRow");
+  const adjRow = document.getElementById("adjustedTotalRow");
+  const origEl = document.getElementById("originalTotalSYP");
+  const adjEl = document.getElementById("adjustedTotalSYP");
+
+  if (adjVal && !isNaN(parseFloat(adjVal)) && adjType) {
+    if (origRow) origRow.classList.remove("hidden");
+    if (adjRow) adjRow.classList.remove("hidden");
+    if (origEl) origEl.textContent = totalSYP.toLocaleString();
+    if (adjEl) adjEl.textContent = adjusted.toLocaleString();
+    if (totalEl) totalEl.textContent = adjusted.toLocaleString();
+  } else {
+    if (origRow) origRow.classList.add("hidden");
+    if (adjRow) adjRow.classList.add("hidden");
+    if (totalEl) totalEl.textContent = totalSYP.toLocaleString();
+  }
 }
 
 // معالجة البحث عند الكتابة
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
   const productInput = document.getElementById("productInput");
   productInput.removeAttribute("readonly"); // جعل الحقل قابل للكتابة
   productInput.addEventListener("input", handleProductSearch);
-  productInput.addEventListener("focus", () => renderProductsList(productInput.value));
+  productInput.addEventListener("focus", () =>
+    renderProductsList(productInput.value)
+  );
+  // استمع لتغييرات حقل/نوع التعديل لنعيد حساب الإجمالي فوراً
+  const adjValEl = document.getElementById("adjustmentValue");
+  const adjTypeEl = document.getElementById("adjustmentType");
+  if (adjValEl) adjValEl.addEventListener("input", () => updateInvoiceTotals());
+  if (adjTypeEl)
+    adjTypeEl.addEventListener("change", () => updateInvoiceTotals());
 });
 
 function fillFormWithInvoice(invoice, allInvoices = []) {
-  if (!invoice || typeof invoice !== 'object') {
-    console.error('fillFormWithInvoice: invoice is invalid', invoice);
+  if (!invoice || typeof invoice !== "object") {
+    console.error("fillFormWithInvoice: invoice is invalid", invoice);
     return;
   }
 
-  const form = document.getElementById('invoiceForm');
+  const form = document.getElementById("invoiceForm");
   if (!form) {
-    console.warn('لا يوجد عنصر form بالمعرف invoiceForm');
+    console.warn("لا يوجد عنصر form بالمعرف invoiceForm");
     return;
   }
-  
+
   // ----------------------------------------------------
   // الحقول الأساسية
   // ----------------------------------------------------
-  const buyerNameEl = document.getElementById('buyerName');
-  const buyerPhoneEl = document.getElementById('buyerPhone');
-  const buyerProvinceEl = document.getElementById('buyerProvince');
-  const deliveryTypeEl = document.getElementById('deliveryType');
+  const buyerNameEl = document.getElementById("buyerName");
+  const buyerPhoneEl = document.getElementById("buyerPhone");
+  const buyerProvinceEl = document.getElementById("buyerProvince");
+  const deliveryTypeEl = document.getElementById("deliveryType");
 
   // تعبئة الحقول الأساسية مع القيم الآمنة
-  if (buyerNameEl) buyerNameEl.value = invoice.customerName || invoice.buyerName || '';
-  if (buyerPhoneEl) buyerPhoneEl.value = invoice.phone || invoice.buyerPhone || '';
-  if (buyerProvinceEl) buyerProvinceEl.value = invoice.city || invoice.buyerProvince || '';
+  if (buyerNameEl)
+    buyerNameEl.value = invoice.customerName || invoice.buyerName || "";
+  if (buyerPhoneEl)
+    buyerPhoneEl.value = invoice.phone || invoice.buyerPhone || "";
+  if (buyerProvinceEl)
+    buyerProvinceEl.value = invoice.city || invoice.buyerProvince || "";
 
   // طريقة التسليم (select) - نستخدم قيمة الفاتورة لتحديد 'shipping'/'local'
-  let deliveryVal = '';
+  let deliveryVal = "";
   // الفاتورة القادمة من السلة تخزن 'shipping' كـ boolean (true/false)
-  if (invoice.shipping === true || invoice.shipping === 'shipping') {
-    deliveryVal = 'shipping';
-  } else if (invoice.shipping === false || invoice.shipping === 'local' || invoice.shipping === 'within-homs') {
-    deliveryVal = 'local';
+  if (invoice.shipping === true || invoice.shipping === "shipping") {
+    deliveryVal = "shipping";
+  } else if (
+    invoice.shipping === false ||
+    invoice.shipping === "local" ||
+    invoice.shipping === "within-homs"
+  ) {
+    deliveryVal = "local";
   }
-  
+
   if (deliveryTypeEl) {
-    deliveryTypeEl.value = deliveryVal || 'local'; // الافتراضي هو 'local'
-    deliveryTypeEl.dispatchEvent(new Event('change'));
+    deliveryTypeEl.value = deliveryVal || "local"; // الافتراضي هو 'local'
+    deliveryTypeEl.dispatchEvent(new Event("change"));
     // يجب أن تكون هذه الدالة موجودة لتعرض حقول الشحن أو تخفيها
-    if (typeof toggleShippingFields === 'function') {
+    if (typeof toggleShippingFields === "function") {
       toggleShippingFields();
     }
   }
@@ -1497,81 +1878,82 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   // ----------------------------------------------------
   // ملء حقول الشحن والتسليم
   // ----------------------------------------------------
-  const shippingCompanyEl = document.getElementById('shippingCompany');
-  const shippingInfoEl = document.getElementById('shippingInfo');
-  const localInfoEl = document.getElementById('localShippingInfo');
-  const shippingDateEl = document.getElementById('shippingDate') || document.getElementById('deliveryDate');
+  const shippingCompanyEl = document.getElementById("shippingCompany");
+  const shippingInfoEl = document.getElementById("shippingInfo");
+  const localInfoEl = document.getElementById("localShippingInfo");
+  const shippingDateEl =
+    document.getElementById("shippingDate") ||
+    document.getElementById("deliveryDate");
 
   // ملء حقول الشحن بالتفاصيل، حسب ما تم اختياره
-  if (shippingCompanyEl) shippingCompanyEl.value = invoice.shippingCompany || '';
-  
+  if (shippingCompanyEl)
+    shippingCompanyEl.value = invoice.shippingCompany || "";
+
   // ملء حقل معلومات الشحن/الموقع
   if (invoice.shipping) {
-    if (shippingInfoEl) shippingInfoEl.value = invoice.shippingInfo || '';
+    if (shippingInfoEl) shippingInfoEl.value = invoice.shippingInfo || "";
   } else {
-    if (localInfoEl) localInfoEl.value = invoice.shippingInfo || '';
+    if (localInfoEl) localInfoEl.value = invoice.shippingInfo || "";
   }
-  
+
   // موعد التسليم
   if (shippingDateEl) {
-    shippingDateEl.value = invoice.shippingDate || invoice.deliveryDate || '';
+    shippingDateEl.value = invoice.shippingDate || invoice.deliveryDate || "";
   }
 
   // ----------------------------------------------------
   // المنتجات (نحتاج أن نعرضها داخل selectedProductsList)
   // ----------------------------------------------------
-  const selList = document.getElementById('selectedProductsList');
-  const notesEl = document.getElementById('invoiceNotes');
+  const selList = document.getElementById("selectedProductsList");
+  const notesEl = document.getElementById("invoiceNotes");
 
   // 💡 خطوة جديدة: تجميع الأوصاف المخصصة
-  let combinedCustomNotes = '';
+  let combinedCustomNotes = "";
 
   if (selList) {
-    selList.innerHTML = ''; // تنظيف القائمة
-    
+    selList.innerHTML = ""; // تنظيف القائمة
+
     const productsArr = Array.isArray(invoice.products) ? invoice.products : [];
-    
+
     // 🔧 إصلاح: إضافة index كمعامل ثاني في forEach
     productsArr.forEach((p, index) => {
       // قراءة حقل isCustom
       const isCustom = p.isCustom === true;
 
-      const name = p.name || p.productName || '';
+      const name = p.name || p.productName || "";
       const qty = p.quantity || p.qty || 1;
       // نستخدم priceAtOrder من كائن الطلب إذا وُجد لضمان صحة السعر عند الطلب
-      const price = p.priceAtOrder || p.priceSYP || p.price || 0; 
-      const colorName = p.selectedColor?.name || p.color?.name || '';
-      const colorCode = p.selectedColor?.code || p.color?.code || '';
-      const customDescription = p.customDescription || '';
+      const price = p.priceAtOrder || p.priceSYP || p.price || 0;
+      const colorName = p.selectedColor?.name || p.color?.name || "";
+      const colorCode = p.selectedColor?.code || p.color?.code || "";
+      const customDescription = p.customDescription || "";
 
       // ✅ إصلاح: استخدام القيمة الآمنة للسعر
       const safePrice = price || 0;
 
       if (isCustom && customDescription) {
-          // 1. تجميع الوصف المخصص للملاحظات العامة (للتعديل اليدوي)
-          combinedCustomNotes += `[${name}]: ${customDescription} | الكمية القادمة: x${qty} | السعر المبدئي: ${safePrice.toLocaleString()} ل.س\n\n`;
+        // 1. تجميع الوصف المخصص للملاحظات العامة (للتعديل اليدوي)
+        combinedCustomNotes += `[${name}]: ${customDescription} | الكمية القادمة: x${qty} | السعر المبدئي: ${safePrice.toLocaleString()} ل.س\n\n`;
       }
 
-      const item = document.createElement('div');
-      item.className = 'selected-product';
-      
+      const item = document.createElement("div");
+      item.className = "selected-product";
+
       if (isCustom) {
-          // 🔧 إصلاح: استخدام المتغير index من forEach
-          const tempProductId = `CUSTOM_${Date.now()}_${index}`;
-          
-          item.innerHTML = `
+        // custom product in fillFormWithInvoice: editable description, no color label
+        const tempProductId = `CUSTOM_${Date.now()}_${index}`;
+        item.innerHTML = `
               <div class="selected-product-left" style="background:#fff3e0; padding:5px; border-radius:4px;">
-                  <span class="product-name" style="font-weight:bold; color:#d9534f;">${name} (تسعير يدوي)</span>
-                  
-                  <span class="selected-color" 
-                        title="أبيض - قيمة افتراضية" 
-                        style="background-color:#FFFFFF;display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle; border:1px solid #ccc;">
-                  </span>
-                  
-                  <p style="font-size:12px; margin-top:5px;">${customDescription || 'بدون وصف'}</p>
+                  <span class="product-name" style="font-weight:bold; color:#d9534f;">${name}</span>
+                  <textarea class="custom-description-input" placeholder="وصف المنتج المخصص..." style="width:100%; margin-top:6px; min-height:48px;">${
+                    customDescription || ""
+                  }</textarea>
                   <input type="hidden" class="is-custom-flag" value="true">
                   <input type="hidden" class="temp-product-id" value="${tempProductId}">
-                  <input type="hidden" class="custom-description-text" value="${customDescription.replace(/"/g, '&quot;')}">
+                  <input type="hidden" class="custom-description-text" value="${customDescription.replace(
+                    /"/g,
+                    "&quot;"
+                  )}">
               </div>
               <div class="selected-product-right">
                   <div class="field-group">
@@ -1588,22 +1970,25 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
                 <i class="fa fa-times"></i>
               </button>
           `;
-          item.classList.add('custom-product-item');
-          
+        item.classList.add("custom-product-item");
       } else {
-          // للمنتج القياسي: يبقى كما هو (Read-Only)
-          const colorName = p.selectedColor?.name || p.color?.name || '';
-          const colorCode = p.selectedColor?.code || p.color?.code || '';
-        
-          item.innerHTML = `
+        // للمنتج القياسي: يبقى كما هو (Read-Only)
+        const colorName = p.selectedColor?.name || p.color?.name || "";
+        const colorCode = p.selectedColor?.code || p.color?.code || "";
+
+        item.innerHTML = `
               <div class="selected-product-left">
                   <span class="product-name">${name}</span>
-                  ${colorCode ? `
+                  ${
+                    colorCode
+                      ? `
                       <span class="selected-color" 
                             title="${colorName}" 
                             style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle">
                       </span>
-                  ` : ''}
+                  `
+                      : ""
+                  }
               </div>
               <div class="selected-product-right">
                   <span class="product-qty">x${qty}</span>
@@ -1614,7 +1999,9 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
                 <i class="fa fa-times"></i>
               </button>
               <input type="hidden" class="is-custom-flag" value="false">
-              <input type="hidden" class="temp-product-id" value="${p.id || ''}">
+              <input type="hidden" class="temp-product-id" value="${
+                p.id || ""
+              }">
               <input type="hidden" class="product-qty-static" value="${qty}">
               <input type="hidden" class="product-price-static" value="${safePrice}">
               <input type="hidden" class="product-color-name" value="${colorName}">
@@ -1629,19 +2016,25 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   // ----------------------------------------------------
   // ملء حالة الدفع والملاحظات
   // ----------------------------------------------------
-  const paymentStatusEl = document.getElementById('paymentStatus');
-  const paymentAmountEl = document.getElementById('paymentAmountPaid');
-  const payment = invoice.payment || { status: 'unpaid', paidSYP: 0, remainingSYP: 0 };
+  const paymentStatusEl = document.getElementById("paymentStatus");
+  const paymentAmountEl = document.getElementById("paymentAmountPaid");
+  const payment = invoice.payment || {
+    status: "unpaid",
+    paidSYP: 0,
+    remainingSYP: 0,
+  };
 
   if (paymentStatusEl) {
-    paymentStatusEl.value = payment.status || 'unpaid';
+    paymentStatusEl.value = payment.status || "unpaid";
     // تشغيل حدث التغيير لتحديث الحقول المرتبطة
-    paymentStatusEl.dispatchEvent(new Event('change'));
+    paymentStatusEl.dispatchEvent(new Event("change"));
   }
-  
+
   // إظهار/إخفاء حقل المبلغ المدفوع (يجب أن تكون هذه الدالة موجودة)
-  if (typeof togglePaymentFields === 'function') {
-    togglePaymentFields(paymentStatusEl ? paymentStatusEl.value : (payment.status || 'unpaid'));
+  if (typeof togglePaymentFields === "function") {
+    togglePaymentFields(
+      paymentStatusEl ? paymentStatusEl.value : payment.status || "unpaid"
+    );
   }
 
   if (paymentAmountEl) {
@@ -1654,28 +2047,45 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   // 🔧 إصلاح: استخدام دالة updateInvoiceTotals الجديدة للحساب
   const selectedProductsList = document.getElementById("selectedProductsList");
   if (selectedProductsList) {
+    // ستقوم updateInvoiceTotals بعرض الإجمالي الأصلي والمعدّل إن وُجد
+    // أولاً نملأ حقل التعديل في حال كانت الفاتورة تحتوي على تعديل
+    const adjVal = document.getElementById("adjustmentValue");
+    const adjType = document.getElementById("adjustmentType");
+    if (adjVal && adjType) {
+      const invAdj = invoice.adjustment;
+      if (invAdj && invAdj.value !== undefined && invAdj.type) {
+        adjVal.value = invAdj.value;
+        adjType.value = invAdj.type;
+      } else {
+        adjVal.value = "";
+        adjType.value = "+";
+      }
+    }
+
     // نستدعي updateInvoiceTotals مباشرة بدلاً من calculateTotals
     setTimeout(updateInvoiceTotals, 0);
   } else {
     // Fallback إلى calculateTotals القديمة
-    const productsForCalculation = Array.isArray(invoice.products) ? invoice.products : [];
+    const productsForCalculation = Array.isArray(invoice.products)
+      ? invoice.products
+      : [];
     const { totalSYP } = calculateTotals(productsForCalculation);
     const safeTotalSYP = totalSYP || 0;
-    const totalDisplay = document.getElementById('totalSYP');
+    const totalDisplay = document.getElementById("totalSYP");
     if (totalDisplay) totalDisplay.textContent = safeTotalSYP.toLocaleString();
   }
 
-  if (notesEl) { 
+  if (notesEl) {
     // ملاحظات الفاتورة الأصلية
-    let existingNotes = invoice.notes || ''; 
+    let existingNotes = invoice.notes || "";
 
     // إذا كان هناك أوصاف مخصصة، ندمجها
     if (combinedCustomNotes) {
-        // نضيف خط فاصل إذا كانت الملاحظات الأصلية موجودة
-        if (existingNotes) {
-            existingNotes += "\n\n--- أوصاف مخصصة من الطلب ---\n\n";
-        }
-        existingNotes += combinedCustomNotes;
+      // نضيف خط فاصل إذا كانت الملاحظات الأصلية موجودة
+      if (existingNotes) {
+        existingNotes += "\n\n--- أوصاف مخصصة من الطلب ---\n\n";
+      }
+      existingNotes += combinedCustomNotes;
     }
 
     notesEl.value = existingNotes;
@@ -1688,112 +2098,175 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   const delBtn = document.getElementById("deleteInvoiceBtn");
   if (delBtn) {
     // ✅ استخدام allInvoices المُمررة للتحقق مما إذا كانت الفاتورة موجودة مسبقاً
-    const isExistingInvoice = allInvoices.findIndex(inv => inv.id === invoice.id) !== -1;
+    const isExistingInvoice =
+      allInvoices.findIndex((inv) => inv.id === invoice.id) !== -1;
     if (isExistingInvoice) {
-      delBtn.classList.remove('hidden'); // إظهاره إذا كانت محفوظة
+      delBtn.classList.remove("hidden"); // إظهاره إذا كانت محفوظة
     } else {
-      delBtn.classList.add('hidden'); // إخفاءه إذا كانت جديدة
+      delBtn.classList.add("hidden"); // إخفاءه إذا كانت جديدة
     }
   }
 
-  // أخيراً افتح المودال 
-  if (typeof openNewInvoiceModel === 'function') {
+  // أخيراً افتح المودال
+  if (typeof openNewInvoiceModel === "function") {
     openNewInvoiceModel();
   } else {
-    console.warn('الدالة openNewInvoiceModel غير معرفة');
+    console.warn("الدالة openNewInvoiceModel غير معرفة");
   }
 }
 
 function onPasteCode() {
-    const codeInput = document.getElementById('pasteInvoiceCodeInput');
-    if (!codeInput) {
-        console.error('❌ حقل إدخال الكود غير موجود.');
-        return;
-    }
+  const codeInput = document.getElementById("pasteInvoiceCodeInput");
+  if (!codeInput) {
+    console.error("❌ حقل إدخال الكود غير موجود.");
+    return;
+  }
 
-    const code = codeInput.value.trim();
-    if (!code) {
-        showToast('ألصق الكود أولاً', 3000, 'orange');
-        return;
-    }
+  const code = codeInput.value.trim();
+  if (!code) {
+    showToast("ألصق الكود أولاً", 3000, "orange");
+    return;
+  }
 
+  try {
+    // 1️⃣ استخراج جزء الكود إذا كان النص يحتوي على كلام إضافي
+    // نتوقع رمز base64url مكوّن من أحرف [A-Za-z0-9_-] بطول معقول (>20)
+    let token = null;
+    const tokenMatch = code.match(/[A-Za-z0-9_\-]{20,}/);
+    if (tokenMatch) token = tokenMatch[0];
+    else token = code;
+
+    // 2️⃣ محاولة إزالة ترميز URI إن وُجد (حالات نسخ من Telegram قد تكون مُرمّزة)
+    let tried = [];
+    let invoice = null;
+
+    const attemptDecode = (candidate) => {
+      try {
+        tried.push(candidate);
+        return decodeInvoice(candidate);
+      } catch (err) {
+        console.warn(
+          "decodeInvoice failed for candidate:",
+          candidate,
+          err && err.message
+        );
+        return null;
+      }
+    };
+
+    // أول محاولة: حاول decodeURIComponent ثم decodeInvoice
     try {
-        // 1️⃣ فك تشفير الكود
-        const invoice = decodeInvoice(code);
-        if (!invoice) throw new Error('لم يتم فك الكود بشكل صحيح');
-
-        // 2️⃣ تجهيز الفاتورة مع معرف جديد
-        const targetInvoice = { ...invoice, id: Date.now() };
-
-        // 3️⃣ جلب جميع الفواتير الحالية
-        const allInvoices = JSON.parse(localStorage.getItem('invoices')) || [];
-
-        // 4️⃣ تعبئة النموذج وفتح المودال إذا كانت الدالة موجودة
-        if (typeof fillFormWithInvoice === 'function') {
-            fillFormWithInvoice(targetInvoice, allInvoices);
-        } else {
-            console.warn('⚠️ الدالة fillFormWithInvoice غير موجودة.');
-        }
-
-        // 5️⃣ حذف معرف التعديل إذا موجود
-        const form = document.getElementById('invoiceForm');
-        if (form && form.dataset.editingId) {
-            delete form.dataset.editingId;
-        }
-
-        // 6️⃣ إخفاء زر الحذف فقط إذا موجود
-        const delBtn = document.getElementById("deleteInvoiceBtn");
-        if (delBtn) delBtn.classList.add('hidden');
-
-        // 7️⃣ رسالة نجاح
-        alert('📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.');
-
-        // 8️⃣ مسح حقل الكود وإخفاء المودال إذا الدالة موجودة
-        codeInput.value = '';
-        if (typeof toggleInvoiceCodeInput === 'function') {
-            toggleInvoiceCodeInput();
-        }
-
+      const decodedURI = decodeURIComponent(token);
+      invoice = attemptDecode(decodedURI);
     } catch (e) {
-        console.error(e);
-        alert('❌ فشل فك الكود — تأكد من أن الكود صحيح\n' + (e.message || e));
+      // لا تفشل هنا — سنجرب المرشح الأصلي
+      console.warn("decodeURIComponent failed or not needed:", e && e.message);
     }
-}
 
+    // إذا لم تنجح، جرّب المرشح الأصلي
+    if (!invoice) invoice = attemptDecode(token);
+
+    // كخيار أخير، جرّب atob (بعض الأنظمة قد تكون أرسلت base64 بدل base64url)
+    if (!invoice) {
+      try {
+        const b64 = token.replace(/-/g, "+").replace(/_/g, "/");
+        // أضف padding إن لزم
+        const pad = b64.length % 4;
+        const padded = pad ? b64 + "=".repeat(4 - pad) : b64;
+        invoice = attemptDecode(padded);
+      } catch (err) {
+        console.warn("atob/decode fallback failed:", err && err.message);
+      }
+    }
+
+    if (!invoice)
+      throw new Error(
+        "لم يتم فك الكود بشكل صحيح (جرب لصق الكود فقط دون أي نص إضافي)"
+      );
+
+    // 2️⃣ تجهيز الفاتورة مع معرف جديد
+    const targetInvoice = { ...invoice, id: Date.now() };
+
+    // 3️⃣ جلب جميع الفواتير الحالية
+    const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
+
+    // 4️⃣ تعبئة النموذج وفتح المودال إذا كانت الدالة موجودة
+    if (typeof fillFormWithInvoice === "function") {
+      fillFormWithInvoice(targetInvoice, allInvoices);
+    } else {
+      console.warn("⚠️ الدالة fillFormWithInvoice غير موجودة.");
+    }
+
+    // 5️⃣ حذف معرف التعديل إذا موجود
+    const form = document.getElementById("invoiceForm");
+    if (form && form.dataset.editingId) {
+      delete form.dataset.editingId;
+    }
+
+    // 6️⃣ إخفاء زر الحذف فقط إذا موجود
+    const delBtn = document.getElementById("deleteInvoiceBtn");
+    if (delBtn) delBtn.classList.add("hidden");
+
+    // 7️⃣ رسالة نجاح
+    alert(
+      '📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.'
+    );
+
+    // 8️⃣ مسح حقل الكود وإخفاء المودال إذا الدالة موجودة
+    codeInput.value = "";
+    if (typeof toggleInvoiceCodeInput === "function") {
+      toggleInvoiceCodeInput();
+    }
+  } catch (e) {
+    console.error(e);
+    alert("❌ فشل فك الكود — تأكد من أن الكود صحيح\n" + (e.message || e));
+  }
+}
 
 function toggleInvoiceCodeInput() {
-    const modal = document.getElementById("invoiceCodeInputModal");
-    if (modal) {
-        modal.classList.toggle("show");
-    } else {
-        console.warn("⚠️ العنصر invoiceCodeInputModal غير موجود.");
+  // دعم كلا المعرفين: القديم والجديد في الـ HTML
+  const modalIds = [
+    "invoiceCodeInputModal",
+    "codeInputPopup",
+    "pasteInvoiceCodeInputModal",
+  ];
+  let found = false;
+  for (const id of modalIds) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.toggle("show");
+      found = true;
     }
+  }
+  if (!found)
+    console.warn(
+      "⚠️ لم يتم العثور على عنصر إدخال كود الفاتورة (id invoiceCodeInputModal|codeInputPopup)"
+    );
 }
 
-
 function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // دالة موحدة لتحديد ما إذا كان يجب عرض زر الصعود للأعلى
 function checkScrollButtonVisibility() {
-    const scrollBtn = document.getElementById("scrollTopBtn");
+  const scrollBtn = document.getElementById("scrollTopBtn");
 
-    // 1. يجب أن يكون هناك تمرير أكثر من 300 بكسل
-    const scrolledEnough = window.scrollY > 300;
-    
-    // 2. يجب أن تكون قائمة FAB مغلقة
-    const fabClosed = !fabMenuOpen;
+  // 1. يجب أن يكون هناك تمرير أكثر من 300 بكسل
+  const scrolledEnough = window.scrollY > 300;
 
-    if (scrolledEnough && fabClosed && invoiceFormOpen === false) {
-        // العرض: يجب أن نستخدم 'show' و 'hide' بشكل متناسق
-        scrollBtn.classList.remove("hide");
-        scrollBtn.classList.add("show");
-    } else {
-        // الإخفاء
-        scrollBtn.classList.remove("show");
-        scrollBtn.classList.add("hide");
-    }
+  // 2. يجب أن تكون قائمة FAB مغلقة
+  const fabClosed = !fabMenuOpen;
+
+  if (scrolledEnough && fabClosed && invoiceFormOpen === false) {
+    // العرض: يجب أن نستخدم 'show' و 'hide' بشكل متناسق
+    scrollBtn.classList.remove("hide");
+    scrollBtn.classList.add("show");
+  } else {
+    // الإخفاء
+    scrollBtn.classList.remove("show");
+    scrollBtn.classList.add("hide");
+  }
 }
 
 // استمع فقط لحدث التمرير
@@ -1801,57 +2274,59 @@ window.addEventListener("scroll", checkScrollButtonVisibility);
 
 window.addEventListener("click", checkScrollButtonVisibility);
 
-
 // دالة جلب المتاجر (تستخدم في صفحة الفواتير)
 function getStores() {
-    try {
-        const stores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
-        return stores;
-    } catch (error) {
-        console.error('❌ خطأ في جلب المتاجر:', error);
-        return [];
-    }
+  try {
+    const stores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
+    return stores;
+  } catch (error) {
+    console.error("❌ خطأ في جلب المتاجر:", error);
+    return [];
+  }
 }
 
-
-    // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
 // A. قراءة معاملات URL وتنفيذ الإجراء
 // ----------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (أي تهيئة سابقة لديك لصفحة الفواتير) ...
-    
-    // 💡 نقوم بفحص رابط URL لتحديد ما إذا كنا قادمين من صفحة المتاجر
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    const storeId = urlParams.get('storeId');
+document.addEventListener("DOMContentLoaded", () => {
+  // ... (أي تهيئة سابقة لديك لصفحة الفواتير) ...
 
-    // 1. تنفيذ إجراء 'ADD' (إضافة فاتورة جديدة لمتجر محدد)
-    if (action === 'add' && storeId) {
-        // نستخدم parseInt لتحويل القيمة إلى رقم لضمان التوافق
-        const targetStoreId = parseInt(storeId);
-        
-        // يجب أن تكون دالة openInvoiceModal() موجودة في هذا الملف
-        // (سنعدلها لتستقبل storeId في الخطوة التالية)
-        openNewInvoiceModel(targetStoreId);
-    }
-    
-    // 2. تنفيذ إجراء 'FILTER' (عرض فواتير متجر محدد)
-    else if (action === 'filter' && storeId) {
-        const targetStoreId = parseInt(storeId);
-       
-        // ✅ 1. تمرير ID المتجر للدالة
-        renderInvoices(targetStoreId); 
-        
-        // 💡 إظهار رسالة تفيد بأن القائمة مفلترة
-        alert(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`);
-        showToast(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`, 5000, 'green');
-    }
-    
-    // إذا لم يكن هناك معامل في الرابط، نعرض الفواتير بشكل طبيعي
-    else {
-        renderInvoices(); 
-    }
+  // 💡 نقوم بفحص رابط URL لتحديد ما إذا كنا قادمين من صفحة المتاجر
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get("action");
+  const storeId = urlParams.get("storeId");
+
+  // 1. تنفيذ إجراء 'ADD' (إضافة فاتورة جديدة لمتجر محدد)
+  if (action === "add" && storeId) {
+    // نستخدم parseInt لتحويل القيمة إلى رقم لضمان التوافق
+    const targetStoreId = parseInt(storeId);
+
+    // يجب أن تكون دالة openInvoiceModal() موجودة في هذا الملف
+    // (سنعدلها لتستقبل storeId في الخطوة التالية)
+    openNewInvoiceModel(targetStoreId);
+  }
+
+  // 2. تنفيذ إجراء 'FILTER' (عرض فواتير متجر محدد)
+  else if (action === "filter" && storeId) {
+    const targetStoreId = parseInt(storeId);
+
+    // ✅ 1. تمرير ID المتجر للدالة
+    renderInvoices(targetStoreId);
+
+    // 💡 إظهار رسالة تفيد بأن القائمة مفلترة
+    alert(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`);
+    showToast(
+      `يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`,
+      5000,
+      "green"
+    );
+  }
+
+  // إذا لم يكن هناك معامل في الرابط، نعرض الفواتير بشكل طبيعي
+  else {
+    renderInvoices();
+  }
 });
 
 /**
@@ -1859,44 +2334,44 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {number | null} preselectStoreId - معرّف المتجر الذي يجب اختياره تلقائياً.
  */
 function populateStoreSelect(preselectStoreId = null) {
-    const storeSelect = document.getElementById('linkedStores');
-    if (!storeSelect) return;
+  const storeSelect = document.getElementById("linkedStores");
+  if (!storeSelect) return;
 
-    // 💡 الجديد: تحديد ما إذا كنا في وضع التعديل بناءً على وجود editingId في النموذج
-    const form = document.getElementById("invoiceForm");
-    const isEditing = !!form.dataset.editingId; 
+  // 💡 الجديد: تحديد ما إذا كنا في وضع التعديل بناءً على وجود editingId في النموذج
+  const form = document.getElementById("invoiceForm");
+  const isEditing = !!form.dataset.editingId;
 
-    // 1. استرجاع المتاجر
-    const stores = getStores(); 
+  // 1. استرجاع المتاجر
+  const stores = getStores();
 
-    // 2. مسح الخيارات الحالية (عدا الخيار الافتراضي)
-    storeSelect.innerHTML = '<option value="">-- اختر المتجر --</option>';
+  // 2. مسح الخيارات الحالية (عدا الخيار الافتراضي)
+  storeSelect.innerHTML = '<option value="">-- اختر المتجر --</option>';
 
-    if (stores.length === 0) {
-        // console.warn('⚠️ لا توجد متاجر في localStorage');
-        return;
-    }
+  if (stores.length === 0) {
+    // console.warn('⚠️ لا توجد متاجر في localStorage');
+    return;
+  }
 
-    // 3. تعبئة القائمة بالبيانات
-    stores.forEach(store => {
-        const option = document.createElement('option');
-        // نستخدم ID المتجر كقيمة (Value)
-        option.value = store.id; 
-        option.textContent = `${store.name}  (${store.location})`; // إضافة تفاصيل للتمييز
-        storeSelect.appendChild(option);
-    });
+  // 3. تعبئة القائمة بالبيانات
+  stores.forEach((store) => {
+    const option = document.createElement("option");
+    // نستخدم ID المتجر كقيمة (Value)
+    option.value = store.id;
+    option.textContent = `${store.name}  (${store.location})`; // إضافة تفاصيل للتمييز
+    storeSelect.appendChild(option);
+  });
 
-    // 4. الاختيار المسبق (في حال القدوم من رابط المتجر أو وضع التعديل)
-    if (preselectStoreId) {
-        // نضمن تحويل الرقم إلى نص لمطابقة قيمة الـ Select
-        storeSelect.value = String(preselectStoreId);
-    }
+  // 4. الاختيار المسبق (في حال القدوم من رابط المتجر أو وضع التعديل)
+  if (preselectStoreId) {
+    // نضمن تحويل الرقم إلى نص لمطابقة قيمة الـ Select
+    storeSelect.value = String(preselectStoreId);
+  }
 
-    // 5. 💡 التعديل الهام: تشغيل handleStoreSelection فقط إذا لم نكن في وضع التعديل (Add New)
-    // هذا يمنع تفريغ حقول المشتري المحملة من الفاتورة أثناء التعديل.
-    if (!isEditing) {
-        handleStoreSelection(storeSelect.value); 
-    }
+  // 5. 💡 التعديل الهام: تشغيل handleStoreSelection فقط إذا لم نكن في وضع التعديل (Add New)
+  // هذا يمنع تفريغ حقول المشتري المحملة من الفاتورة أثناء التعديل.
+  if (!isEditing) {
+    handleStoreSelection(storeSelect.value);
+  }
 }
 
 /**
@@ -1904,273 +2379,253 @@ function populateStoreSelect(preselectStoreId = null) {
  * @param {string | number} selectedId - معرّف المتجر المختار (أو سلسلة فارغة إذا كان "بدون متجر").
  */
 function handleStoreSelection(selectedId) {
-    // 💡 الجديد: الحصول على حالة النموذج
-    const form = document.getElementById("invoiceForm");
-    const isEditing = !!form.dataset.editingId; 
+  // 💡 الجديد: الحصول على حالة النموذج
+  const form = document.getElementById("invoiceForm");
+  const isEditing = !!form.dataset.editingId;
 
-    // 💡 التعديل الهام: إذا كنا في وضع التعديل، نخرج مباشرة دون تغيير الحقول
-    // هذا يمنع تفريغ بيانات المشتري المحملة من الفاتورة الأصلية.
-    if (isEditing) {
-        return; 
+  // 💡 التعديل الهام: إذا كنا في وضع التعديل، نخرج مباشرة دون تغيير الحقول
+  // هذا يمنع تفريغ بيانات المشتري المحملة من الفاتورة الأصلية.
+  if (isEditing) {
+    return;
+  }
+
+  // الوصول إلى حقول المشتري
+  const nameInput = document.getElementById("buyerName");
+  const phoneInput = document.getElementById("buyerPhone");
+  const provinceInput = document.getElementById("buyerProvince");
+
+  // 1. تفريغ الحقول أولاً (يحدث فقط في وضع الإضافة الجديدة)
+  nameInput.value = "";
+  phoneInput.value = "";
+  provinceInput.value = "";
+
+  if (selectedId && selectedId !== "") {
+    const stores = getStores();
+    // ID المتجر يكون string من الـ HTML، يجب تحويله إلى رقم للمقارنة
+    const storeIdNum = parseInt(selectedId);
+
+    const selectedStore = stores.find((s) => s.id === storeIdNum);
+
+    if (selectedStore) {
+      // 2. تعبئة الحقول ببيانات المتجر
+      nameInput.value = selectedStore.name;
+      phoneInput.value = selectedStore.phone;
+      provinceInput.value = selectedStore.location; // استخدمنا 'location' للمحافظة
     }
-    
-    // الوصول إلى حقول المشتري
-    const nameInput = document.getElementById('buyerName');
-    const phoneInput = document.getElementById('buyerPhone');
-    const provinceInput = document.getElementById('buyerProvince');
-
-    // 1. تفريغ الحقول أولاً (يحدث فقط في وضع الإضافة الجديدة)
-    nameInput.value = '';
-    phoneInput.value = '';
-    provinceInput.value = '';
-
-    if (selectedId && selectedId !== "") {
-        const stores = getStores();
-        // ID المتجر يكون string من الـ HTML، يجب تحويله إلى رقم للمقارنة
-        const storeIdNum = parseInt(selectedId); 
-        
-        const selectedStore = stores.find(s => s.id === storeIdNum);
-
-        if (selectedStore) {
-            // 2. تعبئة الحقول ببيانات المتجر
-            nameInput.value = selectedStore.name;
-            phoneInput.value = selectedStore.phone;
-            provinceInput.value = selectedStore.location; // استخدمنا 'location' للمحافظة
-        }
-    }
+  }
 }
 
 let fabMenuOpen = false;
 let invoiceFormOpen = false;
 const menu = document.getElementById("fabSpeedDial");
 const mainFab = document.getElementById("mainFab");
-    
+
 function toggleFabMenu() {
-    fabMenuOpen = !fabMenuOpen;
+  fabMenuOpen = !fabMenuOpen;
 
-    // تبديل حالة العرض
-    menu.classList.toggle("hidden"); 
+  // تبديل حالة العرض
+  menu.classList.toggle("hidden");
 
-    // تغيير أيقونة الـ FAB الرئيسي
-    if (menu.classList.contains("hidden")) {
-        mainFab.querySelector('i').className = 'fa fa-plus'; // عند الإغلاق
-    } else {
-        mainFab.querySelector('i').className = 'fa fa-times'; // عند الفتح
-    }
+  // تغيير أيقونة الـ FAB الرئيسي
+  if (menu.classList.contains("hidden")) {
+    mainFab.querySelector("i").className = "fa fa-plus"; // عند الإغلاق
+  } else {
+    mainFab.querySelector("i").className = "fa fa-times"; // عند الفتح
+  }
 }
 
 function closeFabMenu() {
-    if (!menu.classList.contains("hidden")) {
-        menu.classList.add("hidden");
-        mainFab.querySelector('i').className = 'fa fa-plus';
-        fabMenuOpen = false;
-    }
+  if (!menu.classList.contains("hidden")) {
+    menu.classList.add("hidden");
+    mainFab.querySelector("i").className = "fa fa-plus";
+    fabMenuOpen = false;
+  }
 }
 
 function openFilterModal() {
-    const modal = document.getElementById("filterModal");
-    const overlay = document.getElementById("filterOverlay");
-    
-    // 💡 نقطة هامة: يجب تعبئة قائمة المتاجر الخاصة بالفلتر قبل الفتح
-    // سنستخدم populateStoreSelect(null) مع تعديل بسيط لاحقاً
-    // حالياً نستخدم دالة افتراضية
-    // populateStoreFilterSelect(); 
-    
-    modal.classList.remove("hidden");
-    overlay.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-    
-    // تأكد من إغلاق قائمة الـ FAB بعد فتح المودال
-    toggleFabMenu(); 
+  const modal = document.getElementById("filterModal");
+  const overlay = document.getElementById("filterOverlay");
+
+  // 💡 نقطة هامة: يجب تعبئة قائمة المتاجر الخاصة بالفلتر قبل الفتح
+  // سنستخدم populateStoreSelect(null) مع تعديل بسيط لاحقاً
+  // حالياً نستخدم دالة افتراضية
+  // populateStoreFilterSelect();
+
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+
+  // تأكد من إغلاق قائمة الـ FAB بعد فتح المودال
+  toggleFabMenu();
 }
 
 /**
  * إغلاق مودال التصفية.
  */
 function closeFilterModal() {
-    const modal = document.getElementById("filterModal");
-    const overlay = document.getElementById("filterOverlay");
-    
-    modal.classList.add("hidden");
-    overlay.classList.add("hidden");
-    document.body.style.overflow = "";
+  const modal = document.getElementById("filterModal");
+  const overlay = document.getElementById("filterOverlay");
+
+  modal.classList.add("hidden");
+  overlay.classList.add("hidden");
+  document.body.style.overflow = "";
 }
 
 // ======================================================
 // 💾 دالة تطبيق الفلترة والترتيب
 // ======================================================
-function applyFiltersAndSort() {
-    // 1. قراءة القيم من حقول الإدخال
-    const paymentFilter = document.getElementById('paymentFilter').value;
-    const storeFilter = document.getElementById('storeFilter').value;
-    const sortOption = document.getElementById('sortOption').value;
-    
-    // 🔥 الجديد: قراءة تواريخ البداية والنهاية
-    const startDate = document.getElementById('startDateInput').value;
-    const endDate = document.getElementById('endDateInput').value;
-
-    // 2. تحديث الإعدادات العالمية
-    currentFilters.paymentStatus = paymentFilter;
-    currentFilters.store = storeFilter;
-    currentFilters.sortOption = sortOption;
-    currentFilters.startDate = startDate; // 🔥 تحديث فلتر تاريخ البداية
-    currentFilters.endDate = endDate;     // 🔥 تحديث فلتر تاريخ النهاية
-
-    // 3. إغلاق المودال
-    closeFilterModal();
-
-    // 4. استدعاء دالة عرض الفواتير المحدثة
-    renderInvoices(); 
-}
+// NOTE: `applyFiltersAndSort` consolidated later in this file to avoid duplicate
+// function declarations. The active implementation reads the filter inputs,
+// updates `currentFilters` (including start/end dates) and calls `renderInvoices()`.
 
 /**
  * تبديل حالة منبثق إدخال الكود.
  * @param {Event} event - حدث النقر.
  */
 function toggleCodeInputPopup(event) {
-    const popup = document.getElementById("codeInputPopup");
-    
-    // 2. إغلاق مودال الفلترة (لضمان عدم التداخل)
-    closeFilterModal(); 
+  const popup = document.getElementById("codeInputPopup");
 
-    // 3. تبديل المنبثق نفسه
-    if (!popup.classList.contains("hidden")) {
-        closeCodeInputPopup(); // نستخدم دالة الإغلاق لضمان مسح الحقل
-        return;
-    }
-    
-    popup.classList.remove("hidden");
-    document.getElementById("pasteInvoiceCodeInput").focus();
+  // 2. إغلاق مودال الفلترة (لضمان عدم التداخل)
+  closeFilterModal();
 
-    // 4. منع انتشار حدث النقر
-    if (event) {
-        event.stopPropagation();
-    }
+  // 3. تبديل المنبثق نفسه
+  if (!popup.classList.contains("hidden")) {
+    closeCodeInputPopup(); // نستخدم دالة الإغلاق لضمان مسح الحقل
+    return;
+  }
+
+  popup.classList.remove("hidden");
+  document.getElementById("pasteInvoiceCodeInput").focus();
+
+  // 4. منع انتشار حدث النقر
+  if (event) {
+    event.stopPropagation();
+  }
 }
 
 /**
  * إغلاق منبثق إدخال الكود (للاستخدام الداخلي).
  */
 function closeCodeInputPopup() {
-    const popup = document.getElementById("codeInputPopup");
-    popup.classList.add("hidden");
-    document.getElementById("pasteInvoiceCodeInput").value = ''; 
+  const popup = document.getElementById("codeInputPopup");
+  popup.classList.add("hidden");
+  document.getElementById("pasteInvoiceCodeInput").value = "";
 }
 
 // ======================================================
 // 🛒 دالة تعبئة قائمة المتاجر في مودال الفلترة
 // ======================================================
 function populateStoreFilterSelect() {
-    // 1. 💡 استرجاع المتاجر من المصدر الرئيسي (pointsOfSale)
-    const stores = getStores(); // نستخدم الدالة التي تجلب المتاجر من localStorage["pointsOfSale"]
-    
-    const storeSelect = document.getElementById('storeFilter');
-    
-    if (!storeSelect) return;
+  // 1. 💡 استرجاع المتاجر من المصدر الرئيسي (pointsOfSale)
+  const stores = getStores(); // نستخدم الدالة التي تجلب المتاجر من localStorage["pointsOfSale"]
 
-    // 2. مسح الخيارات الحالية وإضافة خيار "الكل"
-    // القيمة الافتراضية 'all'
-    storeSelect.innerHTML = '<option value="all">جميع المتاجر</option>';
+  const storeSelect = document.getElementById("storeFilter");
 
-    // 3. إضافة خيارات المتاجر بناءً على قائمة المتاجر الرئيسية
-    stores.forEach(store => {
-        if (store.name && store.id !== undefined) {
-            const option = document.createElement('option');
-            
-            // ✅ الأهم: نستخدم ID المتجر كقيمة (Value) للفلترة
-            option.value = store.id; 
-            
-            // نستخدم اسم المتجر كنص (Text) للعرض
-            option.textContent = store.name;
-            storeSelect.appendChild(option);
-        }
-    });
+  if (!storeSelect) return;
 
-    // 4. تعيين القيمة المحددة مسبقاً (سواء كانت 'all' أو ID المتجر المُفلتر)
-    // نستخدم String() لضمان تطابق نوع القيمة مع قيمة الـ <option>
-    storeSelect.value = String(currentFilters.store); 
+  // 2. مسح الخيارات الحالية وإضافة خيار "الكل"
+  // القيمة الافتراضية 'all'
+  storeSelect.innerHTML = '<option value="all">جميع المتاجر</option>';
+
+  // 3. إضافة خيارات المتاجر بناءً على قائمة المتاجر الرئيسية
+  stores.forEach((store) => {
+    if (store.name && store.id !== undefined) {
+      const option = document.createElement("option");
+
+      // ✅ الأهم: نستخدم ID المتجر كقيمة (Value) للفلترة
+      option.value = store.id;
+
+      // نستخدم اسم المتجر كنص (Text) للعرض
+      option.textContent = store.name;
+      storeSelect.appendChild(option);
+    }
+  });
+
+  // 4. تعيين القيمة المحددة مسبقاً (سواء كانت 'all' أو ID المتجر المُفلتر)
+  // نستخدم String() لضمان تطابق نوع القيمة مع قيمة الـ <option>
+  storeSelect.value = String(currentFilters.store);
 }
 
 // ======================================================
 // 💾 دالة تطبيق الفلترة والترتيب
 // ======================================================
 function applyFiltersAndSort() {
-    // 1. قراءة القيم من حقول الإدخال
-    const paymentFilter = document.getElementById('paymentFilter').value;
-    const storeFilter = document.getElementById('storeFilter').value;
-    const sortOption = document.getElementById('sortOption').value;
+  // 1. قراءة القيم من حقول الإدخال
+  const paymentFilter = document.getElementById("paymentFilter").value;
+  const storeFilter = document.getElementById("storeFilter").value;
+  const sortOption = document.getElementById("sortOption").value;
 
-    // 💡 الجديد: قراءة قيم التاريخ
-    const startDate = document.getElementById('startDateInput').value; 
-    const endDate = document.getElementById('endDateInput').value;
+  // 💡 الجديد: قراءة قيم التاريخ
+  const startDate = document.getElementById("startDateInput").value;
+  const endDate = document.getElementById("endDateInput").value;
 
-    // 2. تحديث الإعدادات العالمية
-    currentFilters.paymentStatus = paymentFilter;
-    currentFilters.store = storeFilter;
-    currentFilters.sortOption = sortOption;
+  // 2. تحديث الإعدادات العالمية
+  currentFilters.paymentStatus = paymentFilter;
+  currentFilters.store = storeFilter;
+  currentFilters.sortOption = sortOption;
 
-    // 💡 الجديد: تحديث فلاتر التاريخ
-    currentFilters.startDate = startDate;
-    currentFilters.endDate = endDate;
+  // 💡 الجديد: تحديث فلاتر التاريخ
+  currentFilters.startDate = startDate;
+  currentFilters.endDate = endDate;
 
-    // 3. إغلاق المودال
-    closeFilterModal();
+  // 3. إغلاق المودال
+  closeFilterModal();
 
-    // 4. 💡 استدعاء دالة عرض الفواتير المحدثة
-    // يجب أن تكون هذه الدالة (renderInvoices) جاهزة لاستلام الفلتر وتطبيقه
-    renderInvoices(); 
+  // 4. 💡 استدعاء دالة عرض الفواتير المحدثة
+  // يجب أن تكون هذه الدالة (renderInvoices) جاهزة لاستلام الفلتر وتطبيقه
+  renderInvoices();
 }
 // ======================================================
 // 🔍 تحديث دالة فتح مودال الفلترة
 // ======================================================
 function openFilterModal() {
-    const modal = document.getElementById("filterModal");
-    const overlay = document.getElementById("filterOverlay");
-    
-    // إغلاق قائمة الـ FAB الرئيسية ومنبثق الكود
-    if (fabMenuOpen) {
-        toggleFabMenu(); 
-    }
-    closeCodeInputPopup(); 
-    
-    // تعبئة قائمة المتاجر
-    populateStoreFilterSelect(); 
+  const modal = document.getElementById("filterModal");
+  const overlay = document.getElementById("filterOverlay");
 
-    // تعيين القيم الحالية في حقول الإدخال
-    document.getElementById('paymentFilter').value = currentFilters.paymentStatus;
-    document.getElementById('storeFilter').value = currentFilters.store;
-    document.getElementById('sortOption').value = currentFilters.sortOption;
-    
-    // 🔥 الجديد: تعيين قيم التاريخ الحالية
-    document.getElementById('startDateInput').value = currentFilters.startDate;
-    document.getElementById('endDateInput').value = currentFilters.endDate;
-    
-    modal.classList.remove("hidden");
-    overlay.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
+  // إغلاق قائمة الـ FAB الرئيسية ومنبثق الكود
+  if (fabMenuOpen) {
+    toggleFabMenu();
+  }
+  closeCodeInputPopup();
+
+  // تعبئة قائمة المتاجر
+  populateStoreFilterSelect();
+
+  // تعيين القيم الحالية في حقول الإدخال
+  document.getElementById("paymentFilter").value = currentFilters.paymentStatus;
+  document.getElementById("storeFilter").value = currentFilters.store;
+  document.getElementById("sortOption").value = currentFilters.sortOption;
+
+  // 🔥 الجديد: تعيين قيم التاريخ الحالية
+  document.getElementById("startDateInput").value = currentFilters.startDate;
+  document.getElementById("endDateInput").value = currentFilters.endDate;
+
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
 
 // 💡 تضاف هذه الدالة في أي مكان في ملف الـ JavaScript
 
 function resetFilters() {
-    // 1. إعادة تعيين الفلاتر العالمية إلى القيم الافتراضية
-    currentFilters.paymentStatus = DEFAULT_FILTERS.paymentStatus;
-    currentFilters.store = DEFAULT_FILTERS.store;
-    currentFilters.sortOption = DEFAULT_FILTERS.sortOption;
-    currentFilters.startDate = DEFAULT_FILTERS.startDate; // 🔥 إعادة تعيين
-    currentFilters.endDate = DEFAULT_FILTERS.endDate;     // 🔥 إعادة تعيين
+  // 1. إعادة تعيين الفلاتر العالمية إلى القيم الافتراضية
+  currentFilters.paymentStatus = DEFAULT_FILTERS.paymentStatus;
+  currentFilters.store = DEFAULT_FILTERS.store;
+  currentFilters.sortOption = DEFAULT_FILTERS.sortOption;
+  currentFilters.startDate = DEFAULT_FILTERS.startDate; // 🔥 إعادة تعيين
+  currentFilters.endDate = DEFAULT_FILTERS.endDate; // 🔥 إعادة تعيين
 
-    // 2. مسح حقل البحث السريع
-    currentSearchQuery = '';
-    const searchInput = document.getElementById('quickSearchInput');
-    if (searchInput) {
-        searchInput.value = '';
-    }
+  // 2. مسح حقل البحث السريع
+  currentSearchQuery = "";
+  const searchInput = document.getElementById("quickSearchInput");
+  if (searchInput) {
+    searchInput.value = "";
+  }
 
-    closeFabMenu();
+  closeFabMenu();
 
-    // 3. إعادة عرض الفواتير
-    renderInvoices();
+  // 3. إعادة عرض الفواتير
+  renderInvoices();
 }
 
 /**
@@ -2178,99 +2633,195 @@ function resetFilters() {
  * @param {string | Date} dateSource - مصدر التاريخ (يجب أن يكون قابلاً للتحويل إلى Date object).
  */
 function formatDateToYYYYMMDD(dateSource) {
-    // حاول تحويل المصدر إلى كائن Date
-    const date = new Date(dateSource); 
-    
-    // إذا لم يكن التحويل ناجحاً، أو كانت القيمة فارغة، أرجعها كما هي أو قيمة افتراضية
-    if (isNaN(date.getTime()) || !dateSource) {
-        return dateSource || '-';
-    }
-    
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    return `${year}/${month}/${day}`;
+  // حاول تحويل المصدر إلى كائن Date
+  const date = new Date(dateSource);
+
+  // إذا لم يكن التحويل ناجحاً، أو كانت القيمة فارغة، أرجعها كما هي أو قيمة افتراضية
+  if (isNaN(date.getTime()) || !dateSource) {
+    return dateSource || "-";
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}/${month}/${day}`;
 }
 
 // ✅ ملاحظة: هذه الدالة لم تعد تحتاج إلى document.getElementById() لأننا مررنا الزر مباشرة
 function toggleAllInvoicesAction(clickedButton) {
-    
-    const allInvoices = document.querySelectorAll(".invoice-card"); 
-    
-    if (allInvoices.length === 0) return;
+  const allInvoices = document.querySelectorAll(".invoice-card");
 
-    // 1. تحديد حالة الفواتير الحالية
-    const firstBody = allInvoices[0].querySelector(".invoice-body");
-    const isCurrentlyHidden = firstBody.classList.contains("hidden");
-    
-    // 2. تحديد الأيقونة والنص الجديد لزر FAB
-    const newText = isCurrentlyHidden ? "إغلاق الكل" : "فتح الكل";
-    const newIconClass = isCurrentlyHidden ? "fa-compress" : "fa-expand";
-    
-    // 3. تحديث أيقونة ونصوص زر FAB (باستخدام clickedButton الذي مررناه)
-    const iconElement = clickedButton.querySelector("i");
-    iconElement.className = `fa ${newIconClass}`;
-    clickedButton.querySelector("span").textContent = newText;
+  if (allInvoices.length === 0) return;
 
-    // 4. تطبيق التبديل على كل فاتورة
-    allInvoices.forEach(invoiceCard => {
-        const summary = invoiceCard.querySelector(".invoice-summary");
-        const body = invoiceCard.querySelector(".invoice-body");
-        
-        // الأيقونات الداخلية (مؤشر السهم)
-        const productsDiv = invoiceCard.querySelector(".invoice-products");
-        const productsToggleIcon = invoiceCard.querySelector(".btn-toggle-products i");
+  // 1. تحديد حالة الفواتير الحالية
+  const firstBody = allInvoices[0].querySelector(".invoice-body");
+  const isCurrentlyHidden = firstBody.classList.contains("hidden");
 
-        // عملية التبديل
-        if (isCurrentlyHidden) { 
-            // فتح الكل
-            summary.classList.add("hidden");
-            body.classList.remove("hidden");
-        } else { 
-            // إغلاق الكل
-            summary.classList.remove("hidden");
-            body.classList.add("hidden");
-            
-            // نضمن طي المنتجات الداخلية وتحديث أيقونتها إلى الأسفل
-            if (productsDiv) productsDiv.classList.add("hidden"); 
-            if (productsToggleIcon) productsToggleIcon.classList.replace("fa-chevron-up", "fa-chevron-down");
-        }
-    });
+  // 2. تحديد الأيقونة والنص الجديد لزر FAB
+  const newText = isCurrentlyHidden ? "إغلاق الكل" : "فتح الكل";
+  const newIconClass = isCurrentlyHidden ? "fa-compress" : "fa-expand";
+
+  // 3. تحديث أيقونة ونصوص زر FAB (باستخدام clickedButton الذي مررناه)
+  const iconElement = clickedButton.querySelector("i");
+  iconElement.className = `fa ${newIconClass}`;
+  clickedButton.querySelector("span").textContent = newText;
+
+  // 4. تطبيق التبديل على كل فاتورة
+  allInvoices.forEach((invoiceCard) => {
+    const summary = invoiceCard.querySelector(".invoice-summary");
+    const body = invoiceCard.querySelector(".invoice-body");
+
+    // الأيقونات الداخلية (مؤشر السهم)
+    const productsDiv = invoiceCard.querySelector(".invoice-products");
+    const productsToggleIcon = invoiceCard.querySelector(
+      ".btn-toggle-products i"
+    );
+
+    // عملية التبديل
+    if (isCurrentlyHidden) {
+      // فتح الكل
+      summary.classList.add("hidden");
+      body.classList.remove("hidden");
+    } else {
+      // إغلاق الكل
+      summary.classList.remove("hidden");
+      body.classList.add("hidden");
+
+      // نضمن طي المنتجات الداخلية وتحديث أيقونتها إلى الأسفل
+      if (productsDiv) productsDiv.classList.add("hidden");
+      if (productsToggleIcon)
+        productsToggleIcon.classList.replace(
+          "fa-chevron-up",
+          "fa-chevron-down"
+        );
+    }
+  });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const dividers = document.getElementById('firstDivider');
-    if (isAdmin()) {
-        
-    } else {
-        dividers.style.display = 'none';
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const dividers = document.getElementById("firstDivider");
+  if (isAdmin()) {
+  } else {
+    dividers.style.display = "none";
+  }
 });
 
 // 🔧 دالة لفحص ألوان المنتجات المخزنة
 function debugProductColors(invoiceId) {
-    const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
-    const invoice = allInvoices.find(inv => inv.id === invoiceId);
-    
-    if (!invoice) {
-        console.log('⚠️ الفاتورة غير موجودة');
-        return;
-    }
-    
-    console.log('=== فحص ألوان المنتجات للفاتورة ===');
-    console.log('رقم الفاتورة:', invoice.id);
-    
-    invoice.products.forEach((product, index) => {
-        console.log(`المنتج ${index + 1}:`, {
-            name: product.name,
-            quantity: product.quantity,
-            priceSYP: product.priceSYP,
-            color: product.color,
-            hasColor: !!product.color,
-            colorCode: product.color?.code,
-            colorName: product.color?.name,
-            isCustom: product.isCustom
-        });
+  const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
+  const invoice = allInvoices.find((inv) => inv.id === invoiceId);
+
+  if (!invoice) {
+    console.log("⚠️ الفاتورة غير موجودة");
+    return;
+  }
+
+  console.log("=== فحص ألوان المنتجات للفاتورة ===");
+  console.log("رقم الفاتورة:", invoice.id);
+
+  invoice.products.forEach((product, index) => {
+    console.log(`المنتج ${index + 1}:`, {
+      name: product.name,
+      quantity: product.quantity,
+      priceSYP: product.priceSYP,
+      color: product.color,
+      hasColor: !!product.color,
+      colorCode: product.color?.code,
+      colorName: product.color?.name,
+      isCustom: product.isCustom,
     });
+  });
+}
+
+// يحول نص تاريخ قد يحتوي على أرقام عربية أو فواصل خاصة إلى كائن Date
+function parseArabicDate(dateStr) {
+  if (!dateStr) return new Date(NaN);
+  try {
+    // خرائط للأرقام العربية (الشرقية والغربية)
+    const map = {
+      "٠": "0",
+      "١": "1",
+      "٢": "2",
+      "٣": "3",
+      "٤": "4",
+      "٥": "5",
+      "٦": "6",
+      "٧": "7",
+      "٨": "8",
+      "٩": "9",
+      "\u06F0": "0",
+      "\u06F1": "1",
+      "\u06F2": "2",
+      "\u06F3": "3",
+      "\u06F4": "4",
+      "\u06F5": "5",
+      "\u06F6": "6",
+      "\u06F7": "7",
+      "\u06F8": "8",
+      "\u06F9": "9",
+    };
+
+    // استبدال الأرقام العربية باللاتينية
+    let normalized = dateStr.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (ch) => {
+      return map[ch] || ch;
+    });
+
+    // استبدال أي فاصل غير رقمي بslash
+    normalized = normalized.replace(/[^0-9]/g, "/");
+
+    const parts = normalized.split("/").filter(Boolean);
+    if (parts.length >= 3) {
+      // نفترض الشكل اليوم/شهر/سنة (كما تعطي toLocaleDateString('ar-SY'))
+      let day = parseInt(parts[0], 10);
+      let month = parseInt(parts[1], 10);
+      let year = parseInt(parts[2], 10);
+      if (year < 100) year += 2000;
+      return new Date(year, month - 1, day);
+    }
+
+    // آخر حل: محاولة تحويل مباشر
+    const d = new Date(dateStr);
+    return d;
+  } catch (e) {
+    console.warn("parseArabicDate failed for", dateStr, e);
+    return new Date(dateStr);
+  }
+}
+
+// ترحيل: إضافة حقل `timestamp` رقمي للفواتير القديمة إن لم يكن موجودًا
+function migrateInvoicesTimestamps() {
+  try {
+    const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+    let changed = false;
+    invoices.forEach((inv) => {
+      if (!inv) return;
+      if (typeof inv.timestamp === "number") return; // موجود بالفعل
+
+      let ts = null;
+      // حاول استخدام الحقل date إن وُجد
+      if (inv.date) {
+        if (typeof inv.date === "number") {
+          ts = inv.date;
+        } else if (typeof inv.date === "string") {
+          const pd = parseArabicDate(inv.date);
+          if (pd && !isNaN(pd.getTime())) ts = pd.getTime();
+          else {
+            const d = new Date(inv.date);
+            if (!isNaN(d.getTime())) ts = d.getTime();
+          }
+        }
+      }
+
+      if (!ts) ts = Date.now();
+      inv.timestamp = ts;
+      changed = true;
+    });
+    if (changed) {
+      localStorage.setItem("invoices", JSON.stringify(invoices));
+      console.log("migrateInvoicesTimestamps: updated invoices with timestamp");
+    }
+  } catch (e) {
+    console.warn("migrateInvoicesTimestamps error:", e);
+  }
 }

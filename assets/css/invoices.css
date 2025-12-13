@@ -156,6 +156,10 @@
 }
 
 .invoice-footer .total {
+      display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
   font-weight: bold;
   font-size: 1.1rem;
 }
@@ -888,6 +892,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  gap: 10px;
 }
 
 .product-select-header label {
@@ -1638,4 +1643,16 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
 
 .custom-product-inputs .form-row .form-group {
   flex: 1;
+}
+
+.adjustment-row{
+  display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.product-header-actions{
+      display: flex;
+    justify-content: space-between;
+    gap: 10px;
 }

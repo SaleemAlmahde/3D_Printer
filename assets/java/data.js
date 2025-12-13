@@ -35,6 +35,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg"]
   },
   {
@@ -63,6 +64,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: [ "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/try.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -91,6 +93,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/Chicken_Alfredo.jpg", "assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg"]
   },
   {
@@ -119,6 +122,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -147,6 +151,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -175,6 +180,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -203,6 +209,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/Sushi_Roll.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -231,6 +238,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -259,6 +267,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   },
   {
@@ -287,6 +296,7 @@ const finalBaseProducts = [
       { name: "برتقالي", code: "#FFA500" }
     ],
     price: 132,
+    storePrice:10,
     images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
   }
 ];

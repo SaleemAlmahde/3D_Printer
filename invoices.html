@@ -103,7 +103,13 @@
       <div class="form-group product-select">
         <div class="product-select-header">
           <label>المنتجات:</label>
-          <button type="button" id="openProductsSheet" onclick="openAddProductSheet()">إضافة منتج +</button>
+          <div class="product-header-actions">
+            <button type="button" id="openProductsSheet" onclick="openAddProductSheet()">إضافة منتج +</button>
+            <label class="use-store-prices">
+              <input type="checkbox" id="useStorePrices">
+              أسعار المتجر
+            </label>
+          </div>
         </div>
 
         <!-- قائمة المنتجات المختارة -->
@@ -111,6 +117,21 @@
       </div>
 
         <!-- حالة الدفع والمبلغ المدفوع (اختياري) -->
+        <!-- حقل الخصم/الزيادة (اختياري) -->
+        <div class="form-group adjustment-section">
+          <label>تعديل على الإجمالي (اختياري):</label>
+          <div class="adjustment-row">
+            <input type="number" id="adjustmentValue" placeholder="قيمة" step="0.01" min="0">
+            <select id="adjustmentType" class="small-select">
+              <option value="+">+</option>
+              <option value="-">-</option>
+              <option value="+%">+ %</option>
+              <option value="-%">- %</option>
+            </select>
+          </div>
+          <small class="muted">استخدم هذا الحقل لزيادة أو خصم مبلغ ثابت أو نسبة من الإجمالي.</small>
+        </div>
+
         <div class="form-group payment-section">
           <label>حالة الدفع:</label>
           <select id="paymentStatus" onchange="togglePaymentFields()">
