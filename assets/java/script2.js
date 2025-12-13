@@ -12,6 +12,8 @@ const DEFAULT_FILTERS = {
 
 // تأكد من أن currentFilters يبدأ بالحالة الافتراضية
 let currentFilters = { ...DEFAULT_FILTERS };
+// Marker to keep an invoice open after re-render (set id before calling renderInvoices)
+window.__keepOpenInvoiceId = null;
 
 function calculateTotals(products) {
   if (!Array.isArray(products)) {
@@ -379,6 +381,9 @@ function renderInvoices(filterStoreId = null) {
       ? formatDateToYYYYMMDD(invoice.shippingDate)
       : "-";
 
+    // attach invoice id for later lookup
+    invoiceCard.dataset.invoiceId = invoice.id;
+
     invoiceCard.innerHTML = `
       <div class="invoice-header invoice-toggle-area">
         <h4>فاتورة #${invoice.id.toString().padStart(3, "0")}</h4>
@@ -539,6 +544,34 @@ function renderInvoices(filterStoreId = null) {
         }
       }
     });
+
+    // If we were asked to keep this invoice open (e.g., after editing), open it and scroll to it
+    try {
+      const keepId = window.__keepOpenInvoiceId;
+      if (keepId && Number(keepId) === Number(invoice.id)) {
+        // ensure summary collapsed and details shown
+        if (
+          summaryContainer &&
+          !summaryContainer.classList.contains("hidden")
+        ) {
+          summaryContainer.classList.add("hidden");
+        }
+        if (detailsContainer && detailsContainer.classList.contains("hidden")) {
+          detailsContainer.classList.remove("hidden");
+        }
+        const viewBtn = invoiceCard.querySelector(".btn-view");
+        if (viewBtn) viewBtn.classList.add("visible-btn");
+        // scroll the card into view
+        invoiceCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        // clear marker so only one invoice is focused
+        window.__keepOpenInvoiceId = null;
+      }
+    } catch (err) {
+      console.warn(
+        "Failed to auto-open invoice after save:",
+        err && err.message
+      );
+    }
 
     // ✅ إظهار/إخفاء زر تعديل الفاتورة
     invoiceCard.addEventListener("click", (e) => {
@@ -1157,6 +1190,12 @@ function saveInvoice() {
           // لا نغيّر الطابع الزمني الأصلي عند التعديل إن وُجد، وإلا ندرجه
           timestamp: invoices[index].timestamp || Date.now(),
         };
+        // Keep this invoice open/visible after re-render
+        try {
+          window.__keepOpenInvoiceId = id;
+        } catch (err) {
+          console.warn("Could not set keep-open marker:", err && err.message);
+        }
       }
     } else {
       // إضافة فاتورة جديدة
