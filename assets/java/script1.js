@@ -202,8 +202,8 @@ function loadMoreProducts() {
                 <h3>${product.name}</h3>
                 <p>${product.shortDisc || ''}</p>
             </div>
-            <button class="product-button" onclick="event.stopPropagation(); showModal('${product.id}')">
-                <i class="fa fa-cart-plus"></i>
+            <button class="product-button gradient-text" onclick="event.stopPropagation(); showModal('${product.id}')">
+                <i class="fa fa-cart-plus gradient-icon"></i>
             </button>
         </div>
     `;

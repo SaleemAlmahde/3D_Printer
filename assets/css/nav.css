@@ -88,7 +88,7 @@ nav .container {
 
 @media(max-width: 768px){
   nav img{
-    width: 120px;
+    width: 140px;
   }
 
   .nav-menu{
@@ -107,6 +107,6 @@ nav .container {
     }
 
     #logo{
-        width: 100px;
+        width: 120px;
     }
 }

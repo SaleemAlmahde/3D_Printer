@@ -181,6 +181,20 @@
         margin-left: 5px;
 }
 
+/* Link style for store location when a map URL is provided */
+.store-location-link {
+    color: inherit;
+    text-decoration: underline;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1; /* keep link below the actions overlay */
+    pointer-events: auto; /* ensure link receives pointer events */
+}
+.store-location-link:hover { opacity: 0.95; }
+.store-location-icon { font-size: 0.9em; color: #fff; }
+
 /* ------------------------------------------------ */
 /* أنماط المديونية (Debt Info) */
 /* ------------------------------------------------ */
@@ -213,7 +227,7 @@
             background: rgba(30, 40, 52, 0.85);
             backdrop-filter: blur(10px);
             border-radius: 25px;
-            z-index: 10;
+            z-index: 20;
             
             display: flex;
             flex-direction: column;

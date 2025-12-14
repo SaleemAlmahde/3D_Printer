@@ -5,6 +5,7 @@ let storeForm;
 let deleteStoreBtn;
 let storeLogoInput;
 let storeLogoPreview;
+let removeStoreLogoBtn;
 
 function getStores() {
   // أولاً: جلب المتاجر المحفوظة في localStorage
@@ -74,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // init logo inputs (optional)
   storeLogoInput = document.getElementById("storeLogoInput");
   storeLogoPreview = document.getElementById("storeLogoPreview");
+  removeStoreLogoBtn = document.getElementById("removeStoreLogoBtn");
   const storeLogoDataField = document.getElementById("storeLogoData");
   const storeLogoFake = document.getElementById("storeLogoFake");
   if (storeLogoInput) {
@@ -83,10 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const reader = new FileReader();
       reader.onload = function (evt) {
         const dataUrl = evt.target.result;
+        // store the data but do NOT display the preview inside the modal
         if (storeLogoPreview) {
-          storeLogoPreview.src = dataUrl;
-          document.getElementById("storeLogoPreviewWrap").style.display =
-            "block";
+          storeLogoPreview.src = dataUrl; // keep data for saving but keep hidden
         }
         if (storeLogoDataField) storeLogoDataField.value = dataUrl;
         // also store in form dataset for easier access
@@ -94,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // update fake input value to show filename/selection
         try {
           if (storeLogoFake) storeLogoFake.value = file.name || "صورة مختارة";
+          // show remove button since a file is selected
+          if (removeStoreLogoBtn) removeStoreLogoBtn.classList.remove("hidden");
         } catch (err) {}
       };
       reader.readAsDataURL(file);
@@ -104,6 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
     storeLogoFake.addEventListener("click", (ev) => {
       ev.preventDefault();
       if (storeLogoInput) storeLogoInput.click();
+    });
+  }
+
+  // remove logo button handler (clear selection/data but do not delete store record)
+  if (removeStoreLogoBtn) {
+    removeStoreLogoBtn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      deleteStoreLogo();
     });
   }
 
@@ -139,28 +150,39 @@ function openStoreModal(store = null) {
     document.getElementById("storeName").value = store.name;
     document.getElementById("storePhone").value = store.phone;
     document.getElementById("storeLocation").value = store.location;
+    // populate optional map URL
+    try {
+      document.getElementById("storeMapUrl").value = store.mapUrl || "";
+    } catch (err) {}
     deleteStoreBtn.classList.remove("hidden");
     // populate logo preview if exists and sync fake field
     try {
       const logoField = document.getElementById("storeLogoData");
+      // Do NOT display the image preview inside the modal. Instead expose a remove button when a logo exists.
       if (store.logo) {
-        if (storeLogoPreview) {
-          storeLogoPreview.src = store.logo;
-          document.getElementById("storeLogoPreviewWrap").style.display =
-            "block";
-        }
         if (logoField) logoField.value = store.logo;
         if (storeForm) storeForm.dataset.logoData = store.logo;
         if (storeLogoFake) storeLogoFake.value = "صورة موجودة";
+        if (removeStoreLogoBtn) removeStoreLogoBtn.classList.remove("hidden");
+        // keep preview src but keep wrapper hidden
+        if (storeLogoPreview) storeLogoPreview.src = store.logo;
+        try {
+          document.getElementById("storeLogoPreviewWrap").style.display =
+            "none";
+        } catch (err) {}
       } else {
         if (storeLogoPreview) storeLogoPreview.src = "";
         if (logoField) logoField.value = "";
         if (storeForm) delete storeForm.dataset.logoData;
-        document.getElementById("storeLogoPreviewWrap").style.display = "none";
+        try {
+          document.getElementById("storeLogoPreviewWrap").style.display =
+            "none";
+        } catch (err) {}
         if (storeLogoFake) storeLogoFake.value = "";
+        if (removeStoreLogoBtn) removeStoreLogoBtn.classList.add("hidden");
       }
     } catch (err) {
-      console.warn("Logo preview init failed:", err && err.message);
+      console.warn("Logo init failed:", err && err.message);
     }
   } else {
     // حالة الإضافة الجديدة
@@ -171,11 +193,14 @@ function openStoreModal(store = null) {
       if (storeLogoPreview) storeLogoPreview.src = "";
       if (logoField) logoField.value = "";
       if (storeForm) delete storeForm.dataset.logoData;
-      document.getElementById("storeLogoPreviewWrap").style.display = "none";
+      try {
+        document.getElementById("storeLogoPreviewWrap").style.display = "none";
+      } catch (err) {}
       if (storeLogoInput) storeLogoInput.value = "";
       try {
         if (storeLogoFake) storeLogoFake.value = "";
       } catch (err) {}
+      if (removeStoreLogoBtn) removeStoreLogoBtn.classList.add("hidden");
     } catch (err) {}
   }
 }
@@ -195,6 +220,7 @@ function closeStoreModal() {
     if (storeLogoInput) storeLogoInput.value = "";
     if (storeForm) delete storeForm.dataset.logoData;
     document.getElementById("storeLogoPreviewWrap").style.display = "none";
+    if (removeStoreLogoBtn) removeStoreLogoBtn.classList.add("hidden");
   } catch (err) {}
 }
 
@@ -235,6 +261,10 @@ function saveStore() {
           phone,
           location,
           logo: logoData,
+          mapUrl:
+            (document.getElementById("storeMapUrl") &&
+              document.getElementById("storeMapUrl").value.trim()) ||
+            "",
         };
       }
     } else {
@@ -250,6 +280,10 @@ function saveStore() {
         phone,
         location,
         logo: logoDataNew,
+        mapUrl:
+          (document.getElementById("storeMapUrl") &&
+            document.getElementById("storeMapUrl").value.trim()) ||
+          "",
       };
       stores.push(newStore);
     }
@@ -261,6 +295,53 @@ function saveStore() {
   } catch (e) {
     console.error("خطأ أثناء حفظ المتجر:", e);
     alert("❌ حدث خطأ أثناء الحفظ.");
+  }
+}
+
+// حذف/إفراغ صورة المتجر المؤقتة في المودال (لا يحذف الصورة من البيانات المحفوظة إلا بعد الحفظ)
+function deleteStoreLogo() {
+  try {
+    const logoField = document.getElementById("storeLogoData");
+    if (logoField) logoField.value = "";
+    if (storeForm) delete storeForm.dataset.logoData;
+    if (storeLogoInput) storeLogoInput.value = "";
+    if (storeLogoFake) storeLogoFake.value = "";
+    if (storeLogoPreview) storeLogoPreview.src = "";
+    try {
+      document.getElementById("storeLogoPreviewWrap").style.display = "none";
+    } catch (err) {}
+    if (removeStoreLogoBtn) removeStoreLogoBtn.classList.add("hidden");
+
+    // If currently editing an existing store, remove the logo from storage immediately
+    try {
+      const editingId =
+        storeForm && storeForm.dataset && storeForm.dataset.editingId;
+      if (editingId) {
+        const id = parseInt(editingId);
+        let stores = getStores();
+        const idx = stores.findIndex((s) => s.id === id);
+        if (idx !== -1) {
+          stores[idx] = { ...stores[idx], logo: "" };
+          // Persist changes: setStores will save only modified stores
+          setStores(stores);
+          // Update the displayed list immediately
+          renderStores();
+          showToast("✅ تم حذف الصورة من بيانات المتجر.", 3000, "green");
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Immediate logo deletion failed:", err && err.message);
+    }
+
+    // Fallback: inform user local removal succeeded and advise to save
+    showToast(
+      "✅ تمت إزالة الصورة محليًا. احفظ المتجر لتطبيق التغييرات.",
+      3000,
+      "green"
+    );
+  } catch (err) {
+    console.warn("deleteStoreLogo failed:", err && err.message);
   }
 }
 
@@ -367,9 +448,17 @@ function renderStores(searchTerm = "") {
                     <p><strong> <i class="fa fa-phone"></i> الهاتف :</strong> ${
                       store.phone || "غير محدد"
                     }</p>
-                    <p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${
-                      store.location || "غير محدد"
-                    }</p>
+                    ${
+                      store.mapUrl
+                        ? `<p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> <a href="${
+                            store.mapUrl
+                          }" target="_blank" rel="noopener" class="store-location-link" title="افتح في خرائط Google">${
+                            store.location || "غير محدد"
+                          } <i class='fa fa-external-link store-location-icon' aria-hidden='true'></i></a></p>`
+                        : `<p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${
+                            store.location || "غير محدد"
+                          }</p>`
+                    }
                     ${
                       isAdmin()
                         ? `<p class="store-debt-info">
@@ -415,7 +504,16 @@ function renderStores(searchTerm = "") {
             </div>
         `;
 
-    if (hasLogo) {
+    // If a map URL exists, ensure the link doesn't trigger the card click
+    if (store.mapUrl) {
+      // attach listener after innerHTML assignment so stopPropagation works reliably
+      const link = storeCard.querySelector(".store-location-link");
+      if (link) {
+        link.addEventListener("click", function (e) {
+          e.stopPropagation();
+          // allow default action (opening link) to proceed
+        });
+      }
     }
 
     storesContainer.appendChild(storeCard);

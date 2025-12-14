@@ -631,6 +631,14 @@ border-radius: 25px;
     width: 100%; /* تأكد من ملء العرض ضمن الـ Grid */
 }
 
+#customerInfoFields input[type="tel"] {
+    text-align: right; /* Align phone input text to the right */
+}
+
+#customerInfoFields input[type="tel"]::-webkit-input-placeholder { text-align: right; }
+#customerInfoFields input[type="tel"]::-moz-placeholder { text-align: right; }
+#customerInfoFields input[type="tel"]:-ms-input-placeholder { text-align: right; }
+#customerInfoFields input[type="tel"]::placeholder { text-align: right; }
 #customerInfoFields textarea {
     /* جعل حقل الملاحظات يأخذ عرضاً أكبر إذا أمكن */
     grid-column: 1 / -1; 
@@ -760,7 +768,7 @@ border-radius: 25px;
 
 @media(max-width: 480px){
     #customerInfoFields {
-    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, minmax(190px, 1fr));
     }
 
     .cart-card {

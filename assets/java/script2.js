@@ -2357,8 +2357,23 @@ window.addEventListener("click", checkScrollButtonVisibility);
 // دالة جلب المتاجر (تستخدم في صفحة الفواتير)
 function getStores() {
   try {
-    const stores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
-    return stores;
+    // جلب متاجر المستخدم من localStorage
+    const userStores = JSON.parse(localStorage.getItem("pointsOfSale")) || [];
+
+    // إذا كانت هناك قائمة المتاجر الافتراضية، ندمجها مع متاجر المستخدم
+    let combinedStores = Array.isArray(defaultStores) ? [...defaultStores] : [];
+
+    // استبدال أو إضافة متاجر المستخدم فوق الافتراضية عند الحاجة
+    userStores.forEach((userStore) => {
+      const idx = combinedStores.findIndex((s) => s.id === userStore.id);
+      if (idx !== -1) {
+        combinedStores[idx] = userStore;
+      } else {
+        combinedStores.push(userStore);
+      }
+    });
+
+    return combinedStores;
   } catch (error) {
     console.error("❌ خطأ في جلب المتاجر:", error);
     return [];

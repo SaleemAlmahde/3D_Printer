@@ -64,6 +64,7 @@
                 <input type="text" id="storeName" placeholder="اسم صاحب المحل / المتجر" required>
                 <input type="tel" id="storePhone" placeholder="رقم هاتف المتجر" required>
                 <input type="text" id="storeLocation" placeholder="موقع المحل / المحافظة" required>
+                <input type="url" id="storeMapUrl" placeholder="رابط Google Maps (اختياري)" />
 
                 <!-- Logo (اختياري) - replaced visible label with placeholder-style field -->
                 <input type="file" id="storeLogoInput" accept="image/*" style="display:none">
@@ -72,6 +73,7 @@
                 <div id="storeLogoPreviewWrap" style="margin-top:10px; display:none;">
                     <img id="storeLogoPreview" src="" alt="معاينة الصورة" style="max-width:100%; max-height:90px; border-radius:8px; display:block;" />
                 </div>
+                <button type="button" id="removeStoreLogoBtn" class="remove-logo-btn hidden" style="margin-top:8px; background-color: red;">حذف الصورة</button>
 
                 <button type="button" class="save-invoice-btn" onclick="saveStore()">حفظ المتجر</button>
             </form>

@@ -111,3 +111,9 @@ select{
     /* لمنع قراءة العنصر الفاصل من قبل قارئات الشاشة (مهم لإمكانية الوصول) */
     overflow: true; 
 }
+
+@media (max-width: 480px) {
+  .cats-container {
+    width: 100%;
+  }
+}

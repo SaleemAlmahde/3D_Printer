@@ -118,11 +118,46 @@
     background: transparent;
     border: none;
     border-radius: 50px;
-    color: green;
     font-size: 30px;
     cursor: pointer;
     transition: background 0.3s ease, transform 0.3s, box-shadow 0.3s;
     transform: translateY(3px) scaleX(-1);
+}
+
+/* .gradient-text { */
+    /* 1. تطبيق التدرج كخلفية */
+    /* background: linear-gradient(to left, #09c4a4 0%, #049277 100%); */
+    
+    /* 2. قص الخلفية لتقتصر على محيط النص فقط */
+    /* -webkit-background-clip: text; */
+    /* background-clip: text; */
+    
+    /* 3. جعل لون النص شفافاً لإظهار الخلفية المقصوصة */
+    /* color: transparent !important; */
+    /* -webkit-text-fill-color: transparent !important; */
+/* } */
+
+/* 1. الكلاس الجديد لتطبيق التدرج على الأيقونة */
+.gradient-icon {
+    /* تطبيق التدرج اللوني الذي طلبته */
+    background: linear-gradient(to left, #09c4a4 0%, #049277 100%);
+    
+    /* الخصائص الأساسية لتطبيق الخلفية كقص للنص */
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* 🔑 الأهم: جعل لون الأيقونة شفافاً (تجاهل أي لون آخر) */
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* For custom-product cards, show the cart icon as plain white instead of gradient */
+.custom-product-card .gradient-icon {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
 }
 
 .custom-product-card .product-card-bottom button{
@@ -808,6 +843,7 @@ ease;
     outline: 2px solid var(--main-color);
     outline-offset: 2px;
 }
+
 
 
 

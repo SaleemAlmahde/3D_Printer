@@ -79,6 +79,16 @@
   text-overflow: ellipsis;
 }
 
+/* Ensure phone input placeholder and text are right-aligned to match RTL layout */
+#invoiceForm input[type="tel"] {
+  text-align: right;
+}
+
+#invoiceForm input[type="tel"]::-webkit-input-placeholder { text-align: right; }
+#invoiceForm input[type="tel"]::-moz-placeholder { text-align: right; }
+#invoiceForm input[type="tel"]:-ms-input-placeholder { text-align: right; }
+#invoiceForm input[type="tel"]::placeholder { text-align: right; }
+
 .invoice-header {
   display: flex;
   justify-content: space-between;
