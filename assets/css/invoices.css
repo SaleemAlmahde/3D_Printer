@@ -433,9 +433,93 @@
 @media (max-width: 500px) {
   .form-group.notes { flex-direction: column; }
   .form-group.notes label { text-align: right; }
+.custom-product-item {
 }
 
 /* زر الحفظ */
+/* Improve layout of custom product card on small screens */
+.custom-product-item {
+  display: block;
+  position: relative;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.custom-product-item .product-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.custom-product-item .product-name {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  word-break: break-word;
+  flex: 1 1 auto;
+}
+
+.custom-product-item .selected-color,
+.custom-product-item .product-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  flex: 0 0 auto;
+  margin-inline-start: 8px;
+}
+
+.custom-product-item .custom-badge {
+  margin-inline-start: 8px;
+  font-size: 12px;
+}
+
+.custom-product-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.custom-product-fields .field-group {
+  flex: 1 1 48%;
+  min-width: 120px;
+}
+
+.custom-product-fields .field-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+.custom-description {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #333;
+  background: transparent;
+  padding: 6px 0;
+}
+
+/* position remove button so it doesn't break layout */
+.custom-product-item .remove-product {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  background: none;
+  border: none;
+  color: #ff5252;
+}
+
+/* Ensure inputs inside custom UI take full width on very small screens */
+@media (max-width: 360px) {
+  .custom-product-fields .field-group { flex-basis: 100%; }
+  .custom-product-item .product-name { font-size: 14px; }
+}
 .save-invoice-btn {
   margin-top: 10px;
   background: #fff;
@@ -1382,7 +1466,31 @@ ease;
 .full-width-select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
+      /* Slightly reduce font size for invoice content on small screens */
+      .invoice-card,
+      .invoice-card h4,
+      .invoice-card .invoice-info,
+      #newInvoiceModal .modal-content,
+      #invoiceForm input,
+      #invoiceForm textarea,
+      #newInvoiceModal .modal-content label,
+      .bottom-sheet-content {
+        font-size: 15px;
+        line-height: 1.25;
+      }
+
+      /* Make date input match other inputs width/height/box-sizing */
+      #invoiceForm input[type="date"],
+      #deliveryDate {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        height: calc(2.2em + 12px);
+        padding: 8px 10px;
+        font-size: inherit;
+      }
+
+    /* تنسيقات للمنتج المخصص */
     border-radius: 5px;
 }
 
@@ -1538,6 +1646,10 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
 
     .invoice-hr {
     width: 180px;
+    }
+
+    .invoice-logo {
+      display: none;
     }
 }
 
@@ -1722,4 +1834,5 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
       display: flex;
     justify-content: space-between;
     gap: 10px;
+}
 }

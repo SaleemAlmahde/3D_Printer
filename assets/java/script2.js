@@ -328,26 +328,37 @@ function renderInvoices(filterStoreId = null) {
       const safePriceSYP = Number(product.priceSYP) || 0;
 
       if (product.isCustom) {
-        // Custom product: show wrench icon instead of color
-        // include a hidden description block that can be toggled when viewing the invoice
+        // Custom product: show the admin-entered name and optional color
         const customDesc = product.customDescription
           ? String(product.customDescription)
               .replace(/</g, "&lt;")
               .replace(/>/g, "&gt;")
           : "";
+        const displayName = product.name || "منتج مخصص";
+        const colorCodeRaw = product?.color?.code || "";
+        const colorTitleRaw = product?.color?.name || "";
+        const hasColor =
+          colorCodeRaw &&
+          colorCodeRaw !== "#ffffff" &&
+          colorCodeRaw !== "undefined";
+
         productsHTML += `
       <li class="product-item" onclick="event.stopPropagation(); toggleCustomDesc(this)" style="cursor:pointer;">
-      <span class="product-name">منتج مخصص</span>
-      <span class="product-custom-icon" title="منتج مخصص">🛠️</span>
-      <span class="product-qty">x${product.quantity}</span>
-      <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
-      ${
-        customDesc
-          ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${customDesc}</div>`
-          : ""
-      }
-    </li>
-  `;
+        <span class="product-name">${displayName}</span>
+        ${
+          hasColor
+            ? `<span class="product-color" title="${colorTitleRaw}" style="background-color: ${colorCodeRaw}"></span>`
+            : `<span class="product-custom-icon" title="منتج مخصص">🛠️</span>`
+        }
+        <span class="product-qty">x${product.quantity}</span>
+        <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
+        ${
+          customDesc
+            ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${customDesc}</div>`
+            : ""
+        }
+      </li>
+    `;
       } else {
         const colorCodeRaw = product?.color?.code || "";
         const colorTitleRaw = product?.color?.name || "";
@@ -1077,12 +1088,18 @@ function saveInvoice() {
             item.querySelector(".custom-description-input")?.value ||
             item.querySelector(".custom-description-text")?.value ||
             "";
+          // read optional color info stored on the element
+          const colorNameEl = item.querySelector(".product-color-name");
+          const colorCodeEl = item.querySelector(".product-color-code");
+          const colorName = colorNameEl?.value || "مخصص";
+          const colorCode = colorCodeEl?.value || "#ffffff";
+
           return {
             name: name,
             quantity: quantity,
             priceSYP: priceSYP,
             isCustom: true, // ضروري للحفظ
-            color: { name: "مخصص", code: "#FFFFFF" },
+            color: { name: colorName, code: colorCode },
             customDescription: customDesc,
           };
         } else {
@@ -1481,8 +1498,22 @@ function selectProduct(productId) {
       <h4>إدخال تفاصيل المنتج المخصص</h4>
       <div class="custom-form">
         <div class="form-group">
+          <label>اسم المنتج المخصص:</label>
+          <input type="text" id="customProductName" placeholder="اسم المنتج (مثال: حامل هاتف)">
+        </div>
+        <div class="form-group">
           <label>الوصف المخصص:</label>
           <textarea id="customDescriptionInput" placeholder="أدخل وصف المنتج المخصص..." rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>اسم اللون (اختياري):</label>
+            <input type="text" id="customProductColorName" placeholder="أحمر، أسود...">
+          </div>
+          <div class="form-group">
+            <label>رمز اللون:</label>
+            <input type="color" id="customProductColorCode" value="#ffffff">
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -1615,21 +1646,34 @@ function confirmAddProduct() {
 
   // 🔧 NEW: معالجة المنتج المخصص بشكل مختلف
   if (isCustom) {
+    const customNameInput = document.getElementById("customProductName");
     const descriptionInput = document.getElementById("customDescriptionInput");
     const customQtyInput = document.getElementById("customProductQty");
     const customPriceInput = document.getElementById("customProductPrice");
 
-    if (!descriptionInput || !customQtyInput || !customPriceInput) {
+    if (
+      !customNameInput ||
+      !descriptionInput ||
+      !customQtyInput ||
+      !customPriceInput
+    ) {
       showToast("⚠️ يرجى إدخال تفاصيل المنتج المخصص", 3000, "orange");
       return;
     }
 
+    const customName = customNameInput.value.trim();
     const customDescription = descriptionInput.value.trim();
+    const customColorNameInput = document.getElementById(
+      "customProductColorName"
+    );
+    const customColorCodeInput = document.getElementById(
+      "customProductColorCode"
+    );
     const quantity = parseInt(customQtyInput.value) || 1;
     const priceSYP = parseFloat(customPriceInput.value) || 0;
 
-    if (!customDescription) {
-      showToast("⚠️ يرجى إدخال وصف المنتج المخصص", 3000, "orange");
+    if (!customName) {
+      showToast("⚠️ يرجى إدخال اسم للمنتج المخصص", 3000, "orange");
       return;
     }
 
@@ -1639,9 +1683,15 @@ function confirmAddProduct() {
     );
     const productElement = document.createElement("div");
     productElement.className = "selected-product custom-product-item";
+    const customColorName =
+      (customColorNameInput && customColorNameInput.value.trim()) || "مخصص";
+    const customColorCode =
+      (customColorCodeInput && customColorCodeInput.value) || "#ffffff";
+
     productElement.innerHTML = `
       <div class="product-info">
-        <span class="product-name">${product.name}</span>
+        <span class="product-name">${customName}</span>
+        <div class="selected-color" style="background-color: ${customColorCode};" title="${customColorName}"></div>
         <div class="custom-badge">🛠️ مخصص</div>
       </div>
       <div class="custom-product-fields">
@@ -1668,6 +1718,15 @@ function confirmAddProduct() {
         /"/g,
         "&quot;"
       )}">
+      <input type="hidden" class="custom-product-name-hidden" value="${customName.replace(
+        /"/g,
+        "&quot;"
+      )}">
+      <input type="hidden" class="product-color-name" value="${customColorName.replace(
+        /"/g,
+        "&quot;"
+      )}">
+      <input type="hidden" class="product-color-code" value="${customColorCode}">
     `;
     selectedProductsList.appendChild(productElement);
   } else {
