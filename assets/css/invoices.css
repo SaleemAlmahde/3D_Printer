@@ -433,93 +433,9 @@
 @media (max-width: 500px) {
   .form-group.notes { flex-direction: column; }
   .form-group.notes label { text-align: right; }
-.custom-product-item {
 }
 
 /* زر الحفظ */
-/* Improve layout of custom product card on small screens */
-.custom-product-item {
-  display: block;
-  position: relative;
-  padding: 10px 12px;
-  background: rgba(0,0,0,0.04);
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-
-.custom-product-item .product-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.custom-product-item .product-name {
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 1.2;
-  word-break: break-word;
-  flex: 1 1 auto;
-}
-
-.custom-product-item .selected-color,
-.custom-product-item .product-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-  flex: 0 0 auto;
-  margin-inline-start: 8px;
-}
-
-.custom-product-item .custom-badge {
-  margin-inline-start: 8px;
-  font-size: 12px;
-}
-
-.custom-product-fields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.custom-product-fields .field-group {
-  flex: 1 1 48%;
-  min-width: 120px;
-}
-
-.custom-product-fields .field-group input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 8px;
-  font-size: 14px;
-}
-
-.custom-description {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #333;
-  background: transparent;
-  padding: 6px 0;
-}
-
-/* position remove button so it doesn't break layout */
-.custom-product-item .remove-product {
-  position: absolute;
-  left: 8px;
-  top: 8px;
-  background: none;
-  border: none;
-  color: #ff5252;
-}
-
-/* Ensure inputs inside custom UI take full width on very small screens */
-@media (max-width: 360px) {
-  .custom-product-fields .field-group { flex-basis: 100%; }
-  .custom-product-item .product-name { font-size: 14px; }
-}
 .save-invoice-btn {
   margin-top: 10px;
   background: #fff;
@@ -880,6 +796,89 @@
 
 .selected-product .remove-product:hover {
   opacity: 1;
+}
+
+/* ===== Custom product card layout (modal) ===== */
+.selected-product.custom-product-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  position: relative;
+}
+.selected-product.custom-product-item .selected-product-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.selected-product.custom-product-item .selected-product-right {
+  flex: 0 0 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+.selected-product.custom-product-item .selected-product-right .field-group {
+  margin: 0;
+}
+.selected-product.custom-product-item .selected-product-right input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.selected-product.custom-product-item .custom-description-input {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+.selected-product.custom-product-item .product-name {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.selected-product.custom-product-item .remove-product {
+  position: absolute;
+  top: 8px;
+  left: 8px; /* left because layout is RTL */
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #c62828;
+}
+
+/* Mobile adjustments (<=480px): stack vertically and compact inputs */
+@media (max-width: 480px) {
+  .selected-product.custom-product-item {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+  }
+  .selected-product.custom-product-item .selected-product-right {
+    flex: none;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+  .selected-product.custom-product-item .selected-product-right .field-group {
+    flex: 1 1 50%;
+    margin: 0;
+  }
+  .selected-product.custom-product-item .custom-description-input {
+    min-height: 48px;
+  }
+  .selected-product.custom-product-item .product-name {
+    font-size: 15px;
+  }
+  .selected-product.custom-product-item .remove-product {
+    top: 6px;
+    left: 6px;
+    font-size: 16px;
+  }
 }
 
 /* تحسين قائمة المنتجات في الشيت */
@@ -1834,5 +1833,4 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
       display: flex;
     justify-content: space-between;
     gap: 10px;
-}
 }
