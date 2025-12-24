@@ -146,18 +146,49 @@ function displayCartItems() {
     const card = document.createElement("div");
     card.classList.add("cart-card");
 
+    // determine if this item should show price as 0 and display the "price later" note
+    const hasNote = item.note && item.note.toString().trim() !== "";
+    const priceIsZero = hasNote || item.isCustom;
+    const displayPrice = priceIsZero ? 0 : product.price;
+    const priceNoteHTML = priceIsZero
+      ? `<p style="color:#d35400; font-weight:bold; margin-top:6px;">✳️ السعر يحدد لاحقاً</p>`
+      : "";
+
+    // build details area (different for custom orders)
+    let detailsForCard = "";
+    let actionButtonsHTML = `
+        <button class="delete-cart-btn" onclick="removeFromCart(${item.id})">حذف</button>
+        <button class="edit-cart-btn" onclick="editCartItem(${item.id})">تعديل</button>
+        `;
+
+    if (item.isCustom) {
+      detailsForCard = `
+          <p>الكمية: 1 (طلب)</p>
+          <p style="font-weight: bold; color: #007bff; margin-top: 5px;">الوصف المخصص:</p>
+          <textarea readonly style="width: 100%; border: 1px solid #ccc; padding: 5px; border-radius: 4px; resize: none; height: 80px; font-size: 14px; background: #f9f9f9;">${
+            item.customDescription || "لا يوجد وصف."
+          }</textarea>
+      `;
+      actionButtonsHTML = `<button class="delete-cart-btn" onclick="removeFromCart(${item.id})">حذف</button>
+          <button class="edit-cart-btn" onclick="showToast('⚠️ لا يمكن تعديل الطلب المخصص من هنا. يرجى الحذف وإعادة الإضافة.', 3000, 'orange')">تعديل</button>`;
+    } else {
+      detailsForCard = `
+          <p>اللون : <span style="${colorStyle}">${item.selectedColor.name}</span></p>
+          <p>الكمية : ${item.quantity}</p>
+          <p>السعر : ${displayPrice} ل.س</p>
+      `;
+    }
+
     card.innerHTML = `
         <h3>${product.name}</h3>
       <div class="cart-info">
       <img class="cart-image" src="${product.images[0]}" alt="${product.name}" style="width:120px; height:120px; border-radius:10px 10px 25px 10px; object-fit:contain;">
         <div class="cart-details">
-        <p>اللون : <span style="${colorStyle}; text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;">${item.selectedColor.name}</span></p>
-        <p>الكمية : ${item.quantity}</p>
-        <p>السعر : ${product.price} ل.س</p>
+        ${detailsForCard}
+        ${priceNoteHTML}
         </div>
         <div class="cart-buttons">
-        <button class="delete-cart-btn" onclick="removeFromCart(${item.id})">حذف</button>
-        <button class="edit-cart-btn" onclick="editCartItem(${item.id})">تعديل</button>
+        ${actionButtonsHTML}
         </div>
       </div>
     `;
@@ -275,11 +306,19 @@ function openEditModal(cartItem) {
                     <h2>${product.name}</h2>
                     <h3>${product.price} ل.س</h3>
                 </div>
-                <img src="./${product.images[0]}" alt="${product.name}" style="width: 80px; height: 80px;">
+                <img src="./${product.images[0]}" alt="${
+    product.name
+  }" style="width: 80px; height: 80px;">
             </div>
             ${colorsHTML}
-            <input type="number" id="pQ" placeholder="الكمية" value="${cartItem.quantity}" required>
+            <input type="number" id="pQ" placeholder="الكمية" value="${
+              cartItem.quantity
+            }" required>
             
+            <textarea id="pNote" placeholder="ملاحظات إضافية (اختياري)" style="width:100%; min-height:80px; margin-top:8px;">${
+              cartItem.note || ""
+            }</textarea>
+
             <button onClick="saveEdit(${cartItem.id})">حفظ التعديلات</button>
         </div>
     `;
@@ -344,6 +383,9 @@ function saveEdit(itemId) {
   const selectedColorData = colorContainer.dataset.selectedColor;
   const quantity = parseInt(qInput.value) || 1;
 
+  const noteInput = document.getElementById("pNote");
+  const note = noteInput ? noteInput.value.trim() : "";
+
   if (!selectedColorData) {
     showToast("⚠️ يرجى اختيار لون للمنتج", 3000, "orange");
     return;
@@ -354,6 +396,7 @@ function saveEdit(itemId) {
   // 1. تحديث بيانات العنصر
   cartItems[cartItemIndex].quantity = quantity;
   cartItems[cartItemIndex].selectedColor = selectedColor;
+  cartItems[cartItemIndex].note = note;
 
   // 2. حفظ في localStorage
   localStorage.setItem("cartItems", JSON.stringify(cartItems));
@@ -433,8 +476,13 @@ function updateCartTotals() {
   cartItems.forEach((item) => {
     const product = finalBaseProducts.find((p) => p.id == item.productId);
     if (product) {
-      totalQuantity += item.quantity;
-      totalPrice += item.quantity * product.price;
+      const qty = Number(item.quantity) || 1;
+      totalQuantity += qty;
+
+      const hasNote = item.note && item.note.toString().trim() !== "";
+      const unitPrice =
+        hasNote || item.isCustom ? 0 : Number(product.price) || 0;
+      totalPrice += qty * unitPrice;
     }
   });
 
