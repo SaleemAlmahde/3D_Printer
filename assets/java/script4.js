@@ -450,11 +450,16 @@ function renderStores(searchTerm = "") {
                     }</p>
                     ${
                       store.mapUrl
-                        ? `<p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> <a href="${
+                        ? `<p>
+                        <a href="${
                             store.mapUrl
-                          }" target="_blank" rel="noopener" class="store-location-link" title="افتح في خرائط Google">${
+                          }" target="_blank" rel="noopener"  class="store-location-link" title="افتح في خرائط Google">
+                          <i class="fa fa-map-marker"></i>
+                          <strong style="text-decoration: underline;"> الموقع :
+                          ${
                             store.location || "غير محدد"
-                          } <i class='fa fa-external-link store-location-icon' aria-hidden='true'></i></a></p>`
+                          } </strong>
+                          <i class='fa fa-external-link store-location-icon' aria-hidden='true'></i></a></p>`
                         : `<p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${
                             store.location || "غير محدد"
                           }</p>`

@@ -311,7 +311,7 @@ function renderInvoices(filterStoreId = null) {
     return;
   }
 
-  processedInvoices.forEach((invoice) => {
+  processedInvoices.forEach((invoice, idx) => {
     const invoiceCard = document.createElement("div");
     invoiceCard.classList.add("invoice-card");
 
@@ -341,6 +341,9 @@ function renderInvoices(filterStoreId = null) {
           colorCodeRaw &&
           colorCodeRaw !== "#ffffff" &&
           colorCodeRaw !== "undefined";
+        const noteText = product.note
+          ? String(product.note).replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          : "";
 
         productsHTML += `
       <li class="product-item" onclick="event.stopPropagation(); toggleCustomDesc(this)" style="cursor:pointer;">
@@ -353,8 +356,10 @@ function renderInvoices(filterStoreId = null) {
         <span class="product-qty">x${product.quantity}</span>
         <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
         ${
-          customDesc
-            ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${customDesc}</div>`
+          customDesc || noteText
+            ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${customDesc}${
+                noteText ? `<div class="note-text">${noteText}</div>` : ""
+              }</div>`
             : ""
         }
       </li>
@@ -372,12 +377,53 @@ function renderInvoices(filterStoreId = null) {
             ? colorTitleRaw
             : "بدون لون";
 
+        const descParts = [];
+        if (product.customDescription) {
+          descParts.push(
+            String(product.customDescription)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+          );
+        }
+        if (product.note) {
+          descParts.push(
+            `<div class="note-text">${String(product.note)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")}</div>`
+          );
+        }
+        if (product.description) {
+          descParts.push(
+            String(product.description)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+          );
+        }
+        if (product.shortDisc) {
+          descParts.push(
+            String(product.shortDisc)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+          );
+        }
+
+        const descHTML = descParts.length
+          ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${descParts.join(
+              ""
+            )}</div>`
+          : "";
+
+        const clickableAttr = descParts.length
+          ? ' onclick="event.stopPropagation(); toggleCustomDesc(this)" style="cursor:pointer;"'
+          : "";
+
         productsHTML += `
-    <li class="product-item">
+    <li class="product-item"${clickableAttr}>
       <span class="product-name">${product.name}</span>
       <span class="product-color" title="${displayTitle}" style="background-color: ${displayColor}"></span>
       <span class="product-qty">x${product.quantity}</span>
       <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
+      ${descHTML}
     </li>
   `;
       }
@@ -406,9 +452,11 @@ function renderInvoices(filterStoreId = null) {
     // attach invoice id for later lookup
     invoiceCard.dataset.invoiceId = invoice.id;
 
+    const displayInvoiceNumber = idx + 1;
+
     invoiceCard.innerHTML = `
       <div class="invoice-header invoice-toggle-area">
-        <h4>فاتورة #${invoice.id.toString().padStart(3, "0")}</h4>
+        <h4>فاتورة #${displayInvoiceNumber}</h4>
         <span class="invoice-date">${invoice.date}</span>
       </div>
 
@@ -863,6 +911,9 @@ function editInvoice(id) {
               /"/g,
               "&quot;"
             )}">
+            <input type="hidden" class="product-note-text" value="${(
+              p.note || ""
+            ).replace(/"/g, "&quot;")}">
           </div>
           <div class="selected-product-right">
             <div class="field-group">
@@ -910,6 +961,9 @@ function editInvoice(id) {
                 <input type="hidden" class="product-price-static" value="${priceSYP}">
                 <input type="hidden" class="product-color-name" value="${colorName}">
                 <input type="hidden" class="product-color-code" value="${colorCode}">
+                <input type="hidden" class="product-note-text" value="${(
+                  p.note || ""
+                ).replace(/"/g, "&quot;")}">
             `;
     }
 
@@ -1094,6 +1148,7 @@ function saveInvoice() {
           const colorName = colorNameEl?.value || "مخصص";
           const colorCode = colorCodeEl?.value || "#ffffff";
 
+          const note = item.querySelector(".product-note-text")?.value || "";
           return {
             name: name,
             quantity: quantity,
@@ -1101,6 +1156,7 @@ function saveInvoice() {
             isCustom: true, // ضروري للحفظ
             color: { name: colorName, code: colorCode },
             customDescription: customDesc,
+            note: note,
           };
         } else {
           // --- قراءة المنتج القياسي (Static Hidden Inputs) ---
@@ -1138,12 +1194,14 @@ function saveInvoice() {
             });
           }
 
+          const note = item.querySelector(".product-note-text")?.value || "";
           return {
             name: name,
             quantity: quantity,
             priceSYP: priceSYP,
             isCustom: false, // ضروري للحفظ
             color: { name: colorName, code: colorCode },
+            note: note,
           };
         }
       }
@@ -1583,6 +1641,21 @@ function selectProduct(productId) {
       colorSelector,
       document.getElementById("productQuantity")
     );
+
+  // Add optional note field (placeholder only) for this product selection
+  const existingNote = bottomSheetContent.querySelector(
+    ".product-note-wrapper"
+  );
+  if (existingNote) existingNote.remove();
+  const noteWrapper = document.createElement("div");
+  noteWrapper.className = "product-note-wrapper";
+  noteWrapper.innerHTML = `<textarea id="productNoteInput" placeholder="ملاحظة (اختياري)" rows="2" style="width:100%; box-sizing:border-box; margin-top:8px; resize:vertical;"></textarea>`;
+  document
+    .getElementById("productQuantity")
+    .parentElement.insertBefore(
+      noteWrapper,
+      document.getElementById("productQuantity")
+    );
 }
 
 // اختيار اللون
@@ -1671,6 +1744,9 @@ function confirmAddProduct() {
     );
     const quantity = parseInt(customQtyInput.value) || 1;
     const priceSYP = parseFloat(customPriceInput.value) || 0;
+    // optional note (from bottom-sheet)
+    const noteInput = document.getElementById("productNoteInput");
+    const productNote = noteInput ? noteInput.value.trim() : "";
 
     if (!customName) {
       showToast("⚠️ يرجى إدخال اسم للمنتج المخصص", 3000, "orange");
@@ -1755,6 +1831,10 @@ function confirmAddProduct() {
     );
     const productElement = document.createElement("div");
     productElement.className = "selected-product";
+    // read optional note from bottom-sheet
+    const noteInput = document.getElementById("productNoteInput");
+    const productNote = noteInput ? noteInput.value.trim() : "";
+
     productElement.innerHTML = `
       <div class="product-info">
         <span class="product-name">${product.name}</span>
@@ -1778,7 +1858,11 @@ function confirmAddProduct() {
       <input type="hidden" class="product-color-code" value="${
         selectedColor.code
       }">
-    `;
+      <input type="hidden" class="product-note-text" value="${productNote.replace(
+        /"/g,
+        "&quot;"
+      )}">
+      `;
     selectedProductsList.appendChild(productElement);
   }
 
@@ -2137,6 +2221,10 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
                       onclick="this.closest('.selected-product').remove(); updateTotals();">
                 <i class="fa fa-times"></i>
               </button>
+                      <input type="hidden" class="product-note-text" value="${productNote.replace(
+                        /"/g,
+                        "&quot;"
+                      )}">
               <input type="hidden" class="is-custom-flag" value="false">
               <input type="hidden" class="temp-product-id" value="${
                 p.id || ""

@@ -1,93 +1,123 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>3D Printer - المنتجات</title>
-    
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.min.css" />
-    
+    <link
+      rel="stylesheet"
+      href="assets/plugins/font-awesome/css/font-awesome.min.css"
+    />
+
     <!-- CSS Files -->
-    <link rel="stylesheet" href="assets/css/normalize.css">
-    <link rel="stylesheet" href="assets/css/products.css">
-    
+    <link rel="stylesheet" href="assets/css/normalize.css" />
+    <link rel="stylesheet" href="assets/css/products.css" />
+
     <!-- JavaScript Files -->
     <script src="assets/java/data.js"></script>
     <script src="assets/java/admin.js"></script>
     <script src="assets/java/show_toast.js"></script>
     <script src="assets/java/script1.js"></script>
-</head>
-<body>
-
+  </head>
+  <body>
     <!-- Nav Section -->
     <nav>
-        <div class="container">
-            <ul class="nav-menu">
-                <a href="index.html"><li>المنتجات</li></a>
-                <div class="divider" id="firstDivider" role="separator" aria-orientation="vertical" ></div>
-                <a href="invoices.html" id="invoicesLink"><li>الفواتير</li></a>
-                <div class="divider" role="separator" aria-orientation="vertical" ></div>
-                <a href="cart.html"><li>السلة</li></a>
-                <div class="divider" role="separator" aria-orientation="vertical" ></div>
-                <a href="stores.html"><li>نقاط البيع</li></a>
-            </ul>
+      <div class="container">
+        <ul class="nav-menu">
+          <a href="index.html"><li>المنتجات</li></a>
+          <div
+            class="divider"
+            id="firstDivider"
+            role="separator"
+            aria-orientation="vertical"
+          ></div>
+          <a href="invoices.html" id="invoicesLink"><li>الفواتير</li></a>
+          <div
+            class="divider"
+            role="separator"
+            aria-orientation="vertical"
+          ></div>
+          <a href="cart.html"><li>السلة</li></a>
+          <div
+            class="divider"
+            role="separator"
+            aria-orientation="vertical"
+          ></div>
+          <a href="stores.html"><li>نقاط البيع</li></a>
+        </ul>
 
-            <img src="assets/imgs/3dp web logo copy.png" alt="logo" id="logo">
-        </div>
+        <img src="assets/imgs/3dp web logo copy.png" alt="logo" id="logo" />
+      </div>
     </nav>
 
     <section id="adSection">
-    <div class="container">
+      <div class="container">
         <div class="ad-slider-container">
-            <div class="ad-slider" id="adSlider"></div>
+          <div class="ad-slider" id="adSlider"></div>
         </div>
-    </div>
-</section>
+      </div>
+    </section>
 
     <!-- Products Section -->
     <section id="productsSection">
-        <div class="container">
-            <!-- <div class="top-products"><h2>المنتجات</h2></div> -->
+      <div class="container">
+        <!-- <div class="top-products"><h2>المنتجات</h2></div> -->
 
-            <div class="search-container">
-    <input type="text" id="searchInput" placeholder="ابحث عن منتج..." onkeyup="searchProducts()">
-    <i class="fa fa-search"></i>
-</div>
-
-
-            <div class="cats">
-                <div class="cats-container">
-                <div id="importantCats"></div>
-                <div id="dropDownContainer">
-                    <select name="" id="otherCat" onchange="filterProducts(this.value , true)">
-                    </select>
-                </div>
-                </div>
-            </div>
-
-            <!-- المنتجات -->
-            <div id="products"></div>
-
-            <!-- قسم عرض المزيد -->
-            <div class="load-more-section">
-                <button id="loadMoreBtn" onclick="loadMoreProducts()">عرض المزيد</button>
-                <p id="productsInfo"></p>
-            </div>
+        <div class="search-container">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="ابحث عن منتج..."
+            onkeyup="searchProducts()"
+          />
+          <i class="fa fa-search"></i>
         </div>
+
+        <div class="cats">
+          <div class="cats-container">
+            <div id="importantCats"></div>
+            <div id="dropDownContainer">
+              <select
+                name=""
+                id="otherCat"
+                onchange="filterProducts(this.value , true)"
+              ></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- المنتجات -->
+        <div id="products"></div>
+
+        <!-- قسم عرض المزيد -->
+        <div class="load-more-section">
+          <button id="loadMoreBtn" onclick="loadMoreProducts()">
+            عرض المزيد
+          </button>
+          <p id="productsInfo"></p>
+        </div>
+      </div>
     </section>
 
-   <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
+    <button id="scrollTopBtn" onclick="scrollToTop()">
+      <i class="fa fa-arrow-up"></i>
+    </button>
+    <!-- Cart FAB: appears when cart has items -->
+    <button id="cartFab" class="hidden" onclick="location.href='cart.html'">
+      <span id="cartFabCount">0</span>
+      <i class="fa fa-shopping-cart"></i>
+    </button>
 
     <!-- Modal -->
     <div id="overlay" class="hidden" onclick="closeModal()"></div>
     <div id="modal" class="hidden">
-        <div id="modalContent"></div>
+      <div id="modalContent"></div>
     </div>
 
     <div id="toastNotification" class="toast-hidden">
-    <p id="toastMessage">✅ تمت إضافة المنتج إلى السلة بنجاح!</p>
-</div>
-
-</body>
+      <p id="toastMessage">✅ تمت إضافة المنتج إلى السلة بنجاح!</p>
+    </div>
+  </body>
 </html>

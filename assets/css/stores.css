@@ -184,7 +184,6 @@
 /* Link style for store location when a map URL is provided */
 .store-location-link {
     color: inherit;
-    text-decoration: underline;
     display: inline-flex;
     align-items: center;
     gap: 6px;
