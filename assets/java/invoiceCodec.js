@@ -33,6 +33,10 @@ function encodeInvoice(invoiceObj) {
   try {
     const json = JSON.stringify(invoiceObj);
     const compressed = pako.deflate(json);
+    console.log(compressed);
+    console.log("--------------------");
+    console.log("--------------------");
+    console.log(bytesToBase64Url(compressed));
     return bytesToBase64Url(compressed);
   } catch (err) {
     throw new Error("encodeInvoice failed: " + (err && err.message));

@@ -497,79 +497,65 @@ function updateCartTotals() {
 // 📤 دالة إرسال الطلب لـ Telegram (مُعدَّلة)
 // ======================================================
 function sendTelegramOrder() {
-  // ⚠️ يجب التأكد من صحة الحقول قبل الإرسال (تم التحقق منها في handleCheckout)
-  const BOT_TOKEN = "8574296855:AAHWLVBmKLQs95L4dnLHNdAQnp9fPcruUH8";
-  const CHAT_ID = "1604687718";
+  const CHAT_ID = "1604687718"; // شات ID للبوت
+  const VERCEL_BACKEND_URL = "https://telegram-backend-eta.vercel.app"; // رابط مشروعك على Vercel
 
-  // حفظ معلومات العميل (باستثناء التاريخ والملاحظات) قبل الإرسال
   try {
     saveCustomerInfo();
   } catch (e) {
     console.warn("saveCustomerInfo failed", e);
   }
 
-  // 1. الحصول على الكود والتفاصيل
-  const { code: encodedCode, details: encodedDetails } = formatOrderDetails();
+  // الحصول على الكود والتفاصيل (بدون encodeURIComponent)
+  const { code, details } = formatOrderDetails();
 
-  // 2. بناء عناوين الـ API
-  const codeApiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedCode}`;
-  const detailsApiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedDetails}`;
+  const orderRequests = [
+    { chatId: CHAT_ID, message: code, step: "1/2 (الكود)" },
+    { chatId: CHAT_ID, message: details, step: "2/2 (التفاصيل)" },
+  ];
 
-  // إظهار رسالة تحميل أو تعطيل الزر لمنع الضغط المتعدد
-  document.getElementById("checkoutBtn").disabled = true;
-  document.getElementById("checkoutBtn").textContent =
-    "جاري إرسال الرسالة 1/2 (الكود)...";
+  const btn = document.getElementById("checkoutBtn");
+  btn.disabled = true;
 
-  // دالة مساعدة لضمان نجاح استجابة HTTP
-  const checkResponse = (response) => {
-    if (!response.ok) {
-      // إذا كانت الاستجابة HTTP غير ناجحة (مثل 404 أو 500)
-      throw new Error(`فشل إرسال الطلب. رمز الاستجابة: ${response.status}`);
-    }
-    return response.json();
+  const sendStep = (order) => {
+    btn.textContent = `جاري إرسال الرسالة ${order.step}...`;
+
+    return fetch(`${VERCEL_BACKEND_URL}/sendOrder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatId: order.chatId,
+        message: order.message,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (!data.success) throw new Error(data.error || "فشل الإرسال");
+      });
   };
 
-  // 🛑 الإرسال الأول: الكود فقط
-  fetch(codeApiUrl)
-    .then(checkResponse) // التحقق من HTTP ثم قراءة JSON
-    .then((data) => {
-      if (!data.ok) {
-        // إذا رد Telegram بخطأ (مثل CHAT_ID غير صحيح)
-        throw new Error(data.description || "فشل إرسال الكود عبر Telegram.");
-      }
-
-      // تحديث رسالة التحميل
-      document.getElementById("checkoutBtn").textContent =
-        "جاري إرسال الرسالة 2/2 (التفاصيل)...";
-
-      // 🛑 الإرسال الثاني: التفاصيل الكاملة
-      return fetch(detailsApiUrl);
-    })
-    .then(checkResponse) // التحقق من HTTP ثم قراءة JSON
-    .then((data) => {
-      if (data.ok) {
-        // ✅ النجاح الكامل: مسح السلة ورسالة التأكيد
-        cartItems = [];
-        localStorage.setItem("cartItems", JSON.stringify(cartItems));
-        displayCartItems();
-
-        showConfirmationModal();
-        resetCheckoutButton();
-      } else {
-        // إذا رد Telegram بخطأ في الرسالة الثانية
-        throw new Error(data.description || "فشل إرسال التفاصيل عبر Telegram.");
-      }
+  // إرسال الرسائل بالتتابع
+  sendStep(orderRequests[0])
+    .then(() => sendStep(orderRequests[1]))
+    .then(() => {
+      cartItems = [];
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      displayCartItems();
+      showConfirmationModal();
+      resetCheckoutButton();
     })
     .catch((error) => {
-      // ❌ معالجة الأخطاء
       alert(`⚠️ خطأ في إرسال الطلب: ${error.message}`);
-      console.error("Telegram API Error Details:", error);
-
-      // إعادة تمكين الزر في حالة الفشل
-      document.getElementById("checkoutBtn").disabled = false;
-      document.getElementById("checkoutBtn").textContent = "تأكيد الطلب";
+      console.error("Backend Telegram Error:", error);
+      btn.disabled = false;
+      btn.textContent = "تأكيد الطلب";
     });
 }
+
+
 
 // ======================================================
 // 🔄 دالة لتعيين حالة الزر مرة أخرى
@@ -760,8 +746,8 @@ function formatOrderDetails() {
   messageText += `   - إجمالي المبلغ: ${totalPrice.toLocaleString()} ل.س\n`;
   messageText += `==================================`;
 
-  const encodedDetails = encodeURIComponent(messageText);
-  const encodedCode = encodeURIComponent(displayCode); // الكود وحده
+  const encodedDetails = messageText;
+  const encodedCode = displayCode; // الكود وحده
 
   // 🛑 الإرجاع: نُرجع كائناً يحتوي على الرسالتين المشفرتين
   return {
