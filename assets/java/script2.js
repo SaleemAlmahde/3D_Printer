@@ -3067,3 +3067,13 @@ function migrateInvoicesTimestamps() {
     console.warn("migrateInvoicesTimestamps error:", e);
   }
 }
+
+function openInvoicePrint() {
+  const form = document.getElementById("invoiceForm");
+  const id = form && form.dataset.editingId;
+
+  window.open(
+    `invoice_print.html?id=${id}`,
+    "_blank"
+  );
+}
