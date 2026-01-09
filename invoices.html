@@ -57,8 +57,7 @@
     <div id="newInvoiceModal" class="hidden">
         <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
-        <button id="deleteInvoiceBtn" class="delete-btn hidden" type="button" onclick="openInvoicePrint()">
-           <!-- showDeleteConfirm() -->
+        <button id="deleteInvoiceBtn" class="delete-btn hidden" type="button" onclick="showDeleteConfirm()">
           <i class="fa fa-trash"></i>
         </button>
     <h2>إضافة فاتورة جديدة</h2>
@@ -156,6 +155,7 @@
       </div>
 
       <button type="button" class="save-invoice-btn" onclick="saveInvoice()">حفظ الفاتورة</button>
+      <button type="button" class="save-invoice-btn" onclick="openInvoicePrint()">تصدير الفاتورة</button>
     </form>
   </div>
     </div>
