@@ -32,7 +32,7 @@
    * دالة تعبئة البيانات في الصفحة
    */
   function renderInvoiceData(invoice, allInvoices) {
-    const displayNumber = invoiceId.slice(0,2);
+    const displayNumber = invoiceId.slice(0, 2);
 
     // تعبئة النصوص الأساسية
     document.getElementById("invoiceNumber").textContent = displayNumber;
@@ -68,16 +68,39 @@
     if (invoice.adjustment && invoice.adjustment.value !== 0) {
       adjRow.style.display = "block";
       totalBefore.style.display = "block";
-      document.getElementById("totalDiv").style.justifyContent = "space-between";
-
+      document.getElementById("totalDiv").style.justifyContent =
+        "space-between";
 
       document.getElementById("adjustmentValue").textContent = `${
         invoice.adjustment.type === "-" || "-%" ? "خصم" : "إضافة"
-      } : ${invoice.adjustment.value.toLocaleString()} ${invoice.adjustment.type.length == 1 ? `ل.س` : `%`}`;
+      } : ${invoice.adjustment.value.toLocaleString()} ${
+        invoice.adjustment.type.length == 1 ? `ل.س` : `%`
+      }`;
 
-      document.getElementById("totalValue").textContent = `${invoice.totalOriginalSYP} ل.س`
+      document.getElementById(
+        "totalValue"
+      ).textContent = `${invoice.totalOriginalSYP} ل.س`;
+    }
 
+    const paymentStatus = document.getElementById("paymentStatus");
+    if (invoice.payment.status != "unpaid") {
+      paymentStatus.style.display = "flex";
+      paymentStatus.style.justifyContent = "center";
+      paymentStatus.style.alignItems = "center";
 
+      if (invoice.payment.status == "paid-full") {
+        const span = document.createElement("span");
+        span.textContent = "الفاتورة مدفوعة";
+        paymentStatus.appendChild(span);
+      } else {
+      paymentStatus.style.justifyContent = "space-between";
+        const paidSpan = document.createElement("span");
+        paidSpan.textContent = `المدفوع: ${invoice.payment.paidSYP} ل.س`;
+        const remainingSpan = document.createElement("span");
+        remainingSpan.textContent = `المتبقي: ${invoice.payment.remainingSYP} ل.س`;
+        paymentStatus.appendChild(paidSpan);
+        paymentStatus.appendChild(remainingSpan);
+      }
     }
   }
 
