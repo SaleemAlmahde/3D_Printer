@@ -34,7 +34,7 @@
   function renderInvoiceData(invoice, allInvoices) {
     // حساب رقم العرض بناءً على الترتيب الزمني
     const displayNumber =
-      invoiceId;
+      invoiceId.slice(0,2);
 
     // تعبئة النصوص الأساسية
     document.getElementById("invoiceNumber").textContent = displayNumber;
@@ -53,7 +53,8 @@
             <tr>
                 <td>${index + 1}</td>
                 <td>${p.name}</td>
-                <td>${p.note || "-"}</td>
+                <td>${p.isCustom ? p.customDescription : p.note || "-"}</td>
+                <td>${p.color.name}</td>
                 <td>${p.quantity}</td>
                 <td>${p.priceSYP.toLocaleString()}</td>
                 <td>${(p.quantity * p.priceSYP).toLocaleString()}</td>
@@ -109,8 +110,8 @@
         console.log("✅ تم العثور على عنصر الفاتورة بنجاح");
 
         const options = {
-          margin: 5,
-          filename: `Invoice_${invoice.customerName}.pdf`,
+          margin: 0,
+          filename: `3D Print SY_${invoice.customerName}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: {
             scale: 2,
@@ -119,7 +120,7 @@
             logging: true,
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: "avoid-all" },
+          pagebreak: { mode: ["css", "legacy"] },
         };
 
         console.log("📦 إعدادات التصدير جاهزة، يبدأ التحويل الآن...");

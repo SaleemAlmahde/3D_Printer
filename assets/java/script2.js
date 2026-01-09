@@ -468,7 +468,7 @@ function renderInvoices(filterStoreId = null) {
           ${
             showOrigTotal
               ? `<span class="summary-total"><strong class="summary-total">المبلغ الكلي : </strong>
-                <span class="original-total" style="text-decoration:line-through;color:#999;display:block">${origTotalSYP.toLocaleString()} ل.س</span>
+                <span class="original-total" style="text-decoration:line-through;color:black;display:block">${origTotalSYP.toLocaleString()} ل.س</span>
                 <span class="adjusted-total" style="font-weight:bold;display:block">${safeTotalSYP.toLocaleString()} ل.س</span>
                </span>`
               : `<span class="summary-total"><strong class="summary-total" >المبلغ الكلي : </strong> ${safeTotalSYP.toLocaleString()} ل.س</span>`

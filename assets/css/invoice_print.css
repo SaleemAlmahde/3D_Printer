@@ -1,42 +1,48 @@
 /* ------------------------------------- */
 /* إعداد الورقة لتكون A4 */
 .invoice-page {
-  width: 190mm; /* عرض A4 */
-  min-height: auto; /* طول A4 */
-  padding: 10mm; /* المسافة الداخلية */
-  box-sizing: border-box;
-  
-  /* لجعل الورقة في وسط الصفحة */
-  margin: 20px auto;
-  
-  /* ظل لإظهار الورقة */
+  width: 210mm;            /* العرض الكامل لورقة A4 */
+  min-height: 296mm;       /* أقل بـ 1 ملم من الطول الكامل للأمان */
+  padding: 15mm;           /* هوامش داخلية كافية */
+  box-sizing: border-box;  /* لضمان عدم زيادة الطول بسبب الـ padding */
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
-  
-  background-color: #fff; /* خلفية بيضاء */
-  border-radius: 5px; /* حواف دائرية بسيطة */
-  
-  /* لتسهيل الطباعة */
+
+  margin: 0 auto;          /* التوسيط */
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;  /* لكي يعمل margin-top: auto للفوتر */
   position: relative;
+  overflow: hidden;        
 }
+
+
 
 /* ------------------------------------- */
 /* رأس الفاتورة */
 .invoice-header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+}
+
+.header-row{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
 }
 
 .logo-box {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: center;
+    align-items: start;
 }
 
 .logo-box img {
-  height: 60px;
+  height: 100px;
   margin-bottom: 5px;
 }
 
@@ -46,7 +52,7 @@
 }
 
 .invoice-meta div {
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 3px;
 }
 
@@ -59,7 +65,7 @@ hr {
 /* بيانات العميل */
 .customer-info div {
   margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 /* ------------------------------------- */
@@ -68,11 +74,12 @@ hr {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
+  border: 2px solid #333;
 }
 
 .products-table th,
 .products-table td {
-  border: 1px solid #ccc;
+  border: 1.5px solid #333;
   padding: 8px;
   font-size: 14px;
   text-align: center;
@@ -117,7 +124,113 @@ hr {
   background-color: #0056b3;
 }
 
+.site-name-logo h2{
+  color: #07ae91;
+  font-size: 40px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.img-logo-div {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+th{
+  background-color: #07ae91;
+  color: white;
+}
+
+.invoice-footer {
+  width: 100%;
+  margin-top: auto;       
+  padding-top: 8mm;
+
+  font-size: 18px;
+  color: #555;
+  text-align: center;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+  page-break-before: avoid;
+  page-break-after: avoid;
+}
+
+.top-footer{
+  width: calc(100% + 30mm); /* عرض الصفحة + الهامشين الأيمن والأيسر */
+  margin-right: -15mm;       /* سحب العنصر لليمين ليلامس الحافة */
+  margin-left: -15mm;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.top-footer .left-square, .top-footer .mid-square, .top-footer .right-square {
+  height: 25px;
+  display: inline-block;
+}
+
+.top-footer .left-square, .top-footer .right-square {
+  width: 22%;
+  background-color: rgb(45, 43, 43);
+}
+
+.top-footer .mid-square {
+  width: 38%;
+  background-color: #07ae91; /* أصفر */
+}
+
+.mid-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+
+  margin-top: 20px;
+}
+
+.bottom-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 15px;
+}
+
+.mid-footer .left-square, .mid-footer .right-square, .bottom-footer .bottom-square{
+  width: 38%;
+  height: 25px;
+  background-color: #07ae91;
+  color: white;
+
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+}
+
+.left-square, .right-square, .bottom-square{
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 10px;
+}
+
+.square-icon {
+  width: 25px;
+  height: 25px;
+  background-color: black;
+  border-radius: 25px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* ------------------------------------- */
+
 /* طباعة فقط */
 @media print {
   body {
@@ -130,6 +243,7 @@ hr {
     padding: 10mm; /* قللنا الهامش عند الطباعة */
     border-radius: 0;
     page-break-after: auto; /* أو none */
+    position: relative;
   }
 }
 
