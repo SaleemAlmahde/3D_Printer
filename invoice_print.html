@@ -86,18 +86,26 @@
       </tbody>
     </table>
 
-    <div class="note">
-      <span id="invoiceNote"></span>
+    <div class="total-div" id="totalDiv">
+    <!-- الاجمالي قبل التعديل -->
+     <div class="total-before" id="totalBefore">
+      <span>الإجمالي<span dir="ltr"> : </span></span><span id="totalValue"></span>
     </div>
 
     <!-- التعديل -->
     <div class="adjustment-row" id="adjustmentRow">
-      <span>التعديل: </span><span id="adjustmentValue"></span>
+      <span id="adjustmentValue"></span>
     </div>
 
     <!-- الإجمالي -->
     <div class="total-box">
-      <span>الإجمالي النهائي: </span><span id="finalTotal"></span>
+      <span>الإجمالي النهائي<span dir="ltr"> : </span></span><span id="finalTotal"></span>
+    </div>
+
+    </div>
+
+    <div class="note">
+      <strong><span style="color: green;">ملاحظات</span><span dir="ltr"> : </span></strong><span id="invoiceNote"></span>
     </div>
 
     <div class="invoice-footer">

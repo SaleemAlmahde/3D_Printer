@@ -32,9 +32,7 @@
    * دالة تعبئة البيانات في الصفحة
    */
   function renderInvoiceData(invoice, allInvoices) {
-    // حساب رقم العرض بناءً على الترتيب الزمني
-    const displayNumber =
-      invoiceId.slice(0,2);
+    const displayNumber = invoiceId.slice(0,2);
 
     // تعبئة النصوص الأساسية
     document.getElementById("invoiceNumber").textContent = displayNumber;
@@ -42,6 +40,7 @@
     document.getElementById("customerName").textContent = invoice.customerName;
     document.getElementById("customerPhone").textContent = invoice.phone;
     document.getElementById("customerCity").textContent = invoice.city;
+    document.getElementById("invoiceNote").textContent = invoice.notes || "";
     document.getElementById("finalTotal").textContent =
       invoice.totalSYP.toLocaleString() + " ل.س";
 
@@ -65,11 +64,20 @@
 
     // معالجة سطر التعديل (خصم أو إضافة)
     const adjRow = document.getElementById("adjustmentRow");
+    const totalBefore = document.getElementById("totalBefore");
     if (invoice.adjustment && invoice.adjustment.value !== 0) {
       adjRow.style.display = "block";
+      totalBefore.style.display = "block";
+      document.getElementById("totalDiv").style.justifyContent = "space-between";
+
+
       document.getElementById("adjustmentValue").textContent = `${
-        invoice.adjustment.type === "discount" ? "خصم" : "إضافة"
-      }: ${invoice.adjustment.value.toLocaleString()} ل.س`;
+        invoice.adjustment.type === "-" || "-%" ? "خصم" : "إضافة"
+      } : ${invoice.adjustment.value.toLocaleString()} ${invoice.adjustment.type.length == 1 ? `ل.س` : `%`}`;
+
+      document.getElementById("totalValue").textContent = `${invoice.totalOriginalSYP} ل.س`
+
+
     }
   }
 

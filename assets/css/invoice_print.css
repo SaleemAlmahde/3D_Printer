@@ -93,6 +93,12 @@ hr {
   display: none;
 }
 
+.total-before {
+  margin-top: 10px;
+  font-weight: bold;
+  display: none;
+}
+
 /* ------------------------------------- */
 /* الإجمالي النهائي */
 .total-box {
@@ -226,6 +232,13 @@ th{
   
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.total-div {
+  width: 100%;
+  display: flex;
+  justify-content: end;
   align-items: center;
 }
 
