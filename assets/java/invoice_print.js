@@ -107,66 +107,62 @@
   /**
    * إعداد أزرار الطباعة والتصدير مع نظام تتبع الأخطاء
    */
+ /**
+   * إعداد أزرار الطباعة والتصدير - نسخة متوافقة مع iOS/Safari
+   */
   function setupActionButtons(invoice) {
-    console.log("🛠️ جاري إعداد أزرار العمليات...");
-
-    // 1. زر الطباعة
-    const printBtn = document.getElementById("printInvoice");
-    if (printBtn) {
-      printBtn.addEventListener("click", () => {
-        console.log("🖨️ بدء عملية الطباعة العادية...");
-        window.print();
-      });
-    }
-
-    // 2. زر التصدير إلى PDF
     const exportBtn = document.getElementById("exportPDF");
-    if (exportBtn) {
-      exportBtn.addEventListener("click", async function () {
-        console.log("🚀 تم الضغط على زر تصدير PDF");
+    if (!exportBtn) return;
 
-        // التحقق من وجود المكتبة
-        if (typeof html2pdf === "undefined") {
-          console.error("❌ خطأ: مكتبة html2pdf غير معرفة في الصفحة!");
-          alert("تعذر العثور على مكتبة التصدير، تأكد من اتصال الإنترنت.");
-          return;
-        }
-        console.log("✅ مكتبة html2pdf موجودة");
+    exportBtn.addEventListener("click", async function () {
+      console.log("🚀 بدء التصدير (نسخة التوافق العالي)...");
 
-        const element = document.querySelector(".invoice-page");
-        if (!element) {
-          console.error("❌ خطأ: لم يتم العثور على العنصر .invoice-page");
-          return;
-        }
-        console.log("✅ تم العثور على عنصر الفاتورة بنجاح");
+      if (typeof html2pdf === "undefined") {
+        alert("المكتبة غير محملة، يرجى التحقق من الاتصال.");
+        return;
+      }
 
-        const options = {
-          margin: 0,
-          filename: `3D Print SY_${invoice.customerName}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true, // السماح بمشاركة الموارد عبر الأصول
-            allowTaint: true, // السماح بمعالجة الصور "الملوثة" أمنياً
-            logging: true,
-          },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["css", "legacy"] },
-        };
+      const element = document.querySelector(".invoice-page");
+      
+      // إعدادات محسنة لآيفون (توازن بين الجودة واستهلاك الذاكرة)
+      const options = {
+        margin: 0,
+        filename: `3D_Print_SY_${invoice.customerName}.pdf`,
+        image: { type: "jpeg", quality: 0.95 }, 
+        html2canvas: {
+          scale: 1.5, // 👈 تقليل السكيل من 2 إلى 1.5 يحل 90% من مشاكل الآيفون
+          useCORS: true,
+          allowTaint: true,
+          letterRendering: true, // تحسين رسم الحروف العربية
+          scrollX: 0,
+          scrollY: 0
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] }
+      };
 
-        console.log("📦 إعدادات التصدير جاهزة، يبدأ التحويل الآن...");
+      try {
+        // في الآيفون، يفضل أحياناً تنفيذ العملية على مراحل لضمان الاستقرار
+        const doc = html2pdf().set(options).from(element);
+        
+        // جرب الحفظ المباشر أولاً
+        await doc.save();
+        
+        console.log("🎉 اكتمل التصدير بنجاح!");
+      } catch (err) {
+        console.error("❌ فشل التصدير، محاولة الطريقة البديلة:", err);
+        
+        // طريقة بديلة (Fallback) للآيفون في حال فشل الحفظ التلقائي
+        html2pdf().set(options).from(element).outputPdf('bloburl').then(function (bloburl) {
+            const newWindow = window.open(bloburl, '_blank');
+            if (!newWindow) {
+                alert("يرجى السماح بالنوافذ المنبثقة (Pop-ups) لعرض الفاتورة على الآيفون.");
+            }
+        });
+      }
+    });
 
-        try {
-          // تنفيذ التصدير مع تتبع الوعود (Promises)
-          await html2pdf().set(options).from(element).toPdf().get("pdf").save();
-          console.log("🎉 تمت عملية الحفظ بنجاح!");
-        } catch (err) {
-          console.error("❌ فشل التصدير في المرحلة النهائية:", err);
-          alert("حدث خطأ تقني أثناء توليد ملف PDF");
-        }
-      });
-    } else {
-      console.warn("⚠️ تحذير: لم يتم العثور على زر ID: exportPDF في HTML");
-    }
+    // زر الطباعة يظل كما هو لأنه مدعوم جيداً
+    document.getElementById("printInvoice")?.addEventListener("click", () => window.print());
   }
 })();
