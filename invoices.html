@@ -191,14 +191,18 @@
         onclick=""
       >
       <div class="dropdown-list hidden" id="productDropdown">
+      </div>
     </div>
 
-    <!-- الكمية -->
-    <input type="number" id="productQuantity" placeholder="الكمية" min="1">
+    <!-- قائمة المنتجات للاختيار -->
+    <!-- (يتم ملؤها من JavaScript) -->
+
+    <!-- الكمية (تظهر فقط بعد اختيار منتج) -->
+    <input type="number" id="productQuantity" placeholder="الكمية" min="1" class="hidden">
 
     <!-- الأزرار -->
     <div class="bottom-sheet-buttons">
-      <button type="button" onclick="closeAddProductSheet()">إلغاء</button>
+      <button type="button" class="btn-cancel-red" onclick="closeAddProductSheet()">إلغاء</button>
       <button type="button" onclick="confirmAddProduct()">إضافة</button>
     </div>
   </div>
@@ -301,6 +305,55 @@
 <div id="toastNotification" class="toast-hidden">
     <p id="toastMessage">✅ تمت إضافة المنتج إلى السلة بنجاح!</p>
 </div>
+
+    <!-- Premium Footer Design -->
+    <footer class="premium-footer">
+      <div class="footer-wrapper">
+        <!-- Left Section -->
+        <div class="footer-left">
+          <div class="footer-branding">
+            <h3>3D Printer</h3>
+            <p class="tagline">حلول طباعة ثلاثية الأبعاد</p>
+          </div>
+        </div>
+
+        <!-- Center Section -->
+        <div class="footer-center">
+          <div class="footer-links-column">
+            <h4>الروابط</h4>
+            <a href="index.html">المنتجات</a>
+            <a href="invoices.html">الفواتير</a>
+            <a href="cart.html">السلة</a>
+            <a href="stores.html">نقاط البيع</a>
+          </div>
+
+          <div class="footer-links-column">
+            <h4>التواصل</h4>
+            <p><i class="fa fa-phone"></i> +963 123 456 789</p>
+            <p><i class="fa fa-envelope"></i> info@3dprinter.com</p>
+            <p><i class="fa fa-map-marker"></i> حمص، سوريا</p>
+          </div>
+        </div>
+
+        <!-- Right Section -->
+        <div class="footer-right">
+          <h4>تابعنا</h4>
+          <div class="social-icons">
+            <a href="#" class="social-icon"><i class="fa fa-facebook"></i></a>
+            <a href="#" class="social-icon"><i class="fa fa-instagram"></i></a>
+            <a href="#" class="social-icon"><i class="fa fa-whatsapp"></i></a>
+            <a href="#" class="social-icon"><i class="fa fa-twitter"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom-section">
+        <p>&copy; 2024 3D Printer. جميع الحقوق محفوظة.</p>
+        <p class="footer-credit">صُمم بعناية لتحقيق أفضل تجربة</p>
+      </div>
+    </footer>
 
     <script src="assets/java/script2.js"></script>
 

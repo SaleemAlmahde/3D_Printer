@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>3D Printer - السلة</title>
-    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.min.css" />
-
+    <link
+      rel="stylesheet"
+      href="assets/plugins/font-awesome/css/font-awesome.min.css"
+    />
 
     <script src="assets/java/data.js"></script>
     <script src="assets/java/admin.js"></script>
@@ -14,95 +16,231 @@
     <script src="assets/java/show_toast.js"></script>
     <script src="assets/java/script3.js"></script>
 
-
-    <link rel="stylesheet" href="assets/css/normalize.css">
-    <link rel="stylesheet" href="assets/css/cart.css">
-</head>
-<body>
-
+    <link rel="stylesheet" href="assets/css/normalize.css" />
+    <link rel="stylesheet" href="assets/css/cart.css" />
+  </head>
+  <body>
     <!-- Nav Section -->
     <nav>
-        <div class="container">
-            <ul class="nav-menu">
-                <a href="index.html"><li>المنتجات</li></a>
-                <div class="divider" id="firstDivider" role="separator" aria-orientation="vertical" ></div>
-                <a href="invoices.html" id="invoicesLink"><li>الفواتير</li></a>
-                <div class="divider" role="separator" aria-orientation="vertical" ></div>
-                <a href="cart.html"><li>السلة</li></a>
-                <div class="divider" role="separator" aria-orientation="vertical" ></div>
-                <a href="stores.html"><li>نقاط البيع</li></a>
-            </ul>
+      <div class="container">
+        <ul class="nav-menu">
+          <a href="index.html"><li>المنتجات</li></a>
+          <div
+            class="divider"
+            id="firstDivider"
+            role="separator"
+            aria-orientation="vertical"
+          ></div>
+          <a href="invoices.html" id="invoicesLink"><li>الفواتير</li></a>
+          <div
+            class="divider"
+            role="separator"
+            aria-orientation="vertical"
+          ></div>
+          <a href="cart.html"><li>السلة</li></a>
+          <div
+            class="divider"
+            role="separator"
+            aria-orientation="vertical"
+          ></div>
+          <a href="stores.html"><li>نقاط البيع</li></a>
+        </ul>
 
-            <img src="assets/imgs/3dp web logo copy.png" alt="logo" id="logo">
-        </div>
+        <img src="assets/imgs/3dp web logo copy.png" alt="logo" id="logo" />
+      </div>
     </nav>
 
     <!-- Cart Section -->
     <section id="cartSection">
-        <div class="container">
-            <div class="top-cart"><h2>السلة</h2></div>
+      <div class="container">
+        <div class="top-cart"><h2>السلة</h2></div>
 
-            <!-- المنتجات -->
-            <div id="productsCart"></div>
-        </div>
+        <!-- المنتجات -->
+        <div id="productsCart"></div>
+      </div>
     </section>
-            
 
     <div id="cartSummary">
-    <div class="container summary-content">
-            <button type="button" id="closeBtn" class="close-confirm-btn hidden" onclick="closeCustomerInfoFields()"><i class="fa fa-close"></i></button>
+      <div class="container summary-content">
+        <button
+          type="button"
+          id="closeBtn"
+          class="close-confirm-btn hidden"
+          onclick="closeCustomerInfoFields()"
+        >
+          <i class="fa fa-close"></i>
+        </button>
 
         <div id="customerInfoFields" class="hidden">
+          <input
+            type="text"
+            id="customerName"
+            placeholder="الاسم الكامل"
+            required
+          />
+          <input
+            type="tel"
+            id="customerPhone"
+            placeholder="رقم الجوال للتواصل"
+            pattern="[0-9]{10}"
+            required
+          />
+          <input
+            type="text"
+            id="customerCity"
+            placeholder="المحافظة"
+            required
+          />
 
-            <input type="text" id="customerName" placeholder="الاسم الكامل" required>
-            <input type="tel" id="customerPhone" placeholder="رقم الجوال للتواصل" pattern="[0-9]{10}" required>
-            <input type="text" id="customerCity" placeholder="المحافظة" required>
+          <select
+            id="shippingType"
+            required
+            onchange="updateShippingPlaceholder()"
+          >
+            <option value="homs">تسليم ضمن حمص</option>
+            <option value="delivery">شحن (خارج حمص)</option>
+          </select>
 
-            <select id="shippingType" required onchange="updateShippingPlaceholder()">
-                <option value="homs">تسليم ضمن حمص</option>
-                <option value="delivery">شحن (خارج حمص)</option>
-            </select>
-            
-            <input type="text" id="shippingDetails" placeholder="موقع التسليم المفصل ضمن حمص" required>
-            <input type="date" id="shippingDate" required>
-            <textarea id="notes" placeholder="ملاحظات إضافية على الطلب (اختياري)"></textarea>
-            
+          <input
+            type="text"
+            id="shippingDetails"
+            placeholder="موقع التسليم المفصل ضمن حمص"
+            required
+          />
+          <input type="date" id="shippingDate" required />
+          <textarea
+            id="notes"
+            placeholder="ملاحظات إضافية على الطلب (اختياري)"
+          ></textarea>
         </div>
 
         <p>عدد المنتجات : <span id="totalQuantity">0</span></p>
         <p>الإجمالي : <span id="totalPrice">0 ل.س</span></p>
-        
+
         <button id="checkoutBtn" onclick="handleCheckout()">تأكيد الطلب</button>
+      </div>
     </div>
-</div>
-            
 
-   <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
-
+    <button id="scrollTopBtn" onclick="scrollToTop()">
+      <i class="fa fa-arrow-up"></i>
+    </button>
 
     <!-- Modal -->
     <div id="overlay" class="hidden" onclick="closeModal()"></div>
     <div id="modal" class="hidden">
-        <div id="modalContent"></div>
+      <div id="modalContent"></div>
     </div>
 
-   <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fa fa-arrow-up"></i></button>
+    <button id="scrollTopBtn" onclick="scrollToTop()">
+      <i class="fa fa-arrow-up"></i>
+    </button>
 
-   <!-- مودال التأكيد -->
-<div id="confirmationOverlay" class="hidden" onclick="closeConfirmationModal()"></div>
-<div id="confirmationModal" class="hidden">
-    <div class="confirmation-modal-content">
-        <span class="close-btn" onclick="closeConfirmationModal()">&times;</span>
+    <!-- مودال التأكيد -->
+    <div
+      id="confirmationOverlay"
+      class="hidden"
+      onclick="closeConfirmationModal()"
+    ></div>
+    <div id="confirmationModal" class="hidden">
+      <div class="confirmation-modal-content">
+        <span class="close-btn" onclick="closeConfirmationModal()"
+          >&times;</span
+        >
         <h3>تم إرسال طلبك بنجاح!</h3>
-        <p>سيتم التواصل معكم عبر الجوال قريباً.</p>
-        <button type="button" class="btn-confirm" onclick="closeConfirmationModal()">موافق</button>
+        <p>سيتم التواصل معكم عبر WhatsApp قريبا لتأكيد الطلب</p>
+        <button
+          type="button"
+          class="btn-confirm"
+          onclick="closeConfirmationModal()"
+        >
+          موافق
+        </button>
+      </div>
     </div>
-</div>
 
-<div id="toastNotification" class="toast-hidden">
-    <p id="toastMessage">✅ تمت إضافة المنتج إلى السلة بنجاح!</p>
-</div>
+    <div id="toastNotification" class="toast-hidden">
+      <p id="toastMessage">✅ تمت إضافة المنتج إلى السلة بنجاح!</p>
+    </div>
 
-    
-</body>
+    <!-- Modern Card-Based Footer -->
+    <footer class="modern-cart-footer">
+      <div class="footer-cards-grid">
+        <!-- Why Choose Us Card -->
+        <div class="footer-card">
+          <div class="card-icon">
+            <i class="fa fa-star"></i>
+          </div>
+          <h4>لماذا نختارنا</h4>
+          <p>أفضل جودة وأسعار تنافسية مع خدمة عملاء متميزة وسريعة الاستجابة</p>
+        </div>
+
+        <!-- Fast Delivery Card -->
+        <div class="footer-card">
+          <div class="card-icon">
+            <i class="fa fa-truck"></i>
+          </div>
+          <h4>توصيل سريع</h4>
+          <p>نضمن وصول طلبك في أسرع وقت ممكن مع تتبع شامل للشحنة</p>
+        </div>
+
+        <!-- Support Card -->
+        <div class="footer-card">
+          <div class="card-icon">
+            <i class="fa fa-headphones"></i>
+          </div>
+          <h4>دعم 24/7</h4>
+          <p>فريق دعم متخصص جاهز للإجابة على استفسارات العملاء في أي وقت</p>
+        </div>
+
+        <!-- Quality Card -->
+        <div class="footer-card">
+          <div class="card-icon">
+            <i class="fa fa-check-circle"></i>
+          </div>
+          <h4>ضمان الجودة</h4>
+          <p>كل منتج يمر بفحوصات صارمة ويأتي معه ضمان شامل</p>
+        </div>
+      </div>
+
+      <div class="footer-divider-line"></div>
+
+      <div class="footer-contact-section">
+        <div class="contact-item">
+          <i class="fa fa-phone"></i>
+          <div class="contact-text">
+            <span>اتصل بنا</span>
+            <p>+963 123 456 789</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa fa-envelope"></i>
+          <div class="contact-text">
+            <span>بريد إلكتروني</span>
+            <p>info@3dprinter.com</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa fa-map-marker"></i>
+          <div class="contact-text">
+            <span>الموقع</span>
+            <p>حمص، سوريا</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa fa-clock-o"></i>
+          <div class="contact-text">
+            <span>وقت الرد</span>
+            <p>خلال ساعة واحدة</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 3D Printer Solutions. جميع الحقوق محفوظة &reg;</p>
+      </div>
+    </footer>
+  </body>
 </html>

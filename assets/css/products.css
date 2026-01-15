@@ -362,7 +362,7 @@
     bottom: 20px;
     left: 20px;
     z-index: 900;
-    background-color: #07A98C;
+    background: linear-gradient(135deg, #09c4a4, #049277);
     color: white;
     border: none;
     border-radius: 50%;
@@ -373,9 +373,35 @@
     display: none;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s 
-ease;
+    transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+}
+
+#scrollTopBtn.hidden {
+    animation: slideOutDown 0.4s ease-out forwards;
 }
 
 /* Cart FAB: appears when there are items in cart; positioned below scrollTopBtn */
@@ -388,8 +414,8 @@ ease;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
     font-size: 20px;
     display: flex;
     align-items: center;
@@ -400,7 +426,7 @@ ease;
 
 #cartFab.hidden { display: none; }
 
-#cartFab i { font-size: 22px; }
+#cartFab i { font-size: 25; }
 
 /* badge */
 #cartFabCount {
@@ -941,7 +967,6 @@ ease;
 
     #scrollTopBtn {
         bottom: 40px;
-        left: 40px;
     }
 
     h2{
@@ -979,4 +1004,163 @@ ease;
         height: 240px; /* fallback */
         aspect-ratio: 1 / 1; /* مربع للشاشات الصغيرة */
     }
+}
+
+/* ============================================ */
+/* 🔻 FOOTER STYLING */
+/* ============================================ */
+
+.main-footer {
+  background: linear-gradient(135deg, #09c4a4 0%, #049277 100%);
+  color: white;
+  padding: 60px 20px 30px;
+  margin-top: 80px;
+  font-size: 14px;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.footer-section h4 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 10px;
+}
+
+.footer-section p {
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 15px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.footer-section ul li a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.footer-section ul li a:hover {
+  color: #fff;
+  transform: translateX(-5px);
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.social-links a {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 18px;
+}
+
+.social-links a:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Contact Info */
+.contact-info {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.contact-info li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.contact-info i {
+  width: 25px;
+  color: #fff;
+  font-size: 16px;
+}
+
+/* Working Hours */
+.working-hours li {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+  .footer-container {
+    gap: 30px;
+  }
+
+  .footer-section h4 {
+    font-size: 16px;
+  }
+
+  .main-footer {
+    padding: 40px 20px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .main-footer {
+    padding: 30px 15px 20px;
+    font-size: 13px;
+  }
+
+  .footer-section h4 {
+    font-size: 15px;
+    margin-bottom: 15px;
+  }
+
+  .social-links {
+    gap: 10px;
+  }
+
+  .social-links a {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
 }

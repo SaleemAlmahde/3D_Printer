@@ -1,5 +1,10 @@
 /* ------------------------------------- */
 /* إعداد الورقة لتكون A4 */
+
+body, .invoice-page {
+  font-family: 'Tajawal', sans-serif !important;
+}
+
 .invoice-page {
   width: 210mm;            /* العرض الكامل لورقة A4 */
   min-height: 296mm;       /* أقل بـ 1 ملم من الطول الكامل للأمان */
@@ -255,6 +260,11 @@ th{
   display: none;
   margin-top: 30px;
   font-size: 30px;
+}
+
+a {
+  text-decoration: none;
+  color: white;
 }
 
 /* ------------------------------------- */

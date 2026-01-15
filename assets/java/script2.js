@@ -1412,16 +1412,11 @@ function closeAddProductSheet() {
     sheetOverlay.classList.add("hidden");
   }
   document.getElementById("productDropdown").classList.add("hidden");
-
-  // Defensive: ensure quantity input is visible again and custom UI removed
-  const prodQtyEl = document.getElementById("productQuantity");
-  if (prodQtyEl) {
-    prodQtyEl.classList.remove("hidden");
-    if (prodQtyEl.parentElement)
-      prodQtyEl.parentElement.classList.remove("hidden");
-  }
-  const customUI = document.querySelector(".custom-product-inputs");
-  if (customUI) customUI.remove();
+  // إخفاء حقل الكمية عند إغلاق الـ bottom sheet
+  document.getElementById("productQuantity").classList.add("hidden");
+  document.getElementById("productQuantity").value = ""; // تفريغ القيمة
+  // إعادة تعيين اسم المنتج
+  document.getElementById("productInput").value = "";
 }
 
 // عرض قائمة المنتجات
@@ -1539,6 +1534,10 @@ function selectProduct(productId) {
   // إخفاء قائمة المنتجات وإظهار اختيار اللون
   document.getElementById("productDropdown").classList.add("hidden");
   document.getElementById("productInput").value = product.name;
+
+  // 🔧 إظهار حقل الكمية عند اختيار منتج
+  document.getElementById("productQuantity").classList.remove("hidden");
+  document.getElementById("productQuantity").value = ""; // تفريغ الكمية السابقة
 
   // 🔧 تحسين: تحديد ما إذا كان منتج مخصص
   const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
@@ -3072,8 +3071,5 @@ function openInvoicePrint() {
   const form = document.getElementById("invoiceForm");
   const id = form && form.dataset.editingId;
 
-  window.open(
-    `invoice_print.html?id=${id}`,
-    "_blank"
-  );
+  window.open(`invoice_print.html?id=${id}`, "_blank");
 }

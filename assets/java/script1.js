@@ -300,15 +300,22 @@ function showModal(id) {
                 <p style="text-align:center; margin-bottom: 20px;">${product.shortDisc}</p>
                 <img src="./${product.images[0]}" alt="${product.name}" style="max-width: 150px; margin-bottom: 15px;" loading="lazy">
                 
-                <label for="customDescInput" style="font-weight: bold; margin-bottom: 5px;">وصف المنتج والقياسات المطلوبة:</label>
-                <textarea id="customDescInput" rows="4" placeholder="اكتب هنا مواصفات طلبك (المقاسات، اللون، الوصف المفصل، الكمية المطلوبة، إلخ.)" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+                <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                    ⚠️ السعر سيتحدد لاحقاً بعد تقييم الطلب
+                </div>
                 
-                <button onClick="addToCart('${id}')" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">إرسال طلب التخصيص</button>
+                <label for="customDescInput" style="font-weight: bold; margin-bottom: 5px; display: block;">وصف المنتج والقياسات المطلوبة:</label>
+                <textarea id="customDescInput" rows="4" placeholder="مثال: مقاس A4 - لون أحمر - طباعة ملونة - سمك 3 ملم - تصميم شعار الشركة - 100 قطعة&#10;أو: علبة سماعات بحجم مخصص - لون ذهبي مطفي - مع تصميم داخلي&#10;أو: ستاند هاتف - قياس يناسب الآيفون 13 - لون أسود لامع" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
+                
+                <input type="number" id="customQuantity" placeholder="الكمية المطلوبة" value="1" min="1" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;" />
+                
+                <button onClick="addToCart('${id}')" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%;">إرسال طلب التخصيص</button>
             </div>
         `;
     document.getElementById("modal").classList.remove("hidden");
     document.getElementById("overlay").classList.remove("hidden");
     document.body.style.overflow = "hidden";
+
     return; // إنهاء الدالة هنا للمنتج المخصص
   }
 
@@ -363,13 +370,47 @@ function showModal(id) {
                         <input type="number" id="pQ" placeholder="الكمية" required>
                         <textarea id="productNote" placeholder="ملاحظة (اختياري)" style="width:100%; margin-top:8px; min-height:48px; padding:8px; border:1px solid #ccc; border-radius:4px;"></textarea>
                         ${stickerWarningHTML}
-                        <button onClick="addToCart('${id}')">أضف للسلة</button>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; width: 100%;">
+                            <input type="checkbox" id="customizationCheckbox" style="width: 20px; height: 20px; cursor: pointer;" />
+                            <label for="customizationCheckbox" style="font-weight: bold; cursor: pointer; margin: 0;">إضافة تخصيص للمنتج</label>
+                        </div>
+                        
+                        <div id="customizationWarning" style="display: none; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                            ⚠️ السعر سيتحدد لاحقاً بعد تقييم طلب التخصيص
+                        </div>
+                        
+                        <div id="customizationSection" style="display: none; width: 100%;">
+                            <label for="productCustomDesc" style="font-weight: bold; margin-bottom: 5px; display: block;">وصف التخصيص:</label>
+                            <textarea id="productCustomDesc" rows="3" placeholder="مثال: إضافة شعار الشركة - تغيير اللون - حفر بأحرف ذهبية - إلخ." style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <button onClick="addToCart('${id}')" style="width: 100%;">أضف للسلة</button>
                 </div>
         `;
 
   document.getElementById("modal").classList.remove("hidden");
   document.getElementById("overlay").classList.remove("hidden");
   document.body.style.overflow = "hidden";
+
+  // إضافة event listener للـ checkbox الجديد
+  document
+    .getElementById("customizationCheckbox")
+    .addEventListener("change", function () {
+      const customizationWarning = document.getElementById(
+        "customizationWarning"
+      );
+      const customizationSection = document.getElementById(
+        "customizationSection"
+      );
+      if (this.checked) {
+        customizationWarning.style.display = "block";
+        customizationSection.style.display = "block";
+      } else {
+        customizationWarning.style.display = "none";
+        customizationSection.style.display = "none";
+      }
+    });
 }
 
 function closeModal() {
@@ -415,7 +456,9 @@ function addToCart(productId) {
   // ----------------------------------------------------------------------------------
   if (product.isCustomOrder) {
     const customDescInput = document.getElementById("customDescInput");
+    const customQuantityInput = document.getElementById("customQuantity");
     const customDescription = customDescInput.value.trim();
+    const customQuantity = parseInt(customQuantityInput.value) || 1;
 
     if (customDescription === "") {
       showToast("⚠️ يرجى كتابة وصف لطلبك المخصص", 3000, "#d32f2f");
@@ -426,7 +469,7 @@ function addToCart(productId) {
     cartItems.push({
       id: Date.now(),
       productId: product.id, // ID المنتج الوهمي
-      quantity: 1, // الكمية الافتراضية للطلب المخصص
+      quantity: customQuantity, // الكمية المدخلة من المستخدم
       customDescription: customDescription, // حفظ الوصف هنا
       isCustom: true, // علامة مميزة للعرض في السلة
       selectedColor: { name: "طلب مخصص", code: "" }, // بيانات وهمية لحقول الألوان

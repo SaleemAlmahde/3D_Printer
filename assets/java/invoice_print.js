@@ -133,7 +133,7 @@
           scale: 1.5, // 👈 تقليل السكيل من 2 إلى 1.5 يحل 90% من مشاكل الآيفون
           useCORS: true,
           allowTaint: true,
-          letterRendering: true, // تحسين رسم الحروف العربية
+          letterRendering: false, // تحسين رسم الحروف العربية
           scrollX: 0,
           scrollY: 0
         },
