@@ -654,6 +654,11 @@ function sendTelegramOrder() {
   sendStep(orderRequests[0])
     .then(() => sendStep(orderRequests[1]))
     .then(() => {
+      // حفظ الكوبون كمستخدم فقط بعد نجاح إرسال الطلب
+      if (appliedCoupon) {
+        incrementCouponUsage(appliedCoupon.code);
+      }
+
       cartItems = [];
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
       displayCartItems();
@@ -1139,6 +1144,19 @@ function showCouponModal() {
   // تنظيف حقل الإدخال والرسائل
   document.getElementById("couponCode").value = "";
   document.getElementById("couponMessage").textContent = "";
+
+  // عرض معلومات الكوبون المطبق الحالي إن وجد
+  const messageEl = document.getElementById("couponMessage");
+  if (appliedCoupon) {
+    const discountDisplay = `${appliedCoupon.discountValue}${appliedCoupon.discountType}`;
+    messageEl.innerHTML = `✅ الكوبون المطبق حالياً: <strong>${appliedCoupon.code}</strong><br/>الخصم: ${discountDisplay}<br/><button onclick="removeCouponAndResetModal()" class="remove-coupon-btn" style="margin-top: 10px; padding: 8px 15px; background-color: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">حذف الكوبون واستخدام آخر</button>`;
+    messageEl.className = "coupon-message success";
+    document.getElementById("couponCode").disabled = true;
+    document.querySelector(".apply-coupon-btn").disabled = true;
+  } else {
+    document.getElementById("couponCode").disabled = false;
+    document.querySelector(".apply-coupon-btn").disabled = false;
+  }
 }
 
 function closeCouponModal() {
@@ -1151,6 +1169,14 @@ function closeCouponModal() {
 function applyCoupon() {
   const couponCode = document.getElementById("couponCode").value.trim();
   const messageEl = document.getElementById("couponMessage");
+
+  // التحقق من وجود كوبون مطبق بالفعل
+  if (appliedCoupon) {
+    messageEl.textContent =
+      "❌ يوجد كوبون مطبق بالفعل. الرجاء حذفه أولاً لتطبيق كوبون آخر";
+    messageEl.className = "coupon-message error";
+    return;
+  }
 
   if (!couponCode) {
     messageEl.textContent = "❌ الرجاء إدخال كود الخصم";
@@ -1198,11 +1224,8 @@ function applyCoupon() {
   // تطبيق الكوبون
   appliedCoupon = coupon;
 
-  // حفظ الكوبون كمستخدم
-  incrementCouponUsage(couponCode);
-
   // عرض رسالة النجاح مع معلومات الاستخدام المتبقي
-  const remainingUses = useLimit - (usageCount + 1);
+  const remainingUses = useLimit - usageCount;
   let successMessage = `✅ تم تطبيق الكوبون بنجاح! الخصم: ${
     coupon.discountValue
   } ${coupon.discountType === "%" ? "%" : "ل.س"}`;
@@ -1227,4 +1250,14 @@ function removeCoupon() {
   appliedCoupon = null;
   updateCartTotals();
   showToast("✅ تم إزالة الكوبون", 3000, "green");
+}
+
+// دالة لحذف الكوبون وإعادة تعيين مودال الكوبون
+function removeCouponAndResetModal() {
+  removeCoupon();
+  // إعادة تعيين محتوى المودال
+  document.getElementById("couponCode").value = "";
+  document.getElementById("couponCode").disabled = false;
+  document.querySelector(".apply-coupon-btn").disabled = false;
+  document.getElementById("couponMessage").textContent = "";
 }

@@ -2115,3 +2115,167 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
     font-size: 12px;
   }
 }
+
+/* ===== حقل الكوبون في مودال الفاتورة ===== */
+.coupon-section {
+  margin: 15px 0;
+}
+
+.coupon-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.coupon-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.coupon-input-row select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+}
+
+.coupon-input-row select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.refresh-coupon-btn {
+  padding: 10px 12px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.refresh-coupon-btn:hover {
+  background-color: #2980b9;
+}
+
+#couponDiscountInfo {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* ===== نمط حقل التعديلات المتعددة ===== */
+.adjustment-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.adjustment-row input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.adjustment-row select {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.add-adjustment-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+}
+
+.add-adjustment-btn:hover {
+  background-color: #229954;
+}
+
+/* قائمة التعديلات المضافة */
+.adjustments-list {
+  margin-top: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.adjustments-list.hidden {
+  display: none;
+}
+
+/* عنصر تعديل واحد في القائمة */
+.adjustment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.adjustment-item:last-child {
+  margin-bottom: 0;
+}
+
+.adjustment-item-info {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.adjustment-item-value {
+  font-weight: 500;
+  color: #333;
+  min-width: 60px;
+}
+
+.adjustment-item-type {
+  color: #666;
+  font-size: 12px;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.adjustment-item-remove {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+
+.adjustment-item-remove:hover {
+  background-color: #c0392b;
+}

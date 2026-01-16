@@ -408,4 +408,12 @@ const coupons = [
     useLimit: 5, // عدد مرات الاستخدام المتاحة
     endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
   },
+  {
+    id: 2,
+    code: "ewkjfؤؤjewسسيklfjew",
+    discountType: "%", // - a constant value or %
+    discountValue: 5,
+    useLimit: 5, // عدد مرات الاستخدام المتاحة
+    endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
+  },
 ];

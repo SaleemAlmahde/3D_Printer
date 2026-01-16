@@ -127,7 +127,26 @@
               <option value="+%">+ %</option>
               <option value="-%">- %</option>
             </select>
+            <button type="button" id="addAdjustmentBtn" class="add-adjustment-btn" onclick="addAdjustment()">
+              <i class="fa fa-plus"></i>
+            </button>
           </div>
+          <!-- قائمة التعديلات المضافة -->
+          <div id="adjustmentsList" class="adjustments-list hidden"></div>
+        </div>
+
+        <!-- حقل الكوبون -->
+        <div class="form-group coupon-section">
+          <label>كود الخصم (اختياري):</label>
+          <div class="coupon-input-row">
+            <select id="invoiceCouponSelect" onchange="applyInvoiceCoupon()">
+              <option value="">-- اختر كود خصم --</option>
+            </select>
+            <button type="button" class="refresh-coupon-btn" onclick="loadInvoiceCoupons()" title="تحديث الكوبونات">
+              <i class="fa fa-refresh"></i>
+            </button>
+          </div>
+          <p id="couponDiscountInfo" style="font-size: 12px; color: #666; margin-top: 5px;"></p>
         </div>
 
         <div class="form-group payment-section">

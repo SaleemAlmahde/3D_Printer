@@ -15,6 +15,9 @@ let currentFilters = { ...DEFAULT_FILTERS };
 // Marker to keep an invoice open after re-render (set id before calling renderInvoices)
 window.__keepOpenInvoiceId = null;
 
+// 🔧 متغير لتخزين التعديلات المتعددة على الإجمالي
+let invoiceAdjustments = []; // قائمة التعديلات المضافة
+
 function calculateTotals(products) {
   if (!Array.isArray(products)) {
     console.error("calculateTotals: products is not an array", products);
@@ -64,6 +67,268 @@ function applyAdjustment(total, type, value) {
   // لا نريد قيمة سالبة على الإجمالي
   if (isNaN(adjusted) || adjusted < 0) return 0;
   return Math.round(adjusted * 100) / 100; // دقة بسيطة إلى سنت
+}
+
+// ======================================================
+// 🎯 دالة حساب الخصم الذكي (يراعي التفاعل بين الكوبون والخصم اليدوي)
+// ======================================================
+function applySmartDiscount(
+  baseTotal,
+  couponData,
+  manualAdjustmentType,
+  manualAdjustmentValue
+) {
+  let result = baseTotal;
+
+  // جمع معلومات الخصومات
+  const discounts = [];
+
+  // إضافة خصم الكوبون
+  if (couponData) {
+    discounts.push({
+      type: couponData.discountType, // "%" أو قيمة ثابتة
+      value: couponData.discountValue,
+      source: "coupon",
+    });
+  }
+
+  // إضافة الخصم اليدوي إذا كان خصماً (- أو -%)
+  if (
+    manualAdjustmentType &&
+    (manualAdjustmentType === "-" || manualAdjustmentType === "-%")
+  ) {
+    discounts.push({
+      type: manualAdjustmentType === "-" ? "fixed" : "%",
+      value: parseFloat(manualAdjustmentValue) || 0,
+      source: "manual",
+    });
+  }
+
+  // إذا لم يكن هناك خصومات، تطبيق الزيادة إن وجدت
+  if (discounts.length === 0) {
+    if (manualAdjustmentType === "+" || manualAdjustmentType === "+%") {
+      result = applyAdjustment(
+        baseTotal,
+        manualAdjustmentType,
+        manualAdjustmentValue
+      );
+    }
+    return result;
+  }
+
+  // ========== حالات تطبيق الخصم ==========
+
+  // 1️⃣ كلا الخصمين نسبة (%)
+  const percentageDiscounts = discounts.filter((d) => d.type === "%");
+  const fixedDiscounts = discounts.filter((d) => d.type === "fixed");
+
+  if (
+    discounts.length === 2 &&
+    percentageDiscounts.length === 2 &&
+    fixedDiscounts.length === 0
+  ) {
+    // جمع النسب وتطبيقها مرة واحدة
+    const totalPercentage = percentageDiscounts.reduce(
+      (sum, d) => sum + d.value,
+      0
+    );
+    result = Math.max(0, baseTotal - (baseTotal * totalPercentage) / 100);
+  }
+
+  // 2️⃣ أحدهما نسبة والآخر قيمة ثابتة
+  else if (percentageDiscounts.length === 1 && fixedDiscounts.length === 1) {
+    // تطبيق النسبة أولاً
+    const percentageDiscount = percentageDiscounts[0];
+    result = Math.max(
+      0,
+      baseTotal - (baseTotal * percentageDiscount.value) / 100
+    );
+
+    // ثم تطبيق القيمة الثابتة على النتيجة
+    const fixedDiscount = fixedDiscounts[0];
+    result = Math.max(0, result - fixedDiscount.value);
+  }
+
+  // 3️⃣ كلاهما قيمة ثابتة
+  else if (percentageDiscounts.length === 0 && fixedDiscounts.length === 2) {
+    // جمع القيم الثابتة
+    const totalFixed = fixedDiscounts.reduce((sum, d) => sum + d.value, 0);
+    result = Math.max(0, baseTotal - totalFixed);
+  }
+
+  // 4️⃣ خصم واحد فقط
+  else if (discounts.length === 1) {
+    const discount = discounts[0];
+    if (discount.type === "%") {
+      result = Math.max(0, baseTotal - (baseTotal * discount.value) / 100);
+    } else {
+      result = Math.max(0, baseTotal - discount.value);
+    }
+  }
+
+  return Math.round(result * 100) / 100;
+}
+
+// ======================================================
+// 🎨 دوال إدارة التعديلات المتعددة
+// ======================================================
+
+/**
+ * إضافة تعديل جديد إلى قائمة التعديلات
+ */
+function addAdjustment() {
+  const valueInput = document.getElementById("adjustmentValue");
+  const typeSelect = document.getElementById("adjustmentType");
+  const value = parseFloat(valueInput?.value || 0);
+  const type = typeSelect?.value || "+";
+
+  // التحقق من صحة المدخلات
+  if (!value || isNaN(value) || value === 0) {
+    showToast("⚠️ يرجى إدخال قيمة صحيحة", 3000, "#e74c3c");
+    return;
+  }
+
+  // إضافة التعديل إلى القائمة
+  invoiceAdjustments.push({
+    value: value,
+    type: type,
+    id: Date.now(), // معرف فريد
+  });
+
+  // تحديث العرض
+  renderAdjustmentsList();
+
+  // تفريغ حقول الإدخال
+  valueInput.value = "";
+  typeSelect.value = "+";
+
+  // تحديث الإجماليات
+  updateInvoiceTotals();
+
+  // عرض رسالة نجاح
+  showToast(
+    `✅ تم إضافة تعديل: ${value}${type.includes("%") ? " %" : " ل.س"}`,
+    2000,
+    "#27ae60"
+  );
+}
+
+/**
+ * حذف تعديل من القائمة
+ */
+function removeAdjustment(adjustmentId) {
+  invoiceAdjustments = invoiceAdjustments.filter(
+    (adj) => adj.id !== adjustmentId
+  );
+  renderAdjustmentsList();
+  updateInvoiceTotals();
+}
+
+/**
+ * عرض قائمة التعديلات
+ */
+function renderAdjustmentsList() {
+  const listContainer = document.getElementById("adjustmentsList");
+
+  if (invoiceAdjustments.length === 0) {
+    listContainer.classList.add("hidden");
+    return;
+  }
+
+  listContainer.classList.remove("hidden");
+  listContainer.innerHTML = invoiceAdjustments
+    .map((adj) => {
+      const displayValue = `${adj.value}${
+        adj.type.includes("%") ? " %" : " ل.س"
+      }`;
+      return `
+      <div class="adjustment-item">
+        <div class="adjustment-item-info">
+          <span class="adjustment-item-value">${displayValue}</span>
+          <span class="adjustment-item-type">${adj.type}</span>
+        </div>
+        <button 
+          type="button" 
+          class="adjustment-item-remove" 
+          onclick="removeAdjustment(${adj.id})"
+        >
+          حذف
+        </button>
+      </div>
+    `;
+    })
+    .join("");
+}
+
+/**
+ * تطبيق جميع التعديلات على الإجمالي بشكل ذكي (تجميع النسب والقيم الثابتة)
+ * نفس منطق applySmartDiscount:
+ * - تجميع النسب المئوية أولاً (مثل -5% + 10% - 20% = -15%)
+ * - تجميع القيم الثابتة (مثل 3 + 30 - 100 = -67)
+ * - تطبيق النسب أولاً على المجموع
+ * - ثم تطبيق القيم الثابتة على النتيجة
+ */
+function applyAllAdjustments(baseTotal) {
+  if (!invoiceAdjustments || invoiceAdjustments.length === 0) {
+    return baseTotal;
+  }
+
+  let result = baseTotal;
+
+  // تصنيف التعديلات إلى نسب ثابتة وقيم ثابتة
+  const percentAdjustments = []; // +% و -%
+  const fixedAdjustments = []; // + و -
+
+  for (const adj of invoiceAdjustments) {
+    if (adj.type.includes("%")) {
+      // نسبة مئوية - تخزين العملية والقيمة
+      percentAdjustments.push({
+        isPositive: adj.type === "+%",
+        value: adj.value,
+      });
+    } else {
+      // قيمة ثابتة
+      fixedAdjustments.push({
+        isPositive: adj.type === "+",
+        value: adj.value,
+      });
+    }
+  }
+
+  // 1️⃣ تطبيق النسب المئوية أولاً
+  if (percentAdjustments.length > 0) {
+    // حساب النسبة الكلية
+    let totalPercent = 0;
+    for (const pAdj of percentAdjustments) {
+      if (pAdj.isPositive) {
+        totalPercent += pAdj.value; // إضافة النسبة
+      } else {
+        totalPercent -= pAdj.value; // طرح النسبة
+      }
+    }
+
+    // تطبيق النسبة الكلية
+    if (totalPercent > 0) {
+      // إضافة نسبة
+      result = result + (result * totalPercent) / 100;
+    } else if (totalPercent < 0) {
+      // خصم نسبة (تطبيق كخصم)
+      result = Math.max(0, result - (result * Math.abs(totalPercent)) / 100);
+    }
+  }
+
+  // 2️⃣ تطبيق القيم الثابتة بعد ذلك
+  if (fixedAdjustments.length > 0) {
+    for (const fAdj of fixedAdjustments) {
+      if (fAdj.isPositive) {
+        result += fAdj.value; // إضافة قيمة
+      } else {
+        result = Math.max(0, result - fAdj.value); // طرح قيمة (لا نريد سالب)
+      }
+    }
+  }
+
+  return Math.round(result * 100) / 100; // دقة عشرية لسنت
 }
 
 // تحقق إن الفاتورة تطابق نص البحث (يتحقق عبر أغلب الحقول: المعرف، العميل، الهاتف، المحافظة، الشحن، التواريخ، المنتجات، الإجماليات)
@@ -530,6 +795,12 @@ function renderInvoices(filterStoreId = null) {
 
           ${notes ? `<p><strong>ملاحظات :</strong> ${notes}</p>` : ""}
 
+          ${
+            invoice.coupon
+              ? `<p><strong>كود الخصم :</strong> ${invoice.coupon.code} (خصم: ${invoice.coupon.discountValue}${invoice.coupon.discountType})</p>`
+              : ""
+          }
+
           <div class="invoice-products-toggle">
             <p><strong>المنتجات :</strong></p>
             <hr class="invoice-hr">
@@ -759,6 +1030,18 @@ function resetForm() {
   const adjType = document.getElementById("adjustmentType");
   if (adjVal) adjVal.value = "";
   if (adjType) adjType.value = "+";
+  // إعادة تعيين قائمة التعديلات المتعددة
+  invoiceAdjustments = [];
+  renderAdjustmentsList();
+  // إعادة تعيين الكوبون فقط إذا كنا نضيف فاتورة جديدة (بدون تعديل)
+  // إذا كنا في وضع التعديل، نحافظ على الكوبون المختار
+  if (!form.dataset.editingId) {
+    const couponSelect = document.getElementById("invoiceCouponSelect");
+    if (couponSelect) couponSelect.value = "";
+    const couponInfo = document.getElementById("couponDiscountInfo");
+    if (couponInfo) couponInfo.textContent = "";
+    selectedInvoiceCoupon = null;
+  }
 }
 
 /**
@@ -770,6 +1053,7 @@ function openNewInvoiceModel(targetStoreId = null) {
   // إعادة تعيين النموذج فقط إذا كنا نضيف فاتورة جديدة
   if (!document.getElementById("invoiceForm").dataset.editingId) {
     resetForm();
+    selectedInvoiceCoupon = null; // إعادة تعيين الكوبون
   }
 
   invoiceFormOpen = true;
@@ -780,6 +1064,14 @@ function openNewInvoiceModel(targetStoreId = null) {
 
   // 2. 💡 استدعاء populateStoreSelect هنا
   populateStoreSelect(targetStoreId);
+
+  // تحميل الكوبونات المتاحة
+  loadInvoiceCoupons();
+
+  // تحديث الإجماليات إذا كنا في وضع التعديل (لعرض الخصم الصحيح)
+  if (document.getElementById("invoiceForm").dataset.editingId) {
+    setTimeout(updateInvoiceTotals, 50); // تأخير قليل لضمان تحميل البيانات
+  }
 
   // فتح المودال
   const modal = document.getElementById("newInvoiceModal");
@@ -804,8 +1096,11 @@ function closeModal() {
 
   mainFab.classList.remove("hidden");
 
-  // إعادة تعيين النموذج بعد إغلاق المودال
-  setTimeout(resetForm, 300); // تأخير قليل لضمان انتهاء الأنيميشن
+  // إعادة تعيين النموذج بعد إغلاق المودال فقط إذا لم نكن في وضع التعديل
+  const form = document.getElementById("invoiceForm");
+  if (!form.dataset.editingId) {
+    setTimeout(resetForm, 300); // تأخير قليل لضمان انتهاء الأنيميشن
+  }
   document.body.style.overflow = "";
 }
 
@@ -1010,7 +1305,27 @@ function editInvoice(id) {
     storeSelectEl.value = invoice.posId ? String(invoice.posId) : "";
   }
 
-  // تخزين المعرف داخل الفورم
+  // تحفظ الكوبون المختار من الفاتورة ليتم تحديثه عند فتح المودال
+  if (invoice.coupon) {
+    selectedInvoiceCoupon = invoice.coupon;
+  } else {
+    selectedInvoiceCoupon = null;
+  }
+
+  // تحميل التعديلات المتعددة المحفوظة
+  if (invoice.adjustments && Array.isArray(invoice.adjustments)) {
+    invoiceAdjustments = invoice.adjustments.map((adj, idx) => ({
+      value: adj.value,
+      type: adj.type,
+      id: Date.now() + idx,
+    }));
+  } else {
+    invoiceAdjustments = [];
+  }
+  renderAdjustmentsList();
+
+  // تخزين المعرف داخل الفورم **قبل** فتح المودال
+  // (حتى لا يتم استدعاء resetForm بالخطأ في openNewInvoiceModel)
   document.getElementById("invoiceForm").dataset.editingId = id;
 
   // إظهار زر الحذف لأننا في وضع التعديل
@@ -1249,14 +1564,81 @@ function saveInvoice() {
     // استخدام القيم الآمنة (مع أنها أصبحت آمنة بالفعل في calculateTotals)
     const safeTotalSYP = totalSYP || 0;
 
-    // قراءة إعدادات التعديل (إن وُجدت) وتطبيقها على الإجمالي
-    const adjValGlobal = document.getElementById("adjustmentValue")?.value;
-    const adjTypeGlobal = document.getElementById("adjustmentType")?.value;
-    const adjustedGlobal = applyAdjustment(
-      safeTotalSYP,
-      adjTypeGlobal,
-      adjValGlobal
-    );
+    // ✅ تطبيق ذكي متكامل:
+    // جمع جميع التعديلات (الكوبون + التعديلات المتعددة)
+    // وتطبيقها بشكل ذكي (نسب أولاً، ثم قيم ثابتة)
+
+    const discounts = [];
+
+    // إضافة خصم الكوبون (إن وجد)
+    if (selectedInvoiceCoupon) {
+      discounts.push({
+        type: selectedInvoiceCoupon.discountType, // "%" أو قيمة ثابتة
+        value: selectedInvoiceCoupon.discountValue,
+        source: "coupon",
+      });
+    }
+
+    // إضافة التعديلات المتعددة
+    for (const adj of invoiceAdjustments) {
+      if (adj.type.includes("%")) {
+        discounts.push({
+          type: "%",
+          value: adj.type === "-%" ? -adj.value : adj.value,
+          source: "adjustment",
+        });
+      } else {
+        discounts.push({
+          type: "fixed",
+          value: adj.type === "-" ? -adj.value : adj.value,
+          source: "adjustment",
+        });
+      }
+    }
+
+    // تطبيق جميع التعديلات بشكل ذكي
+    let adjustedGlobal = safeTotalSYP;
+    if (discounts.length > 0) {
+      const percentageDiscounts = discounts.filter((d) => d.type === "%");
+      const fixedDiscounts = discounts.filter((d) => d.type === "fixed");
+
+      // حساب النسبة الكلية
+      let totalPercent = 0;
+      for (const pDisc of percentageDiscounts) {
+        totalPercent += pDisc.value;
+      }
+
+      // حساب القيمة الثابتة الكلية
+      let totalFixed = 0;
+      for (const fDisc of fixedDiscounts) {
+        totalFixed += fDisc.value;
+      }
+
+      // تطبيق النسب أولاً
+      if (totalPercent !== 0) {
+        if (totalPercent > 0) {
+          // إضافة نسبة
+          adjustedGlobal = safeTotalSYP + (safeTotalSYP * totalPercent) / 100;
+        } else {
+          // خصم نسبة
+          adjustedGlobal = Math.max(
+            0,
+            safeTotalSYP - (safeTotalSYP * Math.abs(totalPercent)) / 100
+          );
+        }
+      }
+
+      // ثم تطبيق القيم الثابتة
+      if (totalFixed !== 0) {
+        if (totalFixed > 0) {
+          adjustedGlobal += totalFixed;
+        } else {
+          adjustedGlobal = Math.max(0, adjustedGlobal - Math.abs(totalFixed));
+        }
+      }
+    }
+
+    adjustedGlobal = Math.round(adjustedGlobal * 100) / 100;
 
     if (form.dataset.editingId) {
       // تعديل فاتورة
@@ -1300,6 +1682,7 @@ function saveInvoice() {
             adjValGlobal && adjTypeGlobal
               ? { type: adjTypeGlobal, value: parseFloat(adjValGlobal) }
               : null,
+          coupon: selectedInvoiceCoupon || null, // إضافة الكوبون المطبق
           payment: paymentObj,
           notes,
           posId: posId,
@@ -1348,10 +1731,11 @@ function saveInvoice() {
         products: selectedProducts,
         totalOriginalSYP: safeTotalSYP,
         totalSYP: adjustedGlobal,
-        adjustment:
-          adjValGlobal && adjTypeGlobal
-            ? { type: adjTypeGlobal, value: parseFloat(adjValGlobal) }
-            : null,
+        adjustments:
+          invoiceAdjustments && invoiceAdjustments.length > 0
+            ? invoiceAdjustments.map(({ value, type }) => ({ type, value }))
+            : null, // حفظ قائمة التعديلات المتعددة
+        coupon: selectedInvoiceCoupon || null, // إضافة الكوبون المطبق
         payment: paymentObjNew,
         notes: notesNew,
         posId: posId,
@@ -2007,10 +2391,83 @@ function updateInvoiceTotals() {
       totalSYP += qty * price;
     }
   });
-  // بعد حساب الإجمالي الأصلي، تحقق من وجود تعديل
-  const adjVal = document.getElementById("adjustmentValue")?.value;
-  const adjType = document.getElementById("adjustmentType")?.value;
-  const adjusted = applyAdjustment(totalSYP, adjType, adjVal);
+
+  // ✅ تطبيق ذكي متكامل:
+  // جمع جميع التعديلات (الكوبون + التعديلات المتعددة)
+  // وتطبيقها بشكل ذكي (نسب أولاً، ثم قيم ثابتة)
+
+  const discounts = [];
+
+  // إضافة خصم الكوبون (إن وجد) - الكوبون دائماً خصم (سالب)
+  if (selectedInvoiceCoupon) {
+    discounts.push({
+      type: selectedInvoiceCoupon.discountType, // "%" أو قيمة ثابتة
+      value: -selectedInvoiceCoupon.discountValue, // ⭐ تحويل إلى سالب دائماً (خصم)
+      source: "coupon",
+    });
+  }
+
+  // إضافة التعديلات المتعددة
+  for (const adj of invoiceAdjustments) {
+    if (adj.type.includes("%")) {
+      discounts.push({
+        type: "%",
+        value: adj.type === "-%" ? -adj.value : adj.value,
+        source: "adjustment",
+      });
+    } else {
+      discounts.push({
+        type: "fixed",
+        value: adj.type === "-" ? -adj.value : adj.value,
+        source: "adjustment",
+      });
+    }
+  }
+
+  // تطبيق جميع التعديلات بشكل ذكي
+  let adjusted = totalSYP;
+  if (discounts.length > 0) {
+    adjusted = applySmartDiscount(totalSYP, null, null, null);
+    // إعادة حساب باستخدام discounts المجمعة
+
+    const percentageDiscounts = discounts.filter((d) => d.type === "%");
+    const fixedDiscounts = discounts.filter((d) => d.type === "fixed");
+
+    // حساب النسبة الكلية
+    let totalPercent = 0;
+    for (const pDisc of percentageDiscounts) {
+      totalPercent += pDisc.value;
+    }
+
+    // حساب القيمة الثابتة الكلية
+    let totalFixed = 0;
+    for (const fDisc of fixedDiscounts) {
+      totalFixed += fDisc.value;
+    }
+
+    // تطبيق النسب أولاً
+    if (totalPercent !== 0) {
+      if (totalPercent > 0) {
+        // إضافة نسبة
+        adjusted = totalSYP + (totalSYP * totalPercent) / 100;
+      } else {
+        // خصم نسبة
+        adjusted = Math.max(
+          0,
+          totalSYP - (totalSYP * Math.abs(totalPercent)) / 100
+        );
+      }
+    }
+
+    // ثم تطبيق القيم الثابتة
+    if (totalFixed !== 0) {
+      if (totalFixed > 0) {
+        adjusted += totalFixed;
+      } else {
+        adjusted = Math.max(0, adjusted - Math.abs(totalFixed));
+      }
+    }
+  }
 
   const totalEl = document.getElementById("totalSYP");
   const origRow = document.getElementById("originalTotalRow");
@@ -2018,12 +2475,17 @@ function updateInvoiceTotals() {
   const origEl = document.getElementById("originalTotalSYP");
   const adjEl = document.getElementById("adjustedTotalSYP");
 
-  if (adjVal && !isNaN(parseFloat(adjVal)) && adjType) {
+  // عرض الأصلي والمعدّل إذا كان هناك تعديلات أو كوبون
+  const hasAdjustments = invoiceAdjustments.length > 0 || selectedInvoiceCoupon;
+
+  if (hasAdjustments && adjusted !== totalSYP) {
     if (origRow) origRow.classList.remove("hidden");
     if (adjRow) adjRow.classList.remove("hidden");
     if (origEl) origEl.textContent = totalSYP.toLocaleString();
-    if (adjEl) adjEl.textContent = adjusted.toLocaleString();
-    if (totalEl) totalEl.textContent = adjusted.toLocaleString();
+    if (adjEl)
+      adjEl.textContent = (Math.round(adjusted * 100) / 100).toLocaleString();
+    if (totalEl)
+      totalEl.textContent = (Math.round(adjusted * 100) / 100).toLocaleString();
   } else {
     if (origRow) origRow.classList.add("hidden");
     if (adjRow) adjRow.classList.add("hidden");
@@ -2317,8 +2779,40 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
     notesEl.value = existingNotes;
   }
 
+  // تحميل الكوبون المطبق إن وجد
+  if (invoice.coupon) {
+    selectedInvoiceCoupon = invoice.coupon;
+  } else {
+    selectedInvoiceCoupon = null;
+  }
+
+  // تحميل الكوبونات وملء القائمة (سيتم تحديد الكوبون المختار تلقائياً بناءً على selectedInvoiceCoupon)
+  loadInvoiceCoupons();
+
+  // عرض معلومات الكوبون إذا كان موجوداً
+  if (invoice.coupon) {
+    const discountText = `${invoice.coupon.discountValue}${invoice.coupon.discountType}`;
+    const couponInfo = document.getElementById("couponDiscountInfo");
+    if (couponInfo) {
+      couponInfo.textContent = `✅ تم تطبيق الخصم: ${discountText}`;
+      couponInfo.style.color = "#27ae60";
+    }
+  }
+
   // حفظ المعرف داخل الفورم لتمييز التعديل أو كمعرف مؤقت
   form.dataset.editingId = invoice.id;
+
+  // تحميل التعديلات المتعددة المحفوظة
+  if (invoice.adjustments && Array.isArray(invoice.adjustments)) {
+    invoiceAdjustments = invoice.adjustments.map((adj, idx) => ({
+      value: adj.value,
+      type: adj.type,
+      id: Date.now() + idx,
+    }));
+  } else {
+    invoiceAdjustments = [];
+  }
+  renderAdjustmentsList();
 
   // إظهار زر الحذف فقط في حال كنا نعدل فاتورة محفوظة، وليس فاتورة جديدة مستوردة
   const delBtn = document.getElementById("deleteInvoiceBtn");
@@ -3072,4 +3566,67 @@ function openInvoicePrint() {
   const id = form && form.dataset.editingId;
 
   window.open(`invoice_print.html?id=${id}`, "_blank");
+}
+
+// ======================================================
+// 🎫 دوال إدارة الكوبونات في مودال الفاتورة
+// ======================================================
+
+// متغير لتخزين الكوبون المختار الحالي
+let selectedInvoiceCoupon = null;
+
+// تحميل الكوبونات وملء قائمة الاختيار
+function loadInvoiceCoupons() {
+  const select = document.getElementById("invoiceCouponSelect");
+  if (!select) return;
+
+  // مسح الخيارات السابقة ما عدا الخيار الأول
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+
+  // إضافة الكوبونات إلى القائمة
+  if (coupons && Array.isArray(coupons)) {
+    coupons.forEach((coupon) => {
+      const option = document.createElement("option");
+      const discountText = `${coupon.discountValue}${coupon.discountType}`;
+      const statusText =
+        new Date(coupon.endDate) < new Date() ? " (منتهية)" : "";
+      option.value = coupon.code;
+      option.textContent = `${coupon.code} - خصم ${discountText}${statusText}`;
+      option.dataset.couponData = JSON.stringify(coupon);
+      select.appendChild(option);
+    });
+  }
+
+  // إذا كان هناك كوبون مختار بالفعل، أعد تحديده
+  if (selectedInvoiceCoupon) {
+    select.value = selectedInvoiceCoupon.code;
+  }
+}
+
+// تطبيق الكوبون المختار على الإجمالي
+function applyInvoiceCoupon() {
+  const select = document.getElementById("invoiceCouponSelect");
+  const infoEl = document.getElementById("couponDiscountInfo");
+
+  if (!select.value) {
+    selectedInvoiceCoupon = null;
+    infoEl.textContent = "";
+    updateInvoiceTotals();
+    return;
+  }
+
+  const option = select.options[select.selectedIndex];
+  const couponData = JSON.parse(option.dataset.couponData);
+
+  selectedInvoiceCoupon = couponData;
+
+  // عرض معلومات الكوبون
+  const discountText = `${couponData.discountValue}${couponData.discountType}`;
+  infoEl.textContent = `✅ تم تطبيق الخصم: ${discountText}`;
+  infoEl.style.color = "#27ae60";
+
+  // تحديث الإجماليات
+  updateInvoiceTotals();
 }
