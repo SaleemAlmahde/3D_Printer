@@ -2,7 +2,7 @@ let importantCats = ["all"];
 let otherCats = [];
 let filteredProducts = [];
 let loadedCount = 0;
-const itemsPerLoad = 15; // عدد المنتجات التي تُعرض كل مرة
+const itemsPerLoad = 10; // عدد المنتجات التي تُعرض كل مرة
 let searchQuery = "";
 const scrollTopBtn = document.getElementById("scrollTopBtn"); // زر العودة للأعلى
 let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -368,7 +368,6 @@ function showModal(id) {
                         </div>
                         ${colorsHTML}
                         <input type="number" id="pQ" placeholder="الكمية" required>
-                        <textarea id="productNote" placeholder="ملاحظة (اختياري)" style="width:100%; margin-top:8px; min-height:48px; padding:8px; border:1px solid #ccc; border-radius:4px;"></textarea>
                         ${stickerWarningHTML}
                         
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; width: 100%;">
@@ -376,13 +375,17 @@ function showModal(id) {
                             <label for="customizationCheckbox" style="font-weight: bold; cursor: pointer; margin: 0;">إضافة تخصيص للمنتج</label>
                         </div>
                         
-                        <div id="customizationWarning" style="display: none; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
-                            ⚠️ السعر سيتحدد لاحقاً بعد تقييم طلب التخصيص
-                        </div>
-                        
                         <div id="customizationSection" style="display: none; width: 100%;">
+                            <div style="background-color: #e7f3ff; color: #004085; border: 1px solid #b3d9ff; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                                💡 أضف وصف التخصيص لمنتجك
+                            </div>
+                            
                             <label for="productCustomDesc" style="font-weight: bold; margin-bottom: 5px; display: block;">وصف التخصيص:</label>
-                            <textarea id="productCustomDesc" rows="3" placeholder="مثال: إضافة شعار الشركة - تغيير اللون - حفر بأحرف ذهبية - إلخ." style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
+                            <textarea id="productCustomDesc" rows="4" placeholder="مثال: إضافة شعار الشركة - تغيير اللون - حفر بأحرف ذهبية - إضافة نص مخصص - إلخ." style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box;"></textarea>
+                            
+                            <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                                ⚠️ السعر سيتحدد لاحقاً بعد تقييم طلب التخصيص
+                            </div>
                         </div>
                         
                         <button onClick="addToCart('${id}')" style="width: 100%;">أضف للسلة</button>
@@ -393,22 +396,20 @@ function showModal(id) {
   document.getElementById("overlay").classList.remove("hidden");
   document.body.style.overflow = "hidden";
 
-  // إضافة event listener للـ checkbox الجديد
+  // إضافة event listener للـ checkbox
   document
     .getElementById("customizationCheckbox")
     .addEventListener("change", function () {
-      const customizationWarning = document.getElementById(
-        "customizationWarning"
-      );
       const customizationSection = document.getElementById(
         "customizationSection"
       );
       if (this.checked) {
-        customizationWarning.style.display = "block";
         customizationSection.style.display = "block";
       } else {
-        customizationWarning.style.display = "none";
         customizationSection.style.display = "none";
+        // تنظيف الحقل عند الإلغاء
+        const customEl = document.getElementById("productCustomDesc");
+        if (customEl) customEl.value = "";
       }
     });
 }
@@ -501,28 +502,33 @@ function addToCart(productId) {
   const quantity = parseInt(qInput.value) || 1;
   const selectedColor = JSON.parse(selectedColorData);
 
-  // optional note from modal
-  const note = document.getElementById("productNote")?.value.trim() || "";
-
-  // هل المنتج بنفس اللون موجود مسبقًا؟
-  const existingItem = cartItems.find(
-    (item) =>
-      item.productId === product.id &&
-      item.selectedColor.code === selectedColor.code
+  // التحقق من حالة الـ checkbox
+  const customizationCheckbox = document.getElementById(
+    "customizationCheckbox"
   );
+  const isCustomizationEnabled = customizationCheckbox?.checked || false;
 
-  if (existingItem) {
-    existingItem.quantity += quantity; // زيادة الكمية
-    if (note) existingItem.note = note; // حفظ الملاحظة إن وُجدت (تُحدث/تُستبدل)
-  } else {
-    cartItems.push({
-      id: Date.now(),
-      productId: product.id,
-      quantity: quantity,
-      selectedColor: selectedColor,
-      note: note,
-    });
+  // الحصول على وصف التخصيص من الحقل (إذا كان مفعلاً فقط)
+  let customizationDesc = "";
+  if (isCustomizationEnabled) {
+    customizationDesc =
+      document.getElementById("productCustomDesc")?.value.trim() || "";
+
+    // التحقق من أن حقل التخصيص ليس فارغاً إذا كان الـ checkbox مفعلاً
+    if (customizationDesc === "") {
+      showToast("⚠️ يرجى كتابة وصف التخصيص للمنتج", 3000, "#d32f2f");
+      return;
+    }
   }
+
+  // إضافة المنتج مع التخصيص (أو بدونه إذا لم يتم تفعيل الـ checkbox)
+  cartItems.push({
+    id: Date.now(),
+    productId: product.id,
+    quantity: quantity,
+    selectedColor: selectedColor,
+    customization: customizationDesc, // سيكون فارغاً إذا لم يتم تفعيل التخصيص
+  });
 
   // حفظ في localStorage
   localStorage.setItem("cartItems", JSON.stringify(cartItems));
@@ -530,8 +536,8 @@ function addToCart(productId) {
   // تنظيف الحقول
   delete colorContainer.dataset.selectedColor;
   qInput.value = "";
-  const noteEl = document.getElementById("productNote");
-  if (noteEl) noteEl.value = "";
+  const customEl = document.getElementById("productCustomDesc");
+  if (customEl) customEl.value = "";
 
   const colorSelector = document.querySelector(".color-selector");
   if (colorSelector) colorSelector.remove();

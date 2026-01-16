@@ -37,6 +37,7 @@
     // تعبئة النصوص الأساسية
     document.getElementById("invoiceNumber").textContent = displayNumber;
     document.getElementById("invoiceDate").textContent = invoice.date;
+    document.getElementById("exportDate").textContent = new Date().toLocaleDateString("ar-SY");
     document.getElementById("customerName").textContent = invoice.customerName;
     document.getElementById("customerPhone").textContent = invoice.phone;
     document.getElementById("customerCity").textContent = invoice.city;
@@ -101,6 +102,11 @@
         paymentStatus.appendChild(paidSpan);
         paymentStatus.appendChild(remainingSpan);
       }
+    }
+
+    const noteDiv = document.getElementById("noteDiv");
+    if(invoice.notes === "" || invoice.notes == null){
+      noteDiv.style.display = "none";
     }
   }
 

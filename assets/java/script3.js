@@ -86,8 +86,18 @@ function displayCartItems() {
     let detailsHTML = "";
     let editButtonHTML = "";
 
-    if (item.isCustom) {
-      // للطلبات المخصصة: لا نظهر الوصف داخل الكارد، نعرض ملاحظة وأزرار (التعديل يفتح مودال قابل للتحرير)
+    if (item.customization) {
+      // للمنتجات مع تخصيص: نعرض السعر "يحدد لاحقاً" والكمية والتخصيص
+      detailsHTML = `
+                <p>اللون : <span style="font-weight:bold;">${item.selectedColor.name}</span></p>
+                <p>الكمية : ${item.quantity}</p>
+                <p style="font-weight: bold; color: #ffc107;">السعر: يحدد لاحقاً</p>
+                <p style="font-size: 14px; color: #666; margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px;">التخصيص: ${item.customization}</p>
+            `;
+      // نسمح بفتح مودال التعديل
+      editButtonHTML = `<button class="edit-cart-btn" onclick="editCartItem(${item.id})">تعديل</button>`;
+    } else if (item.isCustom) {
+      // للطلبات المخصصة القديمة: لا نظهر الوصف داخل الكارد، نعرض ملاحظة وأزرار (التعديل يفتح مودال قابل للتحرير)
       detailsHTML = `
                 <p>الكمية: 1 (طلب مخصص)</p>
                 <p style="font-weight: bold; color: #ffc107; margin-top: 5px;">هذا طلب مخصص — اضغط تعديل لتعديل الوصف</p>
@@ -296,7 +306,37 @@ function openEditModal(cartItem) {
   }
 
   // 2. إنشاء محتوى المودل (بشكل مختلف للطلبات المخصصة)
-  if (cartItem.isCustom) {
+  if (cartItem.customization) {
+    // للمنتجات مع تخصيص
+    modalContent.innerHTML = `
+        <div class="container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div>
+                    <h2>${product.name}</h2>
+                    <h3 style="color: #ffc107;">السعر: يحدد لاحقاً</h3>
+                </div>
+                <img src="./${product.images[0]}" alt="${
+      product.name
+    }" style="width: 80px; height: 80px;">
+            </div>
+
+            <p style="margin-bottom:6px; font-weight:600;">اللون: <span style="color:${
+              cartItem.selectedColor.code
+            }; font-weight:bold;">${cartItem.selectedColor.name}</span></p>
+
+            <p style="margin-bottom:6px; font-weight:600;">وصف التخصيص:</p>
+            <textarea id="productCustomDesc" placeholder="اكتب وصف التخصيص هنا" style="width:100%; min-height:140px; margin-top:4px;">${
+              cartItem.customization || ""
+            }</textarea>
+
+            <input type="number" id="pQ" placeholder="الكمية" value="${
+              cartItem.quantity
+            }" min="1" required style="width:100%; margin-top:8px; padding:8px; border:1px solid #ccc; border-radius:4px;" />
+
+            <button onClick="saveEdit(${cartItem.id})">حفظ التعديلات</button>
+        </div>
+    `;
+  } else if (cartItem.isCustom) {
     modalContent.innerHTML = `
         <div class="container">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -415,10 +455,12 @@ function saveEdit(itemId) {
 
   // إذا كان هذا عنصر مخصص، احصل على النص من textarea الخاص بالوصف المخصص
   const customDescInput = document.getElementById("customDesc");
+  const customizationInput = document.getElementById("productCustomDesc");
   const isCustom = cartItems[cartItemIndex].isCustom;
+  const hasCustomization = cartItems[cartItemIndex].customization;
 
   // للمنتجات غير المخصصة: نحتاج لوناً
-  if (!isCustom && !selectedColorData) {
+  if (!isCustom && !hasCustomization && !selectedColorData) {
     showToast("⚠️ يرجى اختيار لون للمنتج", 3000, "orange");
     return;
   }
@@ -431,14 +473,21 @@ function saveEdit(itemId) {
   }
 
   // 1. تحديث بيانات العنصر
-  // إذا كان مخصصاً: نحفظ الكمية المتغيرة والوصف المخصص
-  if (isCustom) {
+  if (hasCustomization) {
+    // للمنتجات مع تخصيص: نحفظ الكمية والتخصيص
+    cartItems[cartItemIndex].quantity = quantity;
+    if (customizationInput) {
+      cartItems[cartItemIndex].customization = customizationInput.value.trim();
+    }
+  } else if (isCustom) {
+    // للطلبات المخصصة القديمة: نحفظ الكمية والوصف المخصص والملاحظات
     cartItems[cartItemIndex].quantity = quantity;
     cartItems[cartItemIndex].customDescription = customDescInput
       ? customDescInput.value.trim()
       : cartItems[cartItemIndex].customDescription;
     cartItems[cartItemIndex].note = note;
   } else {
+    // للمنتجات العادية: نحفظ الكمية واللون والملاحظات
     cartItems[cartItemIndex].quantity = quantity;
     if (selectedColor) cartItems[cartItemIndex].selectedColor = selectedColor;
     cartItems[cartItemIndex].note = note;

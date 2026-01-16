@@ -255,11 +255,11 @@ th{
 }
 
 .payment-status {
-  color: #07ae91;
+  color: red;
   width: 100%;
   display: none;
   margin-top: 30px;
-  font-size: 30px;
+  font-size: 20px;
 }
 
 a {
