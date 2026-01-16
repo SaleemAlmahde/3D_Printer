@@ -7,7 +7,7 @@ const finalBaseProducts = [
     colors: [], // لا يوجد ألوان محددة مسبقًا
     price: 0, // السعر يبدأ من صفر حتى يتم تحديد المواصفات
     images: ["assets/imgs/try.jpg"], // صورة توضيحية لطلب مخصص
-    isCustomOrder: true // 🚩 العلامة الرئيسية لتمييزه
+    isCustomOrder: true, // 🚩 العلامة الرئيسية لتمييزه
   },
   {
     id: 1,
@@ -32,16 +32,17 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg"]
+    storePrice: 10,
+    images: ["assets/imgs/try.jpg"],
   },
   {
     id: 2,
     name: "ميدالية سيارة اودي",
-    shortDisc: "ميدالية ثلاثية الأبعاد بشعار أودي بتفاصيل دقيقة ولمسة نهائية ناعمة.",
+    shortDisc:
+      "ميدالية ثلاثية الأبعاد بشعار أودي بتفاصيل دقيقة ولمسة نهائية ناعمة.",
     categories: ["سيارة", "ميدالية مطبوعة ثلاثي الأبعاد"],
     colors: [
       { name: "ازرق", code: "#0000FF" },
@@ -61,11 +62,15 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: [ "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/try.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/try.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 3,
@@ -90,16 +95,21 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/Chicken_Alfredo.jpg", "assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/Chicken_Alfredo.jpg",
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+    ],
   },
   {
     id: 4,
     name: "ميدالية سيارة هونداي",
-    shortDisc: "ميدالية شعار هيونداي بطباعة ثلاثية الأبعاد بتشطيب قوي ومقاوم للخدش.",
+    shortDisc:
+      "ميدالية شعار هيونداي بطباعة ثلاثية الأبعاد بتشطيب قوي ومقاوم للخدش.",
     categories: ["سيارة", "ميدالية مطبوعة ثلاثي الأبعاد"],
     colors: [
       { name: "ازرق", code: "#0000FF" },
@@ -119,16 +129,21 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 5,
     name: "ميدالية سيارة مرسيدس",
-    shortDisc: "ميدالية بشعار مرسيدس بتصميم أنيق وتفاصيل دقيقة مناسبة كهدايا فاخرة.",
+    shortDisc:
+      "ميدالية بشعار مرسيدس بتصميم أنيق وتفاصيل دقيقة مناسبة كهدايا فاخرة.",
     categories: ["سيارة", "ميدالية مطبوعة ثلاثي الأبعاد"],
     colors: [
       { name: "ازرق", code: "#0000FF" },
@@ -148,11 +163,15 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 6,
@@ -177,11 +196,15 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 7,
@@ -206,16 +229,21 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/Sushi_Roll.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/Sushi_Roll.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 8,
     name: "ميدالية سيارة ميتسوبيشي",
-    shortDisc: "ميدالية شعار ميتسوبيشي بتصميم هندسي واضح وخامات مطبوعة عالية الجودة.",
+    shortDisc:
+      "ميدالية شعار ميتسوبيشي بتصميم هندسي واضح وخامات مطبوعة عالية الجودة.",
     categories: ["ستيكر", "سيارة", "ميدالية مطبوعة ثلاثي الأبعاد"],
     colors: [
       { name: "ازرق", code: "#0000FF" },
@@ -235,11 +263,15 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 9,
@@ -264,16 +296,21 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
+    storePrice: 10,
+    images: [
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
   },
   {
     id: 10,
     name: "ميدالية سيارة فوكسفاجن",
-    shortDisc: "ميدالية شعار فولكس فاجن مطبوعة بدقة مع حواف ناعمة وقابلة للتخصيص.",
+    shortDisc:
+      "ميدالية شعار فولكس فاجن مطبوعة بدقة مع حواف ناعمة وقابلة للتخصيص.",
     categories: ["سيارة", "ميدالية مطبوعة ثلاثي الأبعاد"],
     colors: [
       { name: "ازرق", code: "#0000FF" },
@@ -293,63 +330,82 @@ const finalBaseProducts = [
       { name: "فضي", code: "#C0C0C0" },
       { name: "احمر غامق", code: "#8B0000" },
       { name: "احمر", code: "#FF0000" },
-      { name: "برتقالي", code: "#FFA500" }
+      { name: "برتقالي", code: "#FFA500" },
     ],
     price: 132,
-    storePrice:10,
-    images: ["assets/imgs/try.jpg", "assets/imgs/Spaghetti_Bolognese.jpg", "assets/imgs/Chicken_Alfredo.jpg"]
-  }
+    storePrice: 10,
+    images: [
+      "assets/imgs/try.jpg",
+      "assets/imgs/Spaghetti_Bolognese.jpg",
+      "assets/imgs/Chicken_Alfredo.jpg",
+    ],
+  },
 ];
 
 const defaultStores = [
-    { id: 101,
-      name: "متجر الفا للمطبوعات",
-      phone: "ؤسؤسؤسؤ",
-      location: "دمشق",
-      balance: 0,
-      logo:"assets/imgs/Untitled-11.png"
-    },
-    { id: 102,
-      name: "نقطة بيع المهندس",
-      phone: "0998765432",
-      location: "حلب",
-      balance: 0,
-      logo:"assets/imgs/Untitled-11.png"
-    },
-    { id: 103,
-      name: "مكتبة الإبداع الرقمي",
-      phone: "0995551112",
-      location: "حمص",
-      balance: 0,
-      logo:"assets/imgs/Untitled-33.png"
-    },
-    { id: 104,
-      name: "مكتبة jg الرقمي",
-      phone: "0995551112",
-      location: "حمص",
-      balance: 0,
-      logo:"assets/imgs/Untitled-22.png"
-    },
-    { id: 105,
-      name: "نقطة بيع المهندس",
-      phone: "0998765432",
-      location: "حلب",
-      balance: 0,
-      logo:"assets/imgs/Untitled-11.png"
-    }
+  {
+    id: 101,
+    name: "متجر الفا للمطبوعات",
+    phone: "ؤسؤسؤسؤ",
+    location: "دمشق",
+    balance: 0,
+    logo: "assets/imgs/Untitled-11.png",
+  },
+  {
+    id: 102,
+    name: "نقطة بيع المهندس",
+    phone: "0998765432",
+    location: "حلب",
+    balance: 0,
+    logo: "assets/imgs/Untitled-11.png",
+  },
+  {
+    id: 103,
+    name: "مكتبة الإبداع الرقمي",
+    phone: "0995551112",
+    location: "حمص",
+    balance: 0,
+    logo: "assets/imgs/Untitled-33.png",
+  },
+  {
+    id: 104,
+    name: "مكتبة jg الرقمي",
+    phone: "0995551112",
+    location: "حمص",
+    balance: 0,
+    logo: "assets/imgs/Untitled-22.png",
+  },
+  {
+    id: 105,
+    name: "نقطة بيع المهندس",
+    phone: "0998765432",
+    location: "حلب",
+    balance: 0,
+    logo: "assets/imgs/Untitled-11.png",
+  },
 ];
 
 const ads = [
-  {id: 0,
-    image: "assets/imgs/try.jpg",
-    link: ""
+  { id: 0, image: "assets/imgs/try.jpg", link: "" },
+  { id: 1, image: "assets/imgs/Chicken_Alfredo.jpg", link: "" },
+  { id: 2, image: "assets/imgs/Spaghetti_Bolognese.jpg", link: "" },
+];
+
+const coupons = [
+  {
+    id: 0,
+    code: "ewkjfjewklfjew",
+    discountType: "%", // - a constant value or %
+    discountValue: 5,
+    useLimit: 5, // عدد مرات الاستخدام المتاحة
+    endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
   },
-  {id: 1,
-    image: "assets/imgs/Chicken_Alfredo.jpg",
-    link: ""
+  {
+    id: 1,
+    code: "ewkjfjewسسيklfjew",
+    discountType: "%", // - a constant value or %
+    discountValue: 5,
+    useLimit: 5, // عدد مرات الاستخدام المتاحة
+    endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
   },
-  {id: 2,
-    image: "assets/imgs/Spaghetti_Bolognese.jpg",
-    link: ""
-  },
-]
+];

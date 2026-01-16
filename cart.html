@@ -114,6 +114,10 @@
           ></textarea>
         </div>
 
+        <button id="couponBtn" class="coupon-btn" onclick="showCouponModal()">
+          <i class="fa fa-ticket"></i> لدي كود خصم
+        </button>
+
         <p>عدد المنتجات : <span id="totalQuantity">0</span></p>
         <p>الإجمالي : <span id="totalPrice">0 ل.س</span></p>
 
@@ -163,6 +167,32 @@
     </div>
 
     <!-- Modern Card-Based Footer -->
+    <div id="couponOverlay" class="hidden" onclick="closeCouponModal()"></div>
+    <div id="couponModal" class="hidden">
+      <div class="coupon-modal-content">
+        <button class="close-coupon-btn" onclick="closeCouponModal()">
+          <i class="fa fa-times"></i>
+        </button>
+        <h3>أدخل كود الخصم</h3>
+        <p
+          id="couponInfo"
+          style="font-size: 12px; color: #666; margin-bottom: 10px"
+        ></p>
+        <div class="coupon-input-group">
+          <input
+            type="text"
+            id="couponCode"
+            placeholder="أدخل كود الخصم هنا"
+            autocomplete="off"
+          />
+          <button onclick="applyCoupon()" class="apply-coupon-btn">
+            تطبيق الكوبون
+          </button>
+        </div>
+        <p id="couponMessage" class="coupon-message"></p>
+      </div>
+    </div>
+
     <footer class="modern-cart-footer">
       <div class="footer-divider-line"></div>
       <div class="footer-cards-grid">
@@ -252,7 +282,24 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2024 3D Printer Solutions. جميع الحقوق محفوظة &reg;</p>
+        <div class="footer-copyright">
+          جميع الحقوق محفوظة © 2026 | Saleem Almahde
+        </div>
+        <div class="footer-social-icons">
+          <a href="https://wa.me/963993981269" target="_blank" title="WhatsApp">
+            <i class="fa fa-whatsapp"></i>
+          </a>
+          <a href="https://facebook.com" target="_blank" title="Facebook">
+            <i class="fa fa-facebook"></i>
+          </a>
+          <a
+            href="https://instagram.com/3dp.sy"
+            target="_blank"
+            title="Instagram"
+          >
+            <i class="fa fa-instagram"></i>
+          </a>
+        </div>
       </div>
     </footer>
   </body>

@@ -2,6 +2,7 @@
 // 🛒 تحميل بيانات السلة من localStorage
 // ======================================================
 let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+let appliedCoupon = null; // لتتبع الكوبون المستخدم
 
 /* ======================================================
      حفظ واسترجاع معلومات العميل (باستثناء التاريخ والملاحظات)
@@ -581,11 +582,28 @@ function updateCartTotals() {
     }
   });
 
+  // تطبيق الكوبون إذا كان موجوداً
+  let finalPrice = totalPrice;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "%") {
+      finalPrice =
+        totalPrice - (totalPrice * appliedCoupon.discountValue) / 100;
+    } else {
+      finalPrice = totalPrice - appliedCoupon.discountValue;
+    }
+    finalPrice = Math.max(0, finalPrice); // تأكد من عدم كون السعر سالب
+  }
+
   // عرض النتائج في الـ HTML
   document.getElementById("totalQuantity").textContent = totalQuantity;
-  document.getElementById(
-    "totalPrice"
-  ).textContent = `${totalPrice.toLocaleString()} ل.س`;
+
+  // عرض السعر الأصلي والمخفف إذا كان هناك كوبون
+  let priceDisplay = `${finalPrice.toLocaleString()} ل.س`;
+  if (appliedCoupon) {
+    priceDisplay = `<span style="text-decoration: line-through; color: #999;">${totalPrice.toLocaleString()}</span> → ${finalPrice.toLocaleString()} ل.س ✅`;
+  }
+
+  document.getElementById("totalPrice").innerHTML = priceDisplay;
 }
 
 // ======================================================
@@ -1076,4 +1094,137 @@ function closeCustomerInfoFields() {
     checkoutBtn.textContent = "تأكيد الطلب";
     checkoutBtn.dataset.stage = "initial";
   }
+}
+
+// ======================================================
+// 🎫 دوال إدارة الكوبونات
+// ======================================================
+
+// تحميل سجل الكوبونات المستخدمة من localStorage
+function getUsedCoupons() {
+  try {
+    const used = localStorage.getItem("usedCoupons");
+    return used ? JSON.parse(used) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// حفظ سجل الكوبونات المستخدمة في localStorage
+function saveUsedCoupons(usedCoupons) {
+  try {
+    localStorage.setItem("usedCoupons", JSON.stringify(usedCoupons));
+  } catch (e) {
+    console.error("خطأ في حفظ سجل الكوبونات:", e);
+  }
+}
+
+// التحقق من عدد مرات استخدام الكوبون
+function getCouponUsageCount(couponCode) {
+  const usedCoupons = getUsedCoupons();
+  return usedCoupons[couponCode] || 0;
+}
+
+// زيادة عداد الاستخدام للكوبون
+function incrementCouponUsage(couponCode) {
+  const usedCoupons = getUsedCoupons();
+  usedCoupons[couponCode] = (usedCoupons[couponCode] || 0) + 1;
+  saveUsedCoupons(usedCoupons);
+}
+
+function showCouponModal() {
+  document.getElementById("couponOverlay").classList.remove("hidden");
+  document.getElementById("couponModal").classList.remove("hidden");
+
+  // تنظيف حقل الإدخال والرسائل
+  document.getElementById("couponCode").value = "";
+  document.getElementById("couponMessage").textContent = "";
+}
+
+function closeCouponModal() {
+  document.getElementById("couponOverlay").classList.add("hidden");
+  document.getElementById("couponModal").classList.add("hidden");
+  document.getElementById("couponCode").value = "";
+  document.getElementById("couponMessage").textContent = "";
+}
+
+function applyCoupon() {
+  const couponCode = document.getElementById("couponCode").value.trim();
+  const messageEl = document.getElementById("couponMessage");
+
+  if (!couponCode) {
+    messageEl.textContent = "❌ الرجاء إدخال كود الخصم";
+    messageEl.className = "coupon-message error";
+    return;
+  }
+
+  // البحث عن الكوبون في القائمة
+  const coupon = coupons.find((c) => c.code === couponCode);
+
+  if (!coupon) {
+    messageEl.textContent = "❌ كود الخصم غير صحيح";
+    messageEl.className = "coupon-message error";
+    return;
+  }
+
+  // التحقق من تاريخ انتهاء الكوبون
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // تعيين الساعة إلى منتصف الليل
+
+  let endDate = new Date(coupon.endDate);
+  if (typeof coupon.endDate === "string") {
+    // إذا كان التاريخ نصاً بصيغة YYYY-MM-DD، تحويله بشكل صحيح
+    const [year, month, day] = coupon.endDate.split("-");
+    endDate = new Date(year, month - 1, day);
+  }
+  endDate.setHours(23, 59, 59, 999); // تعيين الساعة إلى نهاية اليوم
+
+  if (today > endDate) {
+    messageEl.textContent = "❌ انتهت صلاحية كود الخصم";
+    messageEl.className = "coupon-message error";
+    return;
+  }
+
+  // التحقق من عدد مرات الاستخدام
+  const usageCount = getCouponUsageCount(couponCode);
+  const useLimit = coupon.useLimit || Infinity; // الحد الأقصى للاستخدام
+
+  if (usageCount >= useLimit) {
+    messageEl.textContent = `❌ تم استخدام هذا الكوبون ${useLimit} مرات وانتهت الحد المسموح به`;
+    messageEl.className = "coupon-message error";
+    return;
+  }
+
+  // تطبيق الكوبون
+  appliedCoupon = coupon;
+
+  // حفظ الكوبون كمستخدم
+  incrementCouponUsage(couponCode);
+
+  // عرض رسالة النجاح مع معلومات الاستخدام المتبقي
+  const remainingUses = useLimit - (usageCount + 1);
+  let successMessage = `✅ تم تطبيق الكوبون بنجاح! الخصم: ${
+    coupon.discountValue
+  } ${coupon.discountType === "%" ? "%" : "ل.س"}`;
+
+  if (useLimit !== Infinity) {
+    successMessage += `<br/>عدد الاستخدامات المتبقية: ${remainingUses}`;
+  }
+
+  messageEl.innerHTML = successMessage;
+  messageEl.className = "coupon-message success";
+
+  // تحديث الإجماليات
+  updateCartTotals();
+
+  // إغلاق المودل بعد 1.5 ثانية
+  setTimeout(() => {
+    closeCouponModal();
+  }, 1500);
+}
+
+function removeCoupon() {
+  appliedCoupon = null;
+  updateCartTotals();
+  showToast("✅ تم إزالة الكوبون", 3000, "green");
 }
