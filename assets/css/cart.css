@@ -385,27 +385,6 @@ body {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ----------------------------------------------------- */
 /* 1. الخلفية (Overlay) */
 /* ----------------------------------------------------- */
@@ -815,7 +794,7 @@ border-radius: 25px;
 
 @media(max-width: 480px){
     #customerInfoFields {
-    grid-template-columns: repeat(2, minmax(190px, 1fr));
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
     }
 
     .cart-card {
