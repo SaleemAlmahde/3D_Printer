@@ -1,5 +1,6 @@
 @import url("nav.css");
 @import url("toast_notification.css");
+@import url("footer.css");
 
 
 #invoicesSection {
@@ -765,14 +766,49 @@
   padding: 12px;
   margin-bottom: 10px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   transition: transform 0.2s;
 }
 
 .selected-product:hover {
   transform: translateX(-5px);
+}
+
+/* عناصر المنتج العلوية (اسم، لون، أيقونات، سعر، كمية، زر حذف) */
+.selected-product-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-product-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.selected-product .remove-product {
+  background: none;
+  border: none;
+  color: #ff5252;
+  cursor: pointer;
+  padding: 5px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.selected-product .remove-product:hover {
+  opacity: 1;
+}
+
+/* الملاحظات والتخصيص يظهران تحت المنتج */
+.selected-product .customization-section,
+.selected-product .product-note-section {
+  width: 100%;
+  margin-top: 8px;
 }
 
 .selected-product .product-info {
@@ -806,20 +842,6 @@
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.selected-product .remove-product {
-  background: none;
-  border: none;
-  color: #ff5252;
-  cursor: pointer;
-  padding: 5px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.selected-product .remove-product:hover {
-  opacity: 1;
 }
 
 /* ===== Custom product card layout (modal) ===== */
@@ -1668,17 +1690,6 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
     font-size: 1.1rem;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 @media (max-width: 480px) {
   #newInvoiceModal {
     width: 75%;
@@ -1701,83 +1712,6 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
       display: none;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* تنسيقات للمنتج المخصص */
 .custom-product-item {
@@ -1884,236 +1818,6 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
     justify-content: space-between;
     gap: 10px;
         width: 100%;
-}
-
-/* ============================================ */
-/* 💎 PREMIUM FOOTER - صفحة الفواتير */
-/* ============================================ */
-
-.premium-footer {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #09c4a4 100%);
-  color: white;
-  padding: 80px 20px 30px;
-  margin-top: 100px;
-  font-family: 'Arial', sans-serif;
-}
-
-.footer-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 60px;
-  max-width: 1400px;
-  margin: 0 auto 40px;
-  align-items: start;
-}
-
-/* Left Section - Branding */
-.footer-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.footer-branding h3 {
-  font-size: 32px;
-  font-weight: 900;
-  margin: 0 0 10px 0;
-  background: linear-gradient(135deg, #09c4a4, #049277);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.footer-branding .tagline {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0;
-  letter-spacing: 1px;
-}
-
-/* Center Section - Links & Contact */
-.footer-center {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-}
-
-.footer-links-column h4 {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  color: #09c4a4;
-  border-bottom: 2px solid #09c4a4;
-  padding-bottom: 10px;
-}
-
-.footer-links-column a {
-  display: block;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  margin-bottom: 12px;
-  transition: all 0.3s ease;
-  font-size: 14px;
-}
-
-.footer-links-column a:hover {
-  color: #09c4a4;
-  transform: translateX(-5px);
-}
-
-.footer-links-column p {
-  color: rgba(255, 255, 255, 0.8);
-  margin: 10px 0;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-links-column p i {
-  color: #09c4a4;
-  width: 20px;
-  text-align: center;
-}
-
-/* Right Section - Social */
-.footer-right {
-  text-align: center;
-}
-
-.footer-right h4 {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  color: #09c4a4;
-}
-
-.social-icons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.social-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(9, 196, 164, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #09c4a4;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  font-size: 20px;
-  border: 2px solid rgba(9, 196, 164, 0.5);
-}
-
-.social-icon:hover {
-  background: #09c4a4;
-  color: white;
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(9, 196, 164, 0.3);
-  border-color: #09c4a4;
-}
-
-/* Divider */
-.footer-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #09c4a4, transparent);
-  margin-bottom: 30px;
-}
-
-/* Bottom Section */
-.footer-bottom-section {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.footer-bottom-section p {
-  margin: 5px 0;
-  font-size: 13px;
-}
-
-.footer-credit {
-  font-size: 12px !important;
-  color: rgba(9, 196, 164, 0.8) !important;
-  font-style: italic;
-}
-
-/* Responsive - Tablet */
-@media (max-width: 768px) {
-  .premium-footer {
-    padding: 60px 20px 25px;
-    margin-top: 60px;
-  }
-
-  .footer-wrapper {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-
-  .footer-center {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-
-  .footer-branding h3 {
-    font-size: 24px;
-  }
-}
-
-/* Responsive - Mobile */
-@media (max-width: 480px) {
-  .premium-footer {
-    padding: 40px 15px 20px;
-    margin-top: 40px;
-  }
-
-  .footer-wrapper {
-    gap: 30px;
-  }
-
-  .footer-branding h3 {
-    font-size: 20px;
-  }
-
-  .footer-branding .tagline {
-    font-size: 12px;
-  }
-
-  .footer-links-column h4 {
-    font-size: 14px;
-    margin-bottom: 15px;
-  }
-
-  .footer-links-column a {
-    font-size: 13px;
-    margin-bottom: 10px;
-  }
-
-  .footer-links-column p {
-    font-size: 12px;
-  }
-
-  .footer-right h4 {
-    font-size: 14px;
-  }
-
-  .social-icon {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
-  }
-
-  .social-icons {
-    gap: 12px;
-  }
-
-  .footer-bottom-section p {
-    font-size: 12px;
-  }
 }
 
 /* ===== حقل الكوبون في مودال الفاتورة ===== */
@@ -2278,4 +1982,80 @@ background: linear-gradient(135deg, #27ae60, #2ecc71);
 
 .adjustment-item-remove:hover {
   background-color: #c0392b;
+}
+
+/* ======================================================
+   🎨 تصميم التخصيص للمنتجات القياسية
+   ====================================================== */
+
+/* تصنيف المنتج الذي يحتوي على تخصيص */
+.selected-product-left.has-customization {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.selected-product-left.has-customization:hover {
+  background-color: #fff8e1;
+  border-radius: 4px;
+}
+
+/* قسم التخصيص المخفي/المعروض */
+.customization-section {
+  background-color: #fff9e6;
+  border-radius: 4px;
+  border: 1px dashed #ff9800;
+  padding: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.customization-section.hidden {
+  display: none;
+}
+
+/* textarea للتخصيص */
+.customization-input {
+  font-family: inherit;
+  font-size: 13px;
+  color: #333;
+}
+
+.customization-input:focus {
+  outline: none;
+  border-color: #ff6f00 !important;
+  box-shadow: 0 0 4px rgba(255, 152, 0, 0.3);
+}
+
+/* ======================================================
+   📝 تصميم الملاحظات للمنتجات
+   ====================================================== */
+
+/* قسم الملاحظة المخفي/المعروض */
+.product-note-section {
+  background-color: #ecf0f1;
+  border-radius: 4px;
+  border: 1px dashed #3498db;
+  padding: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.product-note-section.hidden {
+  display: none;
+}
+
+/* textarea للملاحظات */
+.product-note-input {
+  font-family: inherit;
+  font-size: 13px;
+  color: #333;
+  background-color: #ffffff;
+}
+
+.product-note-input:focus {
+  outline: none;
+  border-color: #2980b9 !important;
+  box-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
 }

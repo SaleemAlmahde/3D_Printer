@@ -230,7 +230,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!el) return;
       el.addEventListener("input", saveCustomerInfo);
       el.addEventListener("change", saveCustomerInfo);
-    }
+    },
   );
 
   // Handle shipping type changes specially: update placeholder and clear details locally,
@@ -300,7 +300,7 @@ function openEditModal(cartItem) {
                     onclick="selectColor(this, '${productId}', '${c.name}', '${c.code}')" 
                     style="width:28px; height:28px; border-radius:50%; background:${c.code}; cursor:pointer; box-shadow:0 2px 6px #0001;"
                 ></div>
-            `
+            `,
               )
               .join("")}
         </div>`;
@@ -317,8 +317,8 @@ function openEditModal(cartItem) {
                     <h3 style="color: #ffc107;">السعر: يحدد لاحقاً</h3>
                 </div>
                 <img src="./${product.images[0]}" alt="${
-      product.name
-    }" style="width: 80px; height: 80px;">
+                  product.name
+                }" style="width: 80px; height: 80px;">
             </div>
 
             <p style="margin-bottom:6px; font-weight:600;">اللون: <span style="color:${
@@ -346,8 +346,8 @@ function openEditModal(cartItem) {
                     <h3>${product.price} ل.س</h3>
                 </div>
                 <img src="./${product.images[0]}" alt="${
-      product.name
-    }" style="width: 80px; height: 80px;">
+                  product.name
+                }" style="width: 80px; height: 80px;">
             </div>
 
             <p style="margin-bottom:6px; font-weight:600;">الوصف المخصص:</p>
@@ -371,8 +371,8 @@ function openEditModal(cartItem) {
                     <h3>${product.price} ل.س</h3>
                 </div>
                 <img src="./${product.images[0]}" alt="${
-      product.name
-    }" style="width: 80px; height: 80px;">
+                  product.name
+                }" style="width: 80px; height: 80px;">
             </div>
             ${colorsHTML}
             <input type="number" id="pQ" placeholder="الكمية" value="${
@@ -398,16 +398,16 @@ function openEditModal(cartItem) {
   if (colorContainer) {
     // تخزين اللون الحالي في dataset لـ saveEdit
     colorContainer.dataset.selectedColor = JSON.stringify(
-      cartItem.selectedColor
+      cartItem.selectedColor,
     );
 
     // البحث عن دائرة اللون وتطبيق فئة التمييز
     const selectedCircle = Array.from(
-      document.querySelectorAll(".color-circle")
+      document.querySelectorAll(".color-circle"),
     ).find((circle) =>
       circle.style.background
         .toLowerCase()
-        .includes(cartItem.selectedColor.code.toLowerCase().replace("#", ""))
+        .includes(cartItem.selectedColor.code.toLowerCase().replace("#", "")),
     );
 
     if (selectedCircle) {
@@ -763,7 +763,7 @@ function handleCheckout() {
       showToast(
         `⚠️ عذراً، يجب طلب 3 ستيكرات على الأقل لإتمام عملية الشراء. (الكمية الحالية: ${totalStickerCount})`,
         5000,
-        "orange"
+        "orange",
       );
 
       return; // إيقاف العملية ومنع المتابعة
@@ -859,7 +859,28 @@ function formatOrderDetails() {
 
   messageText += `\n💰 الإجمالي الكلي:\n`;
   messageText += `   - العدد الكلي: ${totalQuantity} منتجات\n`;
-  messageText += `   - إجمالي المبلغ: ${totalPrice.toLocaleString()} ل.س\n`;
+  messageText += `   - إجمالي المبلغ (قبل الخصم): ${totalPrice.toLocaleString()} ل.س\n`;
+
+  // --- قسم معلومات الخصم والتعديلات ---
+  if (appliedCoupon) {
+    messageText += `\n🎟️ كود الخصم:\n`;
+    messageText += `   - كود الكوبون: ${appliedCoupon.code}\n`;
+    messageText += `   - نوع الخصم: ${appliedCoupon.discountType === "%" ? "نسبة مئوية" : "مبلغ ثابت"}\n`;
+    messageText += `   - قيمة الخصم: ${appliedCoupon.discountValue}${appliedCoupon.discountType === "%" ? "%" : " ل.س"}\n`;
+  }
+
+  // حساب السعر بعد تطبيق الخصم الذكي
+  let finalPrice = totalPrice;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "%") {
+      finalPrice =
+        totalPrice - (totalPrice * appliedCoupon.discountValue) / 100;
+    } else {
+      finalPrice = totalPrice - appliedCoupon.discountValue;
+    }
+  }
+
+  messageText += `\n💵 المبلغ النهائي: ${finalPrice.toLocaleString()} ل.س\n`;
   messageText += `==================================`;
 
   const encodedDetails = messageText;
@@ -909,7 +930,7 @@ function validateCustomerInputs() {
     showToast(
       "⚠️ يرجى تعبئة جميع معلومات التواصل والموقع الإلزامية.",
       3000,
-      "red"
+      "red",
     );
     return false;
   }
@@ -927,7 +948,7 @@ function validateCustomerInputs() {
     showToast(
       "❌ يرجى اختيار تاريخ شحن مستقبلي (لا يمكن الشحن في نفس اليوم أو يوم سابق).",
       3000,
-      "red"
+      "red",
     );
     document.getElementById("shippingDate").focus();
     return false;
@@ -996,6 +1017,24 @@ function generateOrderCode() {
     })
     .filter(Boolean);
 
+  // 🛑 حساب السعر النهائي بعد تطبيق الخصم
+  let finalSYP = totalSYP;
+  let discountInfo = null;
+
+  if (appliedCoupon) {
+    discountInfo = {
+      couponCode: appliedCoupon.code,
+      discountType: appliedCoupon.discountType, // "%" أو "fixed"
+      discountValue: appliedCoupon.discountValue,
+    };
+
+    if (appliedCoupon.discountType === "%") {
+      finalSYP = totalSYP - (totalSYP * appliedCoupon.discountValue) / 100;
+    } else {
+      finalSYP = totalSYP - appliedCoupon.discountValue;
+    }
+  }
+
   // 3. إنشاء كائن الفاتورة
   const orderObject = {
     id: 0,
@@ -1013,11 +1052,13 @@ function generateOrderCode() {
     payment: {
       status: "unpaid",
       paidSYP: 0,
-      remainingSYP: totalSYP,
+      remainingSYP: finalSYP > 0 ? finalSYP : 0,
     },
 
-    // 🛑 إضافة الإجماليين هنا للمقارنة
+    // 🛑 إضافة الإجماليين والخصم هنا للمقارنة
     totalSYP: totalSYP,
+    discount: discountInfo,
+    finalSYP: finalSYP > 0 ? finalSYP : 0,
 
     products: productsArray, // استخدام مصفوفة المنتجات التي تم إنشاؤها
   };

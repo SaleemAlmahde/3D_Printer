@@ -643,6 +643,16 @@ function renderInvoices(filterStoreId = null) {
             : "بدون لون";
 
         const descParts = [];
+
+        // ✅ التعديل الجديد: دعم customization للمنتجات القياسية
+        if (product.customization) {
+          descParts.push(
+            String(product.customization)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;"),
+          );
+        }
+
         if (product.customDescription) {
           descParts.push(
             String(product.customDescription)
@@ -682,9 +692,19 @@ function renderInvoices(filterStoreId = null) {
           ? ' onclick="event.stopPropagation(); toggleCustomDesc(this)" style="cursor:pointer;"'
           : "";
 
+        // ✅ عرض ايقونة عندما يكون هناك تخصيص
+        const customizationIcon = product.customization
+          ? `<i class="fa fa-file-text-o" style="color:#ff9800; font-size:14px; margin-inline-start:4px;" title="يحتوي على وصف تخصيص"></i>`
+          : "";
+
+        // ✅ عرض ايقونة عندما يكون هناك ملاحظة
+        const noteIcon = product.note
+          ? `<i class="fa fa-sticky-note-o" style="color:#3498db; font-size:14px; margin-inline-start:4px;" title="يحتوي على ملاحظة"></i>`
+          : "";
+
         productsHTML += `
     <li class="product-item"${clickableAttr}>
-      <span class="product-name">${product.name}</span>
+      <span class="product-name">${product.name}${customizationIcon}${noteIcon}</span>
       <span class="product-color" title="${displayTitle}" style="background-color: ${displayColor}"></span>
       <span class="product-qty">x${product.quantity}</span>
       <span class="product-price">${safePriceSYP.toLocaleString()} ل.س</span>
@@ -1481,6 +1501,13 @@ function saveInvoice() {
           const colorNameEl = item.querySelector(".product-color-name");
           const colorCodeEl = item.querySelector(".product-color-code");
 
+          // ✅ التعديل الجديد: قراءة وصف التخصيص والملاحظة للمنتج القياسي
+          const customizationInput = item.querySelector(".customization-input");
+          const customization = customizationInput?.value || "";
+
+          const noteInput = item.querySelector(".product-note-input");
+          const noteFromTextarea = noteInput?.value || "";
+
           const quantity = parseInt(qtyEl?.value) || 1;
           const priceSYP = parseFloat(priceEl?.value) || 0;
 
@@ -1509,14 +1536,20 @@ function saveInvoice() {
             });
           }
 
-          const note = item.querySelector(".product-note-text")?.value || "";
+          // 🔧 قراءة الملاحظة من textarea أولاً (الأولوية)، ثم من hidden input
+          const note =
+            noteFromTextarea ||
+            item.querySelector(".product-note-text")?.value ||
+            "";
+
           return {
             name: name,
             quantity: quantity,
             priceSYP: priceSYP,
             isCustom: false, // ضروري للحفظ
             color: { name: colorName, code: colorCode },
-            note: note,
+            customization: customization, // ✅ إضافة وصف التخصيص
+            note: note, // ✅ إضافة الملاحظة
           };
         }
       },
@@ -2050,6 +2083,21 @@ function selectProduct(productId) {
       noteWrapper,
       document.getElementById("productQuantity"),
     );
+
+  // Add optional customization field for this product selection
+  const existingCustomization = bottomSheetContent.querySelector(
+    ".product-customization-wrapper",
+  );
+  if (existingCustomization) existingCustomization.remove();
+  const customizationWrapper = document.createElement("div");
+  customizationWrapper.className = "product-customization-wrapper";
+  customizationWrapper.innerHTML = `<textarea id="productCustomizationInput" placeholder="تخصيص المنتج (اختياري)" rows="2" style="width:100%; box-sizing:border-box; margin-top:8px; resize:vertical;"></textarea>`;
+  document
+    .getElementById("productQuantity")
+    .parentElement.insertBefore(
+      customizationWrapper,
+      document.getElementById("productQuantity"),
+    );
 }
 
 // اختيار اللون
@@ -2219,30 +2267,82 @@ function confirmAddProduct() {
         ? product.storePrice
         : product.price;
 
+    // read optional note and customization from bottom-sheet
+    const noteInput = document.getElementById("productNoteInput");
+    const productNote = noteInput ? noteInput.value.trim() : "";
+
+    const customInput = document.getElementById("productCustomizationInput");
+    const productCustomization = customInput ? customInput.value.trim() : "";
+
+    const hasNote = productNote.length > 0;
+    const hasCustomization = productCustomization.length > 0;
+
     // إضافة المنتج للقائمة المنتجات المحددة
     const selectedProductsList = document.getElementById(
       "selectedProductsList",
     );
     const productElement = document.createElement("div");
     productElement.className = "selected-product";
-    // read optional note from bottom-sheet
-    const noteInput = document.getElementById("productNoteInput");
-    const productNote = noteInput ? noteInput.value.trim() : "";
+
+    const productCardId = `product-card-${Date.now()}-${Math.random()}`;
+    const noteCardId = `note-card-${Date.now()}-${Math.random()}`;
 
     productElement.innerHTML = `
-      <div class="product-info">
-        <span class="product-name">${product.name}</span>
+      <div class="selected-product-left ${hasCustomization || hasNote ? "has-customization" : ""}"
+           ${hasCustomization || hasNote ? `onclick="event.stopPropagation(); handleProductNoteToggle('${productCardId}', '${noteCardId}')"` : ""}>
+        <div style="display:flex; align-items:center; gap:8px; cursor: ${hasCustomization || hasNote ? "pointer" : "default"};">
+          <span class="product-name">${product.name}</span>
+          <span class="selected-color" 
+                title="${selectedColor.name}" 
+                style="background-color:${selectedColor.code};display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:middle">
+          </span>
+          ${
+            hasCustomization
+              ? `<i class="fa fa-file-text-o" style="color:#ff9800; font-size:16px;" title="المنتج يحتوي على وصف تخصيص"></i>`
+              : ""
+          }
+          ${
+            hasNote
+              ? `<i class="fa fa-sticky-note-o" style="color:#3498db; font-size:16px;" title="المنتج يحتوي على ملاحظة"></i>`
+              : ""
+          }
+        </div>
+      </div>
+      <div class="selected-product-right">
         <span class="product-qty">x${quantity}</span>
         <span class="product-price">${priceToUse.toLocaleString()} ل.س</span>
-        <div class="selected-color" style="background-color: ${
-          selectedColor.code
-        }" 
-             title="${selectedColor.name}"></div>
       </div>
       <button type="button" class="remove-product" 
               onclick="this.closest('.selected-product').remove(); updateTotals();">
         <i class="fa fa-times"></i>
       </button>
+      
+      ${
+        hasCustomization
+          ? `
+          <div id="${productCardId}" class="customization-section hidden">
+              <label style="font-size:12px; color:#ff9800; margin-bottom:4px; display:block; font-weight:bold;">وصف التخصيص:</label>
+              <textarea class="customization-input" 
+                        placeholder="وصف التخصيص للمنتج..." 
+                        style="width:100%; min-height:60px; padding:6px; border:1px solid #ff9800; border-radius:4px; resize:vertical;">${productCustomization}</textarea>
+          </div>
+          `
+          : ""
+      }
+      
+      ${
+        hasNote
+          ? `
+          <div id="${noteCardId}" class="product-note-section hidden">
+              <label style="font-size:12px; color:#3498db; margin-bottom:4px; display:block; font-weight:bold;">ملاحظة المنتج:</label>
+              <textarea class="product-note-input" 
+                        placeholder="ملاحظات على المنتج..." 
+                        style="width:100%; min-height:60px; padding:6px; border:1px solid #3498db; border-radius:4px; resize:vertical; background-color:#ecf0f1;">${productNote}</textarea>
+          </div>
+          `
+          : ""
+      }
+
       <input type="hidden" class="is-custom-flag" value="false">
       <input type="hidden" class="product-qty-static" value="${quantity}">
       <input type="hidden" class="product-price-static" value="${priceToUse}">
@@ -2252,6 +2352,10 @@ function confirmAddProduct() {
       <input type="hidden" class="product-color-code" value="${
         selectedColor.code
       }">
+      <input type="hidden" class="customization-text" value="${productCustomization.replace(
+        /"/g,
+        "&quot;",
+      )}">
       <input type="hidden" class="product-note-text" value="${productNote.replace(
         /"/g,
         "&quot;",
@@ -2519,6 +2623,57 @@ document.addEventListener("DOMContentLoaded", function () {
     adjTypeEl.addEventListener("change", () => updateInvoiceTotals());
 });
 
+// ======================================================
+// 🎯 دالة toggle لإظهار/إخفاء وصف التخصيص والملاحظات في المنتج
+// ======================================================
+function handleProductNoteToggle(productCardId, noteCardId) {
+  // هذه الدالة تتعامل مع toggle الملاحظات والتخصيص
+  // عند الضغط على المنتج، نعكس حالة الملاحظة (إن وجدت) والتخصيص (إن وجد)
+
+  const productSection = document.getElementById(productCardId);
+  const noteSection = document.getElementById(noteCardId);
+
+  if (productSection) {
+    productSection.classList.toggle("hidden");
+  }
+
+  if (noteSection) {
+    noteSection.classList.toggle("hidden");
+  }
+}
+
+// ======================================================
+// 🎯 دالة toggle لإظهار/إخفاء وصف التخصيص والملاحظات في المنتج
+// ======================================================
+function toggleProductCustomization(cardId) {
+  // cardId يمكن أن يكون product-card-XXX أو note-card-XXX
+  // نحتاج لتبديل المقابل منهما وإخفاء الآخر
+
+  const section = document.getElementById(cardId);
+  if (!section) return;
+
+  // الحصول على اسم prefix (product-card أو note-card)
+  const isCustomizationCard = cardId.startsWith("product-card-");
+
+  if (isCustomizationCard) {
+    // هذا product-card، إذاً نبدل التخصيص وإخفاء الملاحظة
+    const extractedId = cardId.replace("product-card-", "");
+    const noteCardId = `note-card-${extractedId}`;
+    const noteSection = document.getElementById(noteCardId);
+
+    section.classList.toggle("hidden");
+    if (noteSection) noteSection.classList.add("hidden");
+  } else {
+    // هذا note-card، إذاً نبدل الملاحظة وإخفاء التخصيص
+    const extractedId = cardId.replace("note-card-", "");
+    const productCardId = `product-card-${extractedId}`;
+    const productSection = document.getElementById(productCardId);
+
+    section.classList.toggle("hidden");
+    if (productSection) productSection.classList.add("hidden");
+  }
+}
+
 function fillFormWithInvoice(invoice, allInvoices = []) {
   if (!invoice || typeof invoice !== "object") {
     console.error("fillFormWithInvoice: invoice is invalid", invoice);
@@ -2666,23 +2821,53 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
           `;
         item.classList.add("custom-product-item");
       } else {
-        // للمنتج القياسي: يبقى كما هو (Read-Only)
+        // للمنتج القياسي مع خاصية التخصيص الاختياري
         const colorName = p.selectedColor?.name || p.color?.name || "";
         const colorCode = p.selectedColor?.code || p.color?.code || "";
 
+        // 🔧 قراءة البيانات - نفس الطريقة في renderInvoices
+        const customizationValue = p.customization || "";
+        const noteValue = p.note || "";
+
+        // ✅ استخدام نفس الشرط من renderInvoices
+        const hasCustomization = customizationValue ? true : false;
+        const hasNote = noteValue ? true : false;
+
+        const customizationText = customizationValue;
+        const noteText = noteValue;
+
+        // 🔧 استخدام IDs فريدة
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substr(2, 9);
+        const productCardId = `product-card-${timestamp}-${randomId}`;
+        const noteCardId = `note-card-${timestamp}-${randomId}`;
+
         item.innerHTML = `
-              <div class="selected-product-left">
-                  <span class="product-name">${name}</span>
-                  ${
-                    colorCode
-                      ? `
-                      <span class="selected-color" 
-                            title="${colorName}" 
-                            style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;margin-inline-start:8px;vertical-align:middle">
-                      </span>
-                  `
-                      : ""
-                  }
+              <div class="selected-product-left ${hasCustomization || hasNote ? "has-customization" : ""}" 
+                   ${hasCustomization || hasNote ? `onclick="event.stopPropagation(); handleProductNoteToggle('${productCardId}', '${noteCardId}')"` : ""}>
+                  <div style="display:flex; align-items:center; gap:8px; cursor: ${hasCustomization || hasNote ? "pointer" : "default"};">
+                      <span class="product-name">${name}</span>
+                      ${
+                        colorCode
+                          ? `
+                          <span class="selected-color" 
+                                title="${colorName}" 
+                                style="background-color:${colorCode};display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:middle">
+                          </span>
+                      `
+                          : ""
+                      }
+                      ${
+                        hasCustomization
+                          ? `<i class="fa fa-file-text-o" style="color:#ff9800; font-size:16px;" title="المنتج يحتوي على وصف تخصيص"></i>`
+                          : ""
+                      }
+                      ${
+                        hasNote
+                          ? `<i class="fa fa-sticky-note-o" style="color:#3498db; font-size:16px;" title="المنتج يحتوي على ملاحظة"></i>`
+                          : ""
+                      }
+                  </div>
               </div>
               <div class="selected-product-right">
                   <span class="product-qty">x${qty}</span>
@@ -2692,10 +2877,37 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
                       onclick="this.closest('.selected-product').remove(); updateTotals();">
                 <i class="fa fa-times"></i>
               </button>
-                      <input type="hidden" class="product-note-text" value="${productNote.replace(
-                        /"/g,
-                        "&quot;",
-                      )}">
+              
+              ${
+                hasCustomization
+                  ? `
+                  <div id="${productCardId}" class="customization-section hidden">
+                      <label style="font-size:12px; color:#ff9800; margin-bottom:4px; display:block; font-weight:bold;">وصف التخصيص:</label>
+                      <textarea class="customization-input" 
+                                placeholder="وصف التخصيص للمنتج..." 
+                                style="width:100%; min-height:60px; padding:6px; border:1px solid #ff9800; border-radius:4px; resize:vertical;">${customizationText}</textarea>
+                  </div>
+                  `
+                  : ""
+              }
+              
+              ${
+                hasNote
+                  ? `
+                  <div id="${noteCardId}" class="product-note-section hidden">
+                      <label style="font-size:12px; color:#3498db; margin-bottom:4px; display:block; font-weight:bold;">ملاحظة المنتج:</label>
+                      <textarea class="product-note-input" 
+                                placeholder="ملاحظات على المنتج..." 
+                                style="width:100%; min-height:60px; padding:6px; border:1px solid #3498db; border-radius:4px; resize:vertical; background-color:#ecf0f1;">${noteText}</textarea>
+                  </div>
+                  `
+                  : ""
+              }
+              
+              <input type="hidden" class="product-note-text" value="${noteText.replace(
+                /"/g,
+                "&quot;",
+              )}">
               <input type="hidden" class="is-custom-flag" value="false">
               <input type="hidden" class="temp-product-id" value="${
                 p.id || ""
@@ -2704,6 +2916,10 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
               <input type="hidden" class="product-price-static" value="${safePrice}">
               <input type="hidden" class="product-color-name" value="${colorName}">
               <input type="hidden" class="product-color-code" value="${colorCode}">
+              <input type="hidden" class="customization-text" value="${customizationText.replace(
+                /"/g,
+                "&quot;",
+              )}">
           `;
       }
       // ----------------------------------------------------
@@ -2713,13 +2929,28 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
 
   // ----------------------------------------------------
   // ملء حالة الدفع والملاحظات
+  // ✅ التعديل الجديد: دعم finalSYP من الطلبات القادمة من السلة
   // ----------------------------------------------------
   const paymentStatusEl = document.getElementById("paymentStatus");
   const paymentAmountEl = document.getElementById("paymentAmountPaid");
+
+  // للطلبات الجديدة من السلة: استخدم finalSYP إذا كان موجوداً
+  let remainingAmount = 0;
+  if (invoice.finalSYP !== undefined) {
+    // طلب جديد قادم من السلة مع خصم
+    remainingAmount = invoice.finalSYP > 0 ? invoice.finalSYP : 0;
+  } else if (invoice.payment && invoice.payment.remainingSYP !== undefined) {
+    // فاتورة قديمة محفوظة
+    remainingAmount = invoice.payment.remainingSYP;
+  } else if (invoice.totalSYP !== undefined) {
+    // fallback: استخدم totalSYP
+    remainingAmount = invoice.totalSYP;
+  }
+
   const payment = invoice.payment || {
     status: "unpaid",
     paidSYP: 0,
-    remainingSYP: 0,
+    remainingSYP: remainingAmount,
   };
 
   if (paymentStatusEl) {
@@ -2790,7 +3021,15 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   }
 
   // تحميل الكوبون المطبق إن وجد
-  if (invoice.coupon) {
+  // ✅ التعديل الجديد: دعم كائن discount الجديد من الطلبات القادمة من السلة
+  if (invoice.discount) {
+    selectedInvoiceCoupon = {
+      code: invoice.discount.couponCode || "كود خصم مطبق",
+      discountType: invoice.discount.discountType, // "%" أو "fixed"
+      discountValue: invoice.discount.discountValue,
+    };
+  } else if (invoice.coupon) {
+    // للفواتير القديمة التي تحتوي على coupon بدل discount
     selectedInvoiceCoupon = invoice.coupon;
   } else {
     selectedInvoiceCoupon = null;
@@ -2800,11 +3039,11 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   loadInvoiceCoupons();
 
   // عرض معلومات الكوبون إذا كان موجوداً
-  if (invoice.coupon) {
-    const discountText = `${invoice.coupon.discountValue}${invoice.coupon.discountType}`;
+  if (selectedInvoiceCoupon) {
+    const discountText = `${selectedInvoiceCoupon.discountValue}${selectedInvoiceCoupon.discountType}`;
     const couponInfo = document.getElementById("couponDiscountInfo");
     if (couponInfo) {
-      couponInfo.textContent = `✅ تم تطبيق الخصم: ${discountText}`;
+      couponInfo.textContent = `✅ كود الخصم المطبق: ${selectedInvoiceCoupon.code} (${discountText})`;
       couponInfo.style.color = "#27ae60";
     }
   }
