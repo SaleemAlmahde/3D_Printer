@@ -20,6 +20,10 @@
     <script src="assets/java/admin.js"></script>
     <script src="assets/java/show_toast.js"></script>
     <script src="assets/java/script1.js"></script>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+
   </head>
   <body>
     <!-- Nav Section -->
@@ -232,5 +236,19 @@
         </div>
       </div>
     </footer>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('Service Worker Registered'))
+      .catch(err => console.error('SW registration failed', err));
+  });
+}
+</script>
+
+
+
   </body>
 </html>
