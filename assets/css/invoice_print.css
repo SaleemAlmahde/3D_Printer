@@ -91,15 +91,94 @@ hr {
 }
 
 /* ------------------------------------- */
-/* التعديل */
-.adjustment-row {
-  font-weight: bold;
-  display: none;
+/* عملية حسابية عمودية (Vertical Calculation) */
+.calculation-section {
+  /* width: 100%; */
+  max-width: 400px;
+  margin: 5px 0;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-size: 16px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.total-before {
+.calculation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.calculation-row span:first-child {
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.calculation-row .amount {
   font-weight: bold;
-  display: none;
+  font-size: 16px;
+  min-width: 100px;
+  text-align: left;
+}
+
+.calculation-row.original-total {
+  background-color: #f0f0f0;
+  border-bottom: 2px solid #333;
+  font-weight: bold;
+}
+
+.calculation-row.final-total {
+  background-color: #e8f5e9;
+  border-bottom: none;
+  border-top: none;
+  padding: 15px 15px;
+  font-size: 18px;
+}
+
+.calculation-row.final-total .amount {
+  font-size: 18px;
+  color: #07ae91;
+}
+
+/* خط الفصل (يشبه خط المعادلة الرياضية) */
+.calculation-divider {
+  width: 100%;
+  height: 2px;
+  background-color: #333;
+  margin: 0;
+  border: none;
+}
+
+/* عناصر التعديلات في العملية الحسابية */
+#adjustmentsListContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+#adjustmentsListContainer .adjustment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+  font-size: 15px;
+  background-color: #fff;
+}
+
+#adjustmentsListContainer .adjustment-item span:first-child {
+  color: #d32f2f;
+}
+
+#adjustmentsListContainer .adjustment-item span:last-child {
+  font-weight: bold;
+  color: #d32f2f;
+  text-align: left;
 }
 
 /* ------------------------------------- */
@@ -107,6 +186,7 @@ hr {
 .total-box {
   font-weight: bold;
   text-align: right;
+  display: none;
 }
 
 /* ------------------------------------- */

@@ -1,152 +1,168 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>فاتورة للطباعة</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>فاتورة للطباعة</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <script src="assets/java/data.js"></script>
+    <script src="assets/java/data.js"></script>
 
-  <link
+    <link
       rel="stylesheet"
       href="assets/plugins/font-awesome/css/font-awesome.min.css"
     />
-  <script src="assets/java/html2pdf.bundle.min.js"></script>
-  <link rel="stylesheet" href="assets/css/invoice_print.css">
-  
-  <!-- نربط السكربت الخاص بالعرض -->
-  <script src="assets/java/invoice_print.js" defer></script>
-</head>
+    <script src="assets/java/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="assets/css/invoice_print.css" />
 
-<body>
-  <div class="print-export-btns">
-  <button id="printInvoice">طباعة الفاتورة</button>
-  <button id="exportPDF">حفظ كـ PDF</button>
-</div>
+    <!-- نربط السكربت الخاص بالعرض -->
+    <script src="assets/java/invoice_print.js" defer></script>
+  </head>
 
-  <div class="invoice-page">
-    <!-- رأس الفاتورة -->
-    <!-- رأس الفاتورة -->
-<div class="invoice-header">
+  <body>
+    <div class="print-export-btns">
+      <button id="printInvoice">طباعة الفاتورة</button>
+      <button id="exportPDF">حفظ كـ PDF</button>
+    </div>
 
-  <!-- الصف الأول: الشعار + اسم الموقع -->
-  <div class="header-row header-top">
-    
-    <!-- يمين: الشعار -->
-    <div class="header-right logo-box">
-      <div class="img-logo-div">
-        <img id="invoiceLogo" src="" crossorigin="anonymous" alt="Logo" />
+    <div class="invoice-page">
+      <!-- رأس الفاتورة -->
+      <!-- رأس الفاتورة -->
+      <div class="invoice-header">
+        <!-- الصف الأول: الشعار + اسم الموقع -->
+        <div class="header-row header-top">
+          <!-- يمين: الشعار -->
+          <div class="header-right logo-box">
+            <div class="img-logo-div">
+              <img id="invoiceLogo" src="" crossorigin="anonymous" alt="Logo" />
+            </div>
+          </div>
+
+          <!-- يسار: اسم الموقع -->
+          <div class="header-left site-name-logo">
+            <h2>3DPrintSY</h2>
+          </div>
+        </div>
+
+        <!-- الصف الثاني: بيانات العميل + بيانات الفاتورة -->
+        <div class="header-row header-bottom">
+          <!-- يمين: بيانات العميل -->
+          <div class="header-right customer-info">
+            <div>
+              <strong>العميل<span dir="ltr"> : </span></strong
+              ><span id="customerName"></span>
+            </div>
+            <div>
+              <strong>الهاتف<span dir="ltr"> : </span></strong
+              ><span id="customerPhone"></span>
+            </div>
+            <div>
+              <strong>المدينة<span dir="ltr"> : </span></strong
+              ><span id="customerCity"></span>
+            </div>
+          </div>
+
+          <!-- يسار: بيانات الفاتورة -->
+          <div class="header-left invoice-meta">
+            <div>
+              <strong>فاتورة<span dir="ltr"> : </span></strong>
+              <span id="invoiceNumber"></span>
+            </div>
+            <div>
+              <strong>تاريخ الشراء<span dir="ltr"> : </span></strong>
+              <span id="invoiceDate"></span>
+            </div>
+            <div>
+              <strong>تاريخ الاصدار<span dir="ltr"> : </span></strong>
+              <span id="exportDate"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- جدول المنتجات -->
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>المنتج</th>
+            <th>ملاحظة</th>
+            <th>اللون</th>
+            <th>الكمية</th>
+            <th>السعر</th>
+            <th>الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody id="productsBody">
+          <!-- سيتم تعبئته بواسطة JS -->
+        </tbody>
+      </table>
+
+      <!-- عملية حسابية عمودية -->
+      <div class="calculation-section" id="calculationSection">
+        <!-- الإجمالي الأصلي -->
+        <div class="calculation-row original-total">
+          <span>الإجمالي</span>
+          <span id="totalValue" class="amount"></span>
+        </div>
+
+        <!-- الخصومات والتعديلات -->
+        <div id="adjustmentsListContainer"></div>
+
+        <!-- خط الفصل (يشبه خط المعادلة) -->
+        <div class="calculation-divider"></div>
+
+        <!-- الإجمالي النهائي -->
+        <div class="calculation-row final-total">
+          <span>الإجمالي النهائي</span>
+          <span id="finalTotal" class="amount"></span>
+        </div>
+      </div>
+
+      <div class="payment-status" id="paymentStatus"></div>
+
+      <hr style="border: 1px solid #ddd; margin: 30px 0" />
+
+      <div class="note" id="noteDiv">
+        <strong><span>ملاحظات</span><span dir="ltr"> : </span></strong
+        ><span id="invoiceNote"></span>
+      </div>
+
+      <div class="invoice-footer">
+        <div class="top-footer">
+          <div class="left-square"></div>
+          <div class="mid-square"></div>
+          <div class="right-square"></div>
+        </div>
+
+        <div class="mid-footer">
+          <div class="left-square">
+            <p>almahdesaleem@gmail.com</p>
+            <div class="square-icon"><i class="fa fa-envelope"></i></div>
+          </div>
+          <div class="right-square">
+            <a href="tel+963943022772"><p dir="ltr">0943 022 772</p></a>
+            <div class="square-icon"><i class="fa fa-phone"></i></div>
+          </div>
+        </div>
+
+        <div class="bottom-footer">
+          <div class="bottom-square">
+            <a href="https://www.instagram.com/3dp.sy" target="_blank"
+              ><p>https:fmkefkwkeofkw.com</p></a
+            >
+            <div class="square-icon"><i class="fa fa-instagram"></i></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- يسار: اسم الموقع -->
-    <div class="header-left site-name-logo">
-      <h2>3DPrintSY</h2>
-    </div>
-
-  </div>
-
-  <!-- الصف الثاني: بيانات العميل + بيانات الفاتورة -->
-  <div class="header-row header-bottom">
-
-    <!-- يمين: بيانات العميل -->
-    <div class="header-right customer-info">
-  <div><strong>العميل<span dir="ltr"> : </span></strong><span id="customerName"></span></div>
-  <div><strong>الهاتف<span dir="ltr"> : </span></strong><span id="customerPhone"></span></div>
-  <div><strong>المدينة<span dir="ltr"> : </span></strong><span id="customerCity"></span></div>
-</div>
-
-    <!-- يسار: بيانات الفاتورة -->
-    <div class="header-left invoice-meta">
-      <div><strong>فاتورة<span dir="ltr"> : </span></strong> <span id="invoiceNumber"></span></div>
-      <div><strong>تاريخ الشراء<span dir="ltr"> : </span></strong> <span id="invoiceDate"></span></div>
-      <div><strong>تاريخ الاصدار<span dir="ltr"> : </span></strong> <span id="exportDate"></span></div>
-    </div>
-
-  </div>
-
-</div>
-
-
-    <hr />
-
-    <!-- جدول المنتجات -->
-    <table class="products-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>المنتج</th>
-          <th>ملاحظة</th>
-          <th>اللون</th>
-          <th>الكمية</th>
-          <th>السعر</th>
-          <th>الإجمالي</th>
-        </tr>
-      </thead>
-      <tbody id="productsBody">
-        <!-- سيتم تعبئته بواسطة JS -->
-      </tbody>
-    </table>
-
-    <div class="total-div" id="totalDiv">
-    <!-- الاجمالي قبل التعديل -->
-     <div class="total-before" id="totalBefore">
-      <span>الإجمالي<span dir="ltr"> : </span></span><span id="totalValue"></span>
-    </div>
-
-    <!-- التعديل -->
-    <div class="adjustment-row" id="adjustmentRow">
-      <span id="adjustmentValue"></span>
-    </div>
-
-    <!-- الإجمالي -->
-    <div class="total-box">
-      <span>الإجمالي النهائي<span dir="ltr"> : </span></span><span id="finalTotal"></span>
-    </div>
-
-    </div>
-
-    <div class="payment-status" id="paymentStatus"></div>
-
-    <hr style="border: 1px solid #ddd; margin: 30px 0;">
-
-    <div class="note" id="noteDiv">
-      <strong><span>ملاحظات</span><span dir="ltr"> : </span></strong><span id="invoiceNote"></span>
-    </div>
-
-    <div class="invoice-footer">
-
-    <div class="top-footer">
-      <div class="left-square"></div>
-      <div class="mid-square"></div>
-      <div class="right-square"></div>
-    </div>
-
-    <div class="mid-footer">
-      <div class="left-square">
-        <p>almahdesaleem@gmail.com</p>
-        <div class="square-icon"><i class="fa fa-envelope"></i></div>
-      </div>
-      <div class="right-square">
-        <a href="tel+963943022772"><p dir="ltr">0943 022 772</p></a>
-        <div class="square-icon"><i class="fa fa-phone"></i></div>
-      </div>
-    </div>
-
-    <div class="bottom-footer">
-      <div class="bottom-square">
-        <a href="https://www.instagram.com/3dp.sy" target="_blank"><p>https:fmkefkwkeofkw.com</p></a>
-        <div class="square-icon"><i class="fa fa-instagram"></i></div>
-      </div>
-    </div>
-
-  </div>
-
-  </div>
-
-  <script src="assets/java/invoice_logo.js"></script>
-
-</body>
+    <script src="assets/java/invoice_logo.js"></script>
+  </body>
 </html>

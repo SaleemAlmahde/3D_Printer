@@ -261,6 +261,74 @@ function renderAdjustmentsList() {
 }
 
 /**
+ * تطبيق تعديل واحد على قيمة
+ * @param {number} total - القيمة الأساسية
+ * @param {string} type - نوع التعديل: "+" أو "-" أو "+%" أو "-%"
+ * @param {number} value - قيمة التعديل
+ * @returns {number} القيمة بعد تطبيق التعديل
+ */
+function applySingleAdjustment(total, type, value) {
+  const v = parseFloat(value);
+  if (!type || isNaN(v) || v === 0) return total;
+
+  let result = total;
+
+  switch (type) {
+    case "+":
+      // إضافة قيمة ثابتة
+      result = total + v;
+      break;
+    case "-":
+      // خصم قيمة ثابتة
+      result = Math.max(0, total - v);
+      break;
+    case "+%":
+      // إضافة نسبة مئوية
+      result = total + (total * v) / 100;
+      break;
+    case "-%":
+      // خصم نسبة مئوية
+      result = Math.max(0, total - (total * v) / 100);
+      break;
+    default:
+      result = total;
+  }
+
+  return Math.round(result * 100) / 100;
+}
+
+/**
+ * تطبيق جميع التعديلات بشكل متسلسل (واحد تلو الآخر)
+ * المجموع الأصلي → تطبيق التعديل الأول → تطبيق التعديل الثاني → ... → المجموع النهائي
+ * @param {number} baseTotal - المجموع الأصلي
+ * @param {object} couponData - بيانات الكوبون (أو null)
+ * @param {array} adjustments - قائمة التعديلات المتعددة
+ * @returns {number} المجموع النهائي بعد تطبيق جميع التعديلات
+ */
+function applyAdjustmentsSequentially(baseTotal, couponData, adjustments) {
+  let result = baseTotal;
+
+  // 1️⃣ تطبيق الكوبون أولاً (إن وجد)
+  if (couponData && couponData.discountValue !== 0) {
+    const couponType = couponData.discountType === "%" ? "-%" : "-";
+    result = applySingleAdjustment(
+      result,
+      couponType,
+      couponData.discountValue,
+    );
+  }
+
+  // 2️⃣ تطبيق التعديلات بالترتيب (الواحد تلو الآخر)
+  if (Array.isArray(adjustments) && adjustments.length > 0) {
+    for (const adj of adjustments) {
+      result = applySingleAdjustment(result, adj.type, adj.value);
+    }
+  }
+
+  return Math.round(result * 100) / 100;
+}
+
+/**
  * تطبيق جميع التعديلات على الإجمالي بشكل ذكي (تجميع النسب والقيم الثابتة)
  * نفس منطق applySmartDiscount:
  * - تجميع النسب المئوية أولاً (مثل -5% + 10% - 20% = -15%)
@@ -714,8 +782,17 @@ function renderInvoices(filterStoreId = null) {
       }
     });
 
-    const safeTotalSYP = Number(invoice.totalSYP) || 0;
     const origTotalSYP = Number(invoice.totalOriginalSYP) || 0;
+
+    // ✅ إعادة حساب الإجمالي النهائي بنفس الطريقة المتسلسلة (مثل مودل التعديل)
+    // بدلاً من الاعتماد على totalSYP المحفوظ
+    const calculatedTotal = applyAdjustmentsSequentially(
+      origTotalSYP,
+      invoice.coupon || null,
+      invoice.adjustments || [],
+    );
+    const safeTotalSYP = parseFloat(calculatedTotal.toFixed(2));
+
     const showOrigTotal = origTotalSYP && origTotalSYP !== safeTotalSYP;
 
     const payment = invoice.payment || {
@@ -1597,81 +1674,14 @@ function saveInvoice() {
     // استخدام القيم الآمنة (مع أنها أصبحت آمنة بالفعل في calculateTotals)
     const safeTotalSYP = totalSYP || 0;
 
-    // ✅ تطبيق ذكي متكامل:
-    // جمع جميع التعديلات (الكوبون + التعديلات المتعددة)
-    // وتطبيقها بشكل ذكي (نسب أولاً، ثم قيم ثابتة)
+    // ✅ تطبيق الخصومات والتعديلات بشكل متسلسل:
+    // المجموع الأصلي → تطبيق الكوبون → تطبيق التعديل الأول → تطبيق التعديل الثاني → ... → المجموع النهائي
 
-    const discounts = [];
-
-    // إضافة خصم الكوبون (إن وجد)
-    if (selectedInvoiceCoupon) {
-      discounts.push({
-        type: selectedInvoiceCoupon.discountType, // "%" أو قيمة ثابتة
-        value: selectedInvoiceCoupon.discountValue,
-        source: "coupon",
-      });
-    }
-
-    // إضافة التعديلات المتعددة
-    for (const adj of invoiceAdjustments) {
-      if (adj.type.includes("%")) {
-        discounts.push({
-          type: "%",
-          value: adj.type === "-%" ? -adj.value : adj.value,
-          source: "adjustment",
-        });
-      } else {
-        discounts.push({
-          type: "fixed",
-          value: adj.type === "-" ? -adj.value : adj.value,
-          source: "adjustment",
-        });
-      }
-    }
-
-    // تطبيق جميع التعديلات بشكل ذكي
-    let adjustedGlobal = safeTotalSYP;
-    if (discounts.length > 0) {
-      const percentageDiscounts = discounts.filter((d) => d.type === "%");
-      const fixedDiscounts = discounts.filter((d) => d.type === "fixed");
-
-      // حساب النسبة الكلية
-      let totalPercent = 0;
-      for (const pDisc of percentageDiscounts) {
-        totalPercent += pDisc.value;
-      }
-
-      // حساب القيمة الثابتة الكلية
-      let totalFixed = 0;
-      for (const fDisc of fixedDiscounts) {
-        totalFixed += fDisc.value;
-      }
-
-      // تطبيق النسب أولاً
-      if (totalPercent !== 0) {
-        if (totalPercent > 0) {
-          // إضافة نسبة
-          adjustedGlobal = safeTotalSYP + (safeTotalSYP * totalPercent) / 100;
-        } else {
-          // خصم نسبة
-          adjustedGlobal = Math.max(
-            0,
-            safeTotalSYP - (safeTotalSYP * Math.abs(totalPercent)) / 100,
-          );
-        }
-      }
-
-      // ثم تطبيق القيم الثابتة
-      if (totalFixed !== 0) {
-        if (totalFixed > 0) {
-          adjustedGlobal += totalFixed;
-        } else {
-          adjustedGlobal = Math.max(0, adjustedGlobal - Math.abs(totalFixed));
-        }
-      }
-    }
-
-    adjustedGlobal = Math.round(adjustedGlobal * 100) / 100;
+    let adjustedGlobal = applyAdjustmentsSequentially(
+      safeTotalSYP,
+      selectedInvoiceCoupon,
+      invoiceAdjustments,
+    );
 
     if (form.dataset.editingId) {
       // تعديل فاتورة
@@ -2506,82 +2516,14 @@ function updateInvoiceTotals() {
     }
   });
 
-  // ✅ تطبيق ذكي متكامل:
-  // جمع جميع التعديلات (الكوبون + التعديلات المتعددة)
-  // وتطبيقها بشكل ذكي (نسب أولاً، ثم قيم ثابتة)
+  // ✅ تطبيق الخصومات والتعديلات بشكل متسلسل:
+  // المجموع الأصلي → تطبيق الكوبون → تطبيق التعديل الأول → تطبيق التعديل الثاني → ... → المجموع النهائي
 
-  const discounts = [];
-
-  // إضافة خصم الكوبون (إن وجد) - الكوبون دائماً خصم (سالب)
-  if (selectedInvoiceCoupon) {
-    discounts.push({
-      type: selectedInvoiceCoupon.discountType, // "%" أو قيمة ثابتة
-      value: -selectedInvoiceCoupon.discountValue, // ⭐ تحويل إلى سالب دائماً (خصم)
-      source: "coupon",
-    });
-  }
-
-  // إضافة التعديلات المتعددة
-  for (const adj of invoiceAdjustments) {
-    if (adj.type.includes("%")) {
-      discounts.push({
-        type: "%",
-        value: adj.type === "-%" ? -adj.value : adj.value,
-        source: "adjustment",
-      });
-    } else {
-      discounts.push({
-        type: "fixed",
-        value: adj.type === "-" ? -adj.value : adj.value,
-        source: "adjustment",
-      });
-    }
-  }
-
-  // تطبيق جميع التعديلات بشكل ذكي
-  let adjusted = totalSYP;
-  if (discounts.length > 0) {
-    adjusted = applySmartDiscount(totalSYP, null, null, null);
-    // إعادة حساب باستخدام discounts المجمعة
-
-    const percentageDiscounts = discounts.filter((d) => d.type === "%");
-    const fixedDiscounts = discounts.filter((d) => d.type === "fixed");
-
-    // حساب النسبة الكلية
-    let totalPercent = 0;
-    for (const pDisc of percentageDiscounts) {
-      totalPercent += pDisc.value;
-    }
-
-    // حساب القيمة الثابتة الكلية
-    let totalFixed = 0;
-    for (const fDisc of fixedDiscounts) {
-      totalFixed += fDisc.value;
-    }
-
-    // تطبيق النسب أولاً
-    if (totalPercent !== 0) {
-      if (totalPercent > 0) {
-        // إضافة نسبة
-        adjusted = totalSYP + (totalSYP * totalPercent) / 100;
-      } else {
-        // خصم نسبة
-        adjusted = Math.max(
-          0,
-          totalSYP - (totalSYP * Math.abs(totalPercent)) / 100,
-        );
-      }
-    }
-
-    // ثم تطبيق القيم الثابتة
-    if (totalFixed !== 0) {
-      if (totalFixed > 0) {
-        adjusted += totalFixed;
-      } else {
-        adjusted = Math.max(0, adjusted - Math.abs(totalFixed));
-      }
-    }
-  }
+  let adjusted = applyAdjustmentsSequentially(
+    totalSYP,
+    selectedInvoiceCoupon,
+    invoiceAdjustments,
+  );
 
   const totalEl = document.getElementById("totalSYP");
   const origRow = document.getElementById("originalTotalRow");
@@ -2595,15 +2537,17 @@ function updateInvoiceTotals() {
   if (hasAdjustments && adjusted !== totalSYP) {
     if (origRow) origRow.classList.remove("hidden");
     if (adjRow) adjRow.classList.remove("hidden");
-    if (origEl) origEl.textContent = totalSYP.toLocaleString();
+    if (origEl)
+      origEl.textContent = parseFloat(totalSYP.toFixed(2)).toLocaleString();
     if (adjEl)
-      adjEl.textContent = (Math.round(adjusted * 100) / 100).toLocaleString();
+      adjEl.textContent = parseFloat(adjusted.toFixed(2)).toLocaleString();
     if (totalEl)
-      totalEl.textContent = (Math.round(adjusted * 100) / 100).toLocaleString();
+      totalEl.textContent = parseFloat(adjusted.toFixed(2)).toLocaleString();
   } else {
     if (origRow) origRow.classList.add("hidden");
     if (adjRow) adjRow.classList.add("hidden");
-    if (totalEl) totalEl.textContent = totalSYP.toLocaleString();
+    if (totalEl)
+      totalEl.textContent = parseFloat(totalSYP.toFixed(2)).toLocaleString();
   }
 }
 
