@@ -35,7 +35,7 @@ function calculateTotals(products) {
           totalSYP: totals.totalSYP + priceSYP * quantity,
         };
       },
-      { totalSYP: 0 }
+      { totalSYP: 0 },
     );
   } catch (error) {
     console.error("Error in calculateTotals:", error, products);
@@ -76,7 +76,7 @@ function applySmartDiscount(
   baseTotal,
   couponData,
   manualAdjustmentType,
-  manualAdjustmentValue
+  manualAdjustmentValue,
 ) {
   let result = baseTotal;
 
@@ -110,7 +110,7 @@ function applySmartDiscount(
       result = applyAdjustment(
         baseTotal,
         manualAdjustmentType,
-        manualAdjustmentValue
+        manualAdjustmentValue,
       );
     }
     return result;
@@ -130,7 +130,7 @@ function applySmartDiscount(
     // جمع النسب وتطبيقها مرة واحدة
     const totalPercentage = percentageDiscounts.reduce(
       (sum, d) => sum + d.value,
-      0
+      0,
     );
     result = Math.max(0, baseTotal - (baseTotal * totalPercentage) / 100);
   }
@@ -141,7 +141,7 @@ function applySmartDiscount(
     const percentageDiscount = percentageDiscounts[0];
     result = Math.max(
       0,
-      baseTotal - (baseTotal * percentageDiscount.value) / 100
+      baseTotal - (baseTotal * percentageDiscount.value) / 100,
     );
 
     // ثم تطبيق القيمة الثابتة على النتيجة
@@ -209,7 +209,7 @@ function addAdjustment() {
   showToast(
     `✅ تم إضافة تعديل: ${value}${type.includes("%") ? " %" : " ل.س"}`,
     2000,
-    "#27ae60"
+    "#27ae60",
   );
 }
 
@@ -218,7 +218,7 @@ function addAdjustment() {
  */
 function removeAdjustment(adjustmentId) {
   invoiceAdjustments = invoiceAdjustments.filter(
-    (adj) => adj.id !== adjustmentId
+    (adj) => adj.id !== adjustmentId,
   );
   renderAdjustmentsList();
   updateInvoiceTotals();
@@ -406,7 +406,7 @@ function renderInvoices(filterStoreId = null) {
   // 🚨 الخطوة التشخيصية رقم 2: هل يوجد فواتير أساساً؟
   console.log(
     "عدد الفواتير التي تم جلبها من localStorage:",
-    allInvoices.length
+    allInvoices.length,
   );
 
   // 💡 تحديد القيمة التي سنستخدمها للفلترة: ID المُمرر أو القيمة المحفوظة
@@ -585,7 +585,7 @@ function renderInvoices(filterStoreId = null) {
     if (!Array.isArray(invoice.products)) {
       console.warn(
         "فاتورة بدون قائمة منتجات أو بقيمة غير صحيحة (سيتم عرضها فارغة):",
-        invoice.id
+        invoice.id,
       );
     }
 
@@ -647,34 +647,34 @@ function renderInvoices(filterStoreId = null) {
           descParts.push(
             String(product.customDescription)
               .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
+              .replace(/>/g, "&gt;"),
           );
         }
         if (product.note) {
           descParts.push(
             `<div class="note-text">${String(product.note)
               .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")}</div>`
+              .replace(/>/g, "&gt;")}</div>`,
           );
         }
         if (product.description) {
           descParts.push(
             String(product.description)
               .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
+              .replace(/>/g, "&gt;"),
           );
         }
         if (product.shortDisc) {
           descParts.push(
             String(product.shortDisc)
               .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
+              .replace(/>/g, "&gt;"),
           );
         }
 
         const descHTML = descParts.length
           ? `<div class="invoice-custom-desc" style="display:none; color: white; padding:8px;">${descParts.join(
-              ""
+              "",
             )}</div>`
           : "";
 
@@ -788,8 +788,8 @@ function renderInvoices(filterStoreId = null) {
               payment.status === "unpaid"
                 ? `لم يدفع <i class="fa fa-times-circle" style="color: red;"></i>`
                 : payment.status === "paid-partial"
-                ? `دُفع جزئياً <i class="fa fa-adjust" style="color: yellow;"></i>`
-                : `دُفع كامل <i class="fa fa-check-circle" style="color: green;"></i>`
+                  ? `دُفع جزئياً <i class="fa fa-adjust" style="color: yellow;"></i>`
+                  : `دُفع كامل <i class="fa fa-check-circle" style="color: green;"></i>`
             }
             `}      
 
@@ -867,7 +867,7 @@ function renderInvoices(filterStoreId = null) {
         // إذا كان البودي مُخفى (أي الفاتورة مطوية الآن)، يجب طي المنتجات الداخلية.
         const productsDiv = invoiceCard.querySelector(".invoice-products");
         const toggleProductsBtn = invoiceCard.querySelector(
-          ".btn-toggle-products"
+          ".btn-toggle-products",
         );
         const toggleProductsIcon = toggleProductsBtn
           ? toggleProductsBtn.querySelector("i")
@@ -879,7 +879,7 @@ function renderInvoices(filterStoreId = null) {
           if (toggleProductsIcon) {
             toggleProductsIcon.classList.replace(
               "fa-chevron-up",
-              "fa-chevron-down"
+              "fa-chevron-down",
             );
           }
         }
@@ -910,7 +910,7 @@ function renderInvoices(filterStoreId = null) {
     } catch (err) {
       console.warn(
         "Failed to auto-open invoice after save:",
-        err && err.message
+        err && err.message,
       );
     }
 
@@ -1204,7 +1204,7 @@ function editInvoice(id) {
             <input type="hidden" class="temp-product-id" value="${tempProductId}">
             <input type="hidden" class="custom-description-text" value="${customDescription.replace(
               /"/g,
-              "&quot;"
+              "&quot;",
             )}">
             <input type="hidden" class="product-note-text" value="${(
               p.note || ""
@@ -1432,7 +1432,7 @@ function saveInvoice() {
 
     // جلب المنتجات المختارة
     const selectedProductsList = document.getElementById(
-      "selectedProductsList"
+      "selectedProductsList",
     );
     const selectedProducts = Array.from(selectedProductsList.children).map(
       (item) => {
@@ -1519,7 +1519,7 @@ function saveInvoice() {
             note: note,
           };
         }
-      }
+      },
     );
 
     // التحقق من صحة البيانات
@@ -1545,13 +1545,13 @@ function saveInvoice() {
 
     // 🛑 التعديل: التحقق من أن المدير قام بتسعير المنتجات المخصصة
     const hasZeroPriceCustomItem = selectedProducts.some(
-      (p) => p.isCustom && p.priceSYP === 0
+      (p) => p.isCustom && p.priceSYP === 0,
     );
     if (hasZeroPriceCustomItem) {
       showToast(
         "⚠️ يرجى تسعير جميع المنتجات المخصصة (قيمتها 0) قبل الحفظ.",
         4000,
-        "red"
+        "red",
       );
       return;
     }
@@ -1623,7 +1623,7 @@ function saveInvoice() {
           // خصم نسبة
           adjustedGlobal = Math.max(
             0,
-            safeTotalSYP - (safeTotalSYP * Math.abs(totalPercent)) / 100
+            safeTotalSYP - (safeTotalSYP * Math.abs(totalPercent)) / 100,
           );
         }
       }
@@ -1678,9 +1678,9 @@ function saveInvoice() {
           products: selectedProducts,
           totalOriginalSYP: safeTotalSYP,
           totalSYP: adjustedGlobal,
-          adjustment:
-            adjValGlobal && adjTypeGlobal
-              ? { type: adjTypeGlobal, value: parseFloat(adjValGlobal) }
+          adjustments:
+            invoiceAdjustments && invoiceAdjustments.length > 0
+              ? invoiceAdjustments.map(({ value, type }) => ({ type, value }))
               : null,
           coupon: selectedInvoiceCoupon || null, // إضافة الكوبون المطبق
           payment: paymentObj,
@@ -1876,7 +1876,7 @@ function renderProductsList(searchQuery = "") {
                   style="background-color: ${color.code}" 
                   title="${color.name}">
             </span>
-          `
+          `,
             )
             .join("")}
           ${
@@ -1910,7 +1910,7 @@ function handleProductSearch(event) {
 function selectProduct(productId) {
   // 🔧 إصلاح: التعامل مع ID كنص أو رقم
   const product = finalBaseProducts.find(
-    (p) => p.id === productId || p.id.toString() === productId.toString()
+    (p) => p.id === productId || p.id.toString() === productId.toString(),
   );
 
   if (!product) return;
@@ -1920,8 +1920,10 @@ function selectProduct(productId) {
   document.getElementById("productInput").value = product.name;
 
   // 🔧 إظهار حقل الكمية عند اختيار منتج
-  document.getElementById("productQuantity").classList.remove("hidden");
-  document.getElementById("productQuantity").value = ""; // تفريغ الكمية السابقة
+  const quantityField = document.getElementById("productQuantity");
+  quantityField.classList.remove("hidden");
+  quantityField.classList.add("show");
+  quantityField.value = ""; // تفريغ الكمية السابقة
 
   // 🔧 تحسين: تحديد ما إذا كان منتج مخصص
   const isCustom = product.isCustomOrder || product.id === "CUSTOM_ORDER";
@@ -1971,7 +1973,7 @@ function selectProduct(productId) {
 
     const bottomSheetContent = document.querySelector(".bottom-sheet-content");
     const existingCustomUI = bottomSheetContent.querySelector(
-      ".custom-product-inputs"
+      ".custom-product-inputs",
     );
     const existingColorSelector =
       bottomSheetContent.querySelector(".color-selector");
@@ -1984,11 +1986,13 @@ function selectProduct(productId) {
       document.getElementById("productQuantity").parentElement;
     productQuantityContainer.insertBefore(
       customProductUI,
-      document.getElementById("productQuantity")
+      document.getElementById("productQuantity"),
     );
 
     // إخفاء حقل الكمية القياسي للمنتج المخصص
-    document.getElementById("productQuantity").classList.add("hidden");
+    const qtyField = document.getElementById("productQuantity");
+    qtyField.classList.remove("show");
+    qtyField.classList.add("hidden");
 
     return; // نخرج لأن المنتج المخصص لا يحتاج لاختيار لون
   }
@@ -2007,13 +2011,20 @@ function selectProduct(productId) {
              style="background-color: ${color.code}"
              title="${color.name}">
         </div>
-      `
+      `,
         )
         .join("")}
     </div>
   `;
 
   const bottomSheetContent = document.querySelector(".bottom-sheet-content");
+
+  // 🔧 حذف حقول المنتج المخصص إذا كانت موجودة
+  const existingCustomUI = bottomSheetContent.querySelector(
+    ".custom-product-inputs",
+  );
+  if (existingCustomUI) existingCustomUI.remove();
+
   const existingSelector = bottomSheetContent.querySelector(".color-selector");
   if (existingSelector) {
     existingSelector.remove();
@@ -2022,12 +2033,12 @@ function selectProduct(productId) {
     .getElementById("productQuantity")
     .parentElement.insertBefore(
       colorSelector,
-      document.getElementById("productQuantity")
+      document.getElementById("productQuantity"),
     );
 
   // Add optional note field (placeholder only) for this product selection
   const existingNote = bottomSheetContent.querySelector(
-    ".product-note-wrapper"
+    ".product-note-wrapper",
   );
   if (existingNote) existingNote.remove();
   const noteWrapper = document.createElement("div");
@@ -2037,7 +2048,7 @@ function selectProduct(productId) {
     .getElementById("productQuantity")
     .parentElement.insertBefore(
       noteWrapper,
-      document.getElementById("productQuantity")
+      document.getElementById("productQuantity"),
     );
 }
 
@@ -2120,10 +2131,10 @@ function confirmAddProduct() {
     const customName = customNameInput.value.trim();
     const customDescription = descriptionInput.value.trim();
     const customColorNameInput = document.getElementById(
-      "customProductColorName"
+      "customProductColorName",
     );
     const customColorCodeInput = document.getElementById(
-      "customProductColorCode"
+      "customProductColorCode",
     );
     const quantity = parseInt(customQtyInput.value) || 1;
     const priceSYP = parseFloat(customPriceInput.value) || 0;
@@ -2138,7 +2149,7 @@ function confirmAddProduct() {
 
     // إضافة المنتج المخصص لقائمة المنتجات المحددة
     const selectedProductsList = document.getElementById(
-      "selectedProductsList"
+      "selectedProductsList",
     );
     const productElement = document.createElement("div");
     productElement.className = "selected-product custom-product-item";
@@ -2175,15 +2186,15 @@ function confirmAddProduct() {
       <input type="hidden" class="is-custom-flag" value="true">
       <input type="hidden" class="custom-description-text" value="${customDescription.replace(
         /"/g,
-        "&quot;"
+        "&quot;",
       )}">
       <input type="hidden" class="custom-product-name-hidden" value="${customName.replace(
         /"/g,
-        "&quot;"
+        "&quot;",
       )}">
       <input type="hidden" class="product-color-name" value="${customColorName.replace(
         /"/g,
-        "&quot;"
+        "&quot;",
       )}">
       <input type="hidden" class="product-color-code" value="${customColorCode}">
     `;
@@ -2210,7 +2221,7 @@ function confirmAddProduct() {
 
     // إضافة المنتج للقائمة المنتجات المحددة
     const selectedProductsList = document.getElementById(
-      "selectedProductsList"
+      "selectedProductsList",
     );
     const productElement = document.createElement("div");
     productElement.className = "selected-product";
@@ -2243,7 +2254,7 @@ function confirmAddProduct() {
       }">
       <input type="hidden" class="product-note-text" value="${productNote.replace(
         /"/g,
-        "&quot;"
+        "&quot;",
       )}">
       `;
     selectedProductsList.appendChild(productElement);
@@ -2269,13 +2280,12 @@ function confirmAddProduct() {
   productInput.value = "";
   delete productInput.dataset.selectedColor;
 
-  // تأكد من إعادة قيمة حقل الكمية وإظهاره (قد تم إخفاؤه عند اختيار منتج مخصص)
+  // تأكد من إعادة تعيين حقل الكمية وإخفاؤه بعد إضافة المنتج
   const prodQtyEl = document.getElementById("productQuantity");
   if (prodQtyEl) {
     prodQtyEl.value = "";
-    prodQtyEl.classList.remove("hidden");
-    if (prodQtyEl.parentElement)
-      prodQtyEl.parentElement.classList.remove("hidden");
+    prodQtyEl.classList.remove("show");
+    prodQtyEl.classList.add("hidden");
   }
 
   // تنظيف الواجهة
@@ -2288,7 +2298,7 @@ function confirmAddProduct() {
 // تحديث إجماليات الفاتورة
 function updateTotals() {
   const selectedProducts = Array.from(
-    document.getElementById("selectedProductsList").children
+    document.getElementById("selectedProductsList").children,
   ).map((item) => {
     // If this item is a custom product it uses different DOM structure
     const isCustom = item.querySelector(".is-custom-flag")?.value === "true";
@@ -2454,7 +2464,7 @@ function updateInvoiceTotals() {
         // خصم نسبة
         adjusted = Math.max(
           0,
-          totalSYP - (totalSYP * Math.abs(totalPercent)) / 100
+          totalSYP - (totalSYP * Math.abs(totalPercent)) / 100,
         );
       }
     }
@@ -2499,7 +2509,7 @@ document.addEventListener("DOMContentLoaded", function () {
   productInput.removeAttribute("readonly"); // جعل الحقل قابل للكتابة
   productInput.addEventListener("input", handleProductSearch);
   productInput.addEventListener("focus", () =>
-    renderProductsList(productInput.value)
+    renderProductsList(productInput.value),
   );
   // استمع لتغييرات حقل/نوع التعديل لنعيد حساب الإجمالي فوراً
   const adjValEl = document.getElementById("adjustmentValue");
@@ -2636,7 +2646,7 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
                   <input type="hidden" class="temp-product-id" value="${tempProductId}">
                   <input type="hidden" class="custom-description-text" value="${customDescription.replace(
                     /"/g,
-                    "&quot;"
+                    "&quot;",
                   )}">
               </div>
               <div class="selected-product-right">
@@ -2684,7 +2694,7 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
               </button>
                       <input type="hidden" class="product-note-text" value="${productNote.replace(
                         /"/g,
-                        "&quot;"
+                        "&quot;",
                       )}">
               <input type="hidden" class="is-custom-flag" value="false">
               <input type="hidden" class="temp-product-id" value="${
@@ -2721,7 +2731,7 @@ function fillFormWithInvoice(invoice, allInvoices = []) {
   // إظهار/إخفاء حقل المبلغ المدفوع (يجب أن تكون هذه الدالة موجودة)
   if (typeof togglePaymentFields === "function") {
     togglePaymentFields(
-      paymentStatusEl ? paymentStatusEl.value : payment.status || "unpaid"
+      paymentStatusEl ? paymentStatusEl.value : payment.status || "unpaid",
     );
   }
 
@@ -2868,7 +2878,7 @@ function onPasteCode() {
         console.warn(
           "decodeInvoice failed for candidate:",
           candidate,
-          err && err.message
+          err && err.message,
         );
         return null;
       }
@@ -2901,7 +2911,7 @@ function onPasteCode() {
 
     if (!invoice)
       throw new Error(
-        "لم يتم فك الكود بشكل صحيح (جرب لصق الكود فقط دون أي نص إضافي)"
+        "لم يتم فك الكود بشكل صحيح (جرب لصق الكود فقط دون أي نص إضافي)",
       );
 
     // 2️⃣ تجهيز الفاتورة مع معرف جديد
@@ -2929,7 +2939,7 @@ function onPasteCode() {
 
     // 7️⃣ رسالة نجاح
     alert(
-      '📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.'
+      '📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.',
     );
 
     // 8️⃣ مسح حقل الكود وإخفاء المودال إذا الدالة موجودة
@@ -2960,7 +2970,7 @@ function toggleInvoiceCodeInput() {
   }
   if (!found)
     console.warn(
-      "⚠️ لم يتم العثور على عنصر إدخال كود الفاتورة (id invoiceCodeInputModal|codeInputPopup)"
+      "⚠️ لم يتم العثور على عنصر إدخال كود الفاتورة (id invoiceCodeInputModal|codeInputPopup)",
     );
 }
 
@@ -3054,7 +3064,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast(
       `يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`,
       5000,
-      "green"
+      "green",
     );
   }
 
@@ -3410,7 +3420,7 @@ function toggleAllInvoicesAction(clickedButton) {
     // الأيقونات الداخلية (مؤشر السهم)
     const productsDiv = invoiceCard.querySelector(".invoice-products");
     const productsToggleIcon = invoiceCard.querySelector(
-      ".btn-toggle-products i"
+      ".btn-toggle-products i",
     );
 
     // عملية التبديل
@@ -3428,7 +3438,7 @@ function toggleAllInvoicesAction(clickedButton) {
       if (productsToggleIcon)
         productsToggleIcon.classList.replace(
           "fa-chevron-up",
-          "fa-chevron-down"
+          "fa-chevron-down",
         );
     }
   });
