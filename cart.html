@@ -107,18 +107,26 @@
             placeholder="موقع التسليم المفصل ضمن حمص"
             required
           />
-          <input type="date" id="shippingDate" required />
+
+          <div class="date-div">
+            <label for="shippingDate" class="date-label"
+              >تاريخ التسليم</label
+            >
+            <input type="date" id="shippingDate" required />
+          </div>
+
           <textarea
             id="notes"
             placeholder="ملاحظات إضافية على الطلب (اختياري)"
           ></textarea>
         </div>
 
+        <p>عدد المنتجات : <span id="totalQuantity">0</span></p>
+
         <button id="couponBtn" class="coupon-btn" onclick="showCouponModal()">
           <i class="fa fa-ticket"></i> لدي كود خصم
         </button>
 
-        <p>عدد المنتجات : <span id="totalQuantity">0</span></p>
         <p>الإجمالي : <span id="totalPrice">0 ل.س</span></p>
 
         <button id="checkoutBtn" onclick="handleCheckout()">تأكيد الطلب</button>
@@ -290,7 +298,11 @@
             <i class="fa fa-whatsapp"></i>
             <span dir="ltr">+963 943022772</span>
           </a>
-          <a href="https://www.facebook.com/slym.almhdy.193474" target="_blank" title="Facebook">
+          <a
+            href="https://www.facebook.com/slym.almhdy.193474"
+            target="_blank"
+            title="Facebook"
+          >
             <i class="fa fa-facebook"></i>
             <span>سليم المهدي</span>
           </a>

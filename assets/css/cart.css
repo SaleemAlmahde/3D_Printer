@@ -255,10 +255,10 @@ body {
 
 #scrollTopBtn {
     position: fixed;
-    bottom: 90px;
+    bottom: 155px;
     left: 20px;
     z-index: 1000;
-    background-color: #07A98C;
+    background: linear-gradient(135deg, #09c4a4, #049277);
     color: white;
     border: none;
     border-radius: 50%;
@@ -541,7 +541,7 @@ body {
 }
 
 #checkoutBtn {
-    background-color: #049277; 
+    background: linear-gradient(135deg, #09c4a4, #049277); 
     color: white;
     border: none;
     border-radius: 25px;
@@ -683,6 +683,24 @@ border-radius: 25px;
 #customerInfoFields input[type="tel"]::-moz-placeholder { text-align: right; }
 #customerInfoFields input[type="tel"]:-ms-input-placeholder { text-align: right; }
 #customerInfoFields input[type="tel"]::placeholder { text-align: right; }
+
+.date-div {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    align-items: center;
+}
+
+/* تنسيق label تاريخ التسليم */
+.date-label {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    margin: 0;
+}
+
 #customerInfoFields textarea {
     /* جعل حقل الملاحظات يأخذ عرضاً أكبر إذا أمكن */
     grid-column: 1 / -1; 
