@@ -323,6 +323,7 @@ function showModal(id) {
   // 💡 1. منطق التحقق من قاعدة الستيكرات 💡
   // -----------------------------------------------------
   let stickerWarningHTML = "";
+  let isSticker = false;
 
   // التحقق: إذا كان المنتج موجوداً ويحتوي على تصنيفات، والتصنيف الأول فيه كلمة 'ستيكر'
   if (
@@ -336,19 +337,19 @@ function showModal(id) {
             </div>
         `;
 
-        document.getElementById("colorContainer").style.display = "none";        
+        isSticker = true;
   }
   // -----------------------------------------------------
 
   // عرض الألوان كدوائر
   let colorsHTML = "";
   if (product.colors && product.colors.length > 0) {
-    colorsHTML = `<div class="color-container" id="colorContainer" style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
+    colorsHTML = `<div class="color-container" id="colorContainer" style="display:${isSticker ? "none" : "flex"}; gap:10px; align-items:center; flex-wrap: wrap;">
                 ${product.colors
                   .filter((c) => c.code)
                   .map(
                     (c) => `
-                    <div class="color-circle" title="${c.name}" onclick="selectColor(this, '${id}', '${c.name}', '${c.code}')" style="width:28px; height:28px; border-radius:50%; background:${c.code}; cursor:pointer; box-shadow:0 2px 6px #0001;"></div>
+                    <div class="color-circle" title="${c.name}" onclick="selectColor(this, '${id}', '${c.name}', '${c.code}', )" style="width:28px; height:28px; border-radius:50%; background:${c.code}; cursor:pointer; box-shadow:0 2px 6px #0001;"></div>
                 `
                   )
                   .join("")}
@@ -495,7 +496,24 @@ function addToCart(productId) {
     return;
   }
 
-  const selectedColorData = colorContainer.dataset.selectedColor;
+  let selectedColorData;
+
+  if(product.categories &&
+    product.categories.length > 0 &&
+    product.categories[0] == "ستيكرات"){
+
+  //     colorContainer.dataset.selectedColor = JSON.stringify({
+  //   name: colorName,
+  //   code: colorCode,
+  // });
+
+       selectedColorData = JSON.stringify({"name":"اسود","code":"#000000"});
+      console.log(selectedColorData);
+    } else {
+       selectedColorData = colorContainer.dataset.selectedColor;
+      console.log(selectedColorData);
+    }
+
   if (!selectedColorData) {
     showToast("⚠️ يرجى اختيار لون للمنتج", 3000, "#d32f2f");
     return;
