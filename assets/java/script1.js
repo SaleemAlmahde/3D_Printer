@@ -335,6 +335,8 @@ function showModal(id) {
             🔔 يجب طلب 3 ستيكرات على الأقل من أي نوع إذا كانت طلبيتك ستيكرات فقط.
             </div>
         `;
+
+        document.getElementById("colorContainer").style.display = "none";        
   }
   // -----------------------------------------------------
 
