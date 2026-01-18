@@ -183,7 +183,14 @@ function displayCartItems() {
             <p>الكمية : ${item.quantity}</p>
             <p>السعر : <span style="color:#dc143c; font-weight:bold;">يحدد لاحقا</span></p>
         `;
-      } else {
+      } else if(product.categories &&
+    product.categories.length > 0 &&
+    product.categories[0] == "ستيكرات"){
+      detailsForCard = `
+            <p>الكمية : ${item.quantity}</p>
+            <p>السعر : ${displayPrice} ل.س</p>
+        `;
+    } else {
         detailsForCard = `
             <p>اللون : <span style="${colorStyle}">${item.selectedColor.name}</span></p>
             <p>الكمية : ${item.quantity}</p>
