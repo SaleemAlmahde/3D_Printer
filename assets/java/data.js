@@ -112,6 +112,23 @@ const finalBaseProducts = [
     "images": ["assets/imgs/cars/c6.webp"]
   },
 
+
+
+//  ------------- Stickers DATA -------------
+   {
+    "id":51,
+    "name": "ستيكر الهوية البصرية",
+    "shortDisc": "ستيكر الهوية البصرية لكفر الجوال مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["ستيكرات"],
+    "colors": [
+      { "name": "اسود", "code": "#000000" }
+    ],
+    "price": 70,
+    "storePrice": 50,
+    "images": ["assets/imgs/Stickers/syria_idS.webp"]
+  },
+
+// ------------------------------------------
 ];
 
 // STORSE DATA ----------------------------
