@@ -31,7 +31,7 @@
     <nav>
       <div class="container">
         <ul class="nav-menu">
-          <a href="index.html"><li>المنتجات</li></a>
+          <a href="index.html"><li>هبتصهبثهبثص</li></a>
           <div
             class="divider"
             id="firstDivider"
@@ -242,9 +242,19 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => console.log('Service Worker Registered'))
-      .catch(err => console.error('SW registration failed', err));
+    navigator.serviceWorker.register('/service-worker.js').then(reg => {
+      // مراقبة أي تحديث للـ Service Worker
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // إعلام المستخدم أو إعادة تحميل الصفحة تلقائياً
+            console.log("✨ نسخة جديدة متوفرة، يتم التحديث...");
+            window.location.reload();
+          }
+        });
+      });
+    });
   });
 }
 </script>
