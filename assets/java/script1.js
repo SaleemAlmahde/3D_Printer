@@ -328,7 +328,7 @@ function showModal(id) {
   if (
     product.categories &&
     product.categories.length > 0 &&
-    product.categories[0] == "ستيكر"
+    product.categories[0] == "ستيكرات"
   ) {
     stickerWarningHTML = `
             <div class="sticker-warning-alert" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center;">
