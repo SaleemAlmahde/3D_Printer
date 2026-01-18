@@ -42,74 +42,74 @@ const finalBaseProducts = [
     {
     "id": 1,
     "name": "ميدالية سيارة KIA (الشعار القديم)",
-    "shortDisc": "ميدالية شعار سيارة KIA (الشعار القديم) مطبوع بإستخدام الطباعة ثلاثية الابعاد مصنوع بدقة وبتفاصيل مميزة.",
+    "shortDisc": "ميدالية شعار سيارة KIA (الشعار القديم) مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["سيارات"],
     "colors": [
       { "name": "اسود", "code": "#000000" }
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c1.png"]
+    "images": ["assets/imgs/cars/c1.webp"]
   },
     {
     "id": 2,
     "name": "ميدالية سيارة BMW",
-    "shortDisc": "ميدالية شعار سيارة BMW مطبوع بإستخدام الطباعة ثلاثية الابعاد مصنوع بدقة وبتفاصيل مميزة.",
+    "shortDisc": "ميدالية شعار سيارة BMW مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["سيارات"],
     "colors": [
       { "name": "اسود", "code": "#000000" }
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c2.png"]
+    "images": ["assets/imgs/cars/c2.webp"]
   },
     {
     "id": 3,
     "name": "ميدالية سيارة فوكس فاجن",
-    "shortDisc": "ميدالية شعار سيارة فوكس فاجن مطبوع بإستخدام الطباعة ثلاثية الابعاد مصنوع بدقة وبتفاصيل مميزة.",
+    "shortDisc": "ميدالية شعار سيارة فوكس فاجن مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["سيارات"],
     "colors": [
       { "name": "اسود", "code": "#000000" }
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c3.png"]
+    "images": ["assets/imgs/cars/c3.webp"]
   },
       {
     "id": 4,
     "name": "ميدالية سيارة اودي",
-    "shortDisc": "ميدالية شعار سيارة اودي مطبوع بإستخدام الطباعة ثلاثية الابعاد مصنوع بدقة وبتفاصيل مميزة.",
+    "shortDisc": "ميدالية شعار سيارة اودي مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["سيارات"],
     "colors": [
       { "name": "اسود", "code": "#000000" }
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c4.png"]
+    "images": ["assets/imgs/cars/c4.webp"]
   },
   {
     "id": 5,
     "name": "ميدالية سيارة مرسيدس",
-    "shortDisc": "ميدالية شعار سيارة مرسيدس مطبوع بإستخدام الطباعة ثلاثية الابعاد مصنوع بدقة وبتفاصيل مميزة.",
+    "shortDisc": "ميدالية شعار سيارة مرسيدس مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["سيارات"],
     "colors": [
       { "name": "اسود", "code": "#000000" }
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c5.png"]
+    "images": ["assets/imgs/cars/c5.webp"]
   },
    {
     "id": 6,
     "name": "ميدالية سيارة موستبيشي",
-    "shortDisc": "ميدالية شعار سيارة موستبيشي مطبوع بإستخدام الطباعة ثلاثية الابعاد مصنوع بدقة وبتفاصيل مميزة.",
+    "shortDisc": "ميدالية شعار سيارة موستبيشي مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["سيارات"],
     "colors": [
       { "name": "اسود", "code": "#000000" }
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c6.png"]
+    "images": ["assets/imgs/cars/c6.webp"]
   },
 
 ];
