@@ -1,4 +1,4 @@
-const CACHE_NAME = "invoice-cache-v1";
+const CACHE_NAME = "invoice-cache-v2";
 const FILES_TO_CACHE = [
   "/index.html",
   "/invoices.html",
