@@ -127,6 +127,18 @@ const finalBaseProducts = [
     "storePrice": 50,
     "images": ["assets/imgs/Stickers/syria_idS.webp"]
   },
+     {
+    "id":52,
+    "name": "ستيكر الهوية البصرية",
+    "shortDisc": "ستيكر الهوية البصرية لكفر الجوال مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["ستيكرات"],
+    "colors": [
+      { "name": "اسود", "code": "#000000" }
+    ],
+    "price": 70,
+    "storePrice": 50,
+    "images": ["assets/imgs/Stickers/syria_idS2.webp"]
+  },
 
 // ------------------------------------------
 ];
