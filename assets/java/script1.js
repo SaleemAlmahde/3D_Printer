@@ -498,7 +498,7 @@ function addToCart(productId) {
   const colorContainer = document.getElementById("colorContainer");
 
   if (!product) {
-    alert("⚠️ المنتج غير موجود");
+    showToast("⚠️ المنتج غير موجود", 3000, "red");
     return;
   }
 

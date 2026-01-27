@@ -1241,7 +1241,13 @@ function togglePaymentFields() {
 function editInvoice(id) {
   const allInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
   const invoice = allInvoices.find((inv) => inv.id === id);
-  if (!invoice) return alert("⚠️ لم يتم العثور على الفاتورة");
+  if (!invoice) {
+    try {
+      if (typeof showToast === "function")
+        showToast("⚠️ لم يتم العثور على الفاتورة", 3000, "orange");
+    } catch (e) {}
+    return;
+  }
 
   // تعبئة الحقول بالقيم الحالية
   document.getElementById("buyerName").value = invoice.customerName;
@@ -1797,7 +1803,14 @@ function saveInvoice() {
     renderInvoices();
   } catch (e) {
     console.error(e);
-    alert("حدث خطأ أثناء الحفظ: " + (e && e.message ? e.message : e));
+    try {
+      if (typeof showToast === "function")
+        showToast(
+          "حدث خطأ أثناء الحفظ: " + (e && e.message ? e.message : e),
+          5000,
+          "red",
+        );
+    } catch (ee) {}
   }
 }
 
@@ -1859,9 +1872,9 @@ function renderProductsList(searchQuery = "") {
     return (
       product.isVisible === 1 &&
       (product.name.toLowerCase().includes(searchLower) ||
-      (product.shortDisc &&
-        product.shortDisc.toLowerCase().includes(searchLower)) ||
-      product.price.toString().includes(searchLower))
+        (product.shortDisc &&
+          product.shortDisc.toLowerCase().includes(searchLower)) ||
+        product.price.toString().includes(searchLower))
     );
   });
 
@@ -2164,7 +2177,10 @@ function confirmAddProduct() {
 
   const product = finalBaseProducts.find((p) => p.name === productName);
   if (!product) {
-    alert("⚠️ المنتج غير موجود");
+    try {
+      if (typeof showToast === "function")
+        showToast("⚠️ المنتج غير موجود", 3000, "orange");
+    } catch (e) {}
     return;
   }
 
@@ -3122,9 +3138,14 @@ function onPasteCode() {
     if (delBtn) delBtn.classList.add("hidden");
 
     // 7️⃣ رسالة نجاح
-    alert(
-      '📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.',
-    );
+    try {
+      if (typeof showToast === "function")
+        showToast(
+          '📝 تم تحميل بيانات الفاتورة. يرجى مراجعتها والضغط على "حفظ" لحفظ الفاتورة.',
+          5000,
+          "green",
+        );
+    } catch (e) {}
 
     // 8️⃣ مسح حقل الكود وإخفاء المودال إذا الدالة موجودة
     codeInput.value = "";
@@ -3133,7 +3154,14 @@ function onPasteCode() {
     }
   } catch (e) {
     console.error(e);
-    alert("❌ فشل فك الكود — تأكد من أن الكود صحيح\n" + (e.message || e));
+    try {
+      if (typeof showToast === "function")
+        showToast(
+          "❌ فشل فك الكود — تأكد من أن الكود صحيح\n" + (e.message || e),
+          6000,
+          "red",
+        );
+    } catch (ee) {}
   }
 }
 
@@ -3244,12 +3272,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderInvoices(targetStoreId);
 
     // 💡 إظهار رسالة تفيد بأن القائمة مفلترة
-    alert(`يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`);
-    showToast(
-      `يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`,
-      5000,
-      "green",
-    );
+    try {
+      if (typeof showToast === "function")
+        showToast(
+          `يتم الآن عرض الفواتير المرتبطة بالمتجر ID: ${targetStoreId}`,
+          5000,
+          "green",
+        );
+    } catch (e) {}
   }
 
   // إذا لم يكن هناك معامل في الرابط، نعرض الفواتير بشكل طبيعي
