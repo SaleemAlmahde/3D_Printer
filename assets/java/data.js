@@ -426,9 +426,9 @@ const defaultStores = [
 ];
 
 const ads = [
-  { id: 0, image: "assets/imgs/try.jpg", link: "" },
-  { id: 1, image: "assets/imgs/Chicken_Alfredo.jpg", link: "" },
-  { id: 2, image: "assets/imgs/Spaghetti_Bolognese.jpg", link: "" },
+  { id: 0, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
+  { id: 1, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
+  { id: 2, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
 ];
 
 const coupons = [
