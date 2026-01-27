@@ -27,7 +27,7 @@
 //     storePrice: 10,
 //     images: ["assets/imgs/try.jpg"],
 //   }
-
+// ------------- CUSTOM ORDER DATA -------------
 const finalBaseProducts = [
   {
     id: "CUSTOM_ORDER", // معرّف فريد وغير رقمي لتجنب التعارض
@@ -40,10 +40,11 @@ const finalBaseProducts = [
     isCustomOrder: true, // 🚩 العلامة الرئيسية لتمييزه
     isVisible: 1, // 1 = مرئي ، 0 = مخفي
   },
+// ----------------------------------------------
 
-//  ------------- KEYCHAIN DATA -------------
 
-// ------------- CARS DATA -------------
+// -------------- KEYCHAIN DATA -------------
+// ---------------- CARS DATA ---------------
     {
     "id": 1,
     "name": "ميدالية سيارة KIA (الشعار القديم)",
@@ -122,6 +123,7 @@ const finalBaseProducts = [
     "images": ["assets/imgs/cars/c6.webp"],
     "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
+   
 // --------------- JOPS DATA ---------------
 
    {
@@ -229,9 +231,128 @@ const finalBaseProducts = [
     "images": ["assets/imgs/Jops/InteriorD.webp"],
     "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   }, 
+  //  ------------- OTHERS DATA -------------
+      {
+    "id": 300,
+    "name": "ميدالية رائد فضاء",
+    "shortDisc": "ميدالية رائد فضاء مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" }
+    ],
+    "price": 180,
+    "storePrice": 140,
+    "images": ["assets/imgs/Others/Astronaut.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+        {
+    "id": 301,
+    "name": "ميدالية افكادو ",
+    "shortDisc": "ميدالية شكل افكادو مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" }
+    ],
+    "price": 180,
+    "storePrice": 140,
+    "images": ["assets/imgs/Others/Avocado.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+{
+    "id": 302,
+    "name": "ميدالية برشالونة",
+    "shortDisc": "ميدالية شعار نادي برشالونة مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "ازرق", "code": "#004D98" }
+    ],
+    "price": 160,
+    "storePrice": 120,
+    "images": ["assets/imgs/Others/Barcelona.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+   {
+    "id": 303,
+    "name": "ميدالية كوب قهوة",
+    "shortDisc": "كوب قهوة مطبوعة بإستخدام الطباعة ثلاثية الابعاد ميدالية .",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "ابيض", "code": "#FFFFFF" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Others/Coffee.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+   {
+    "id": 304,
+    "name": "ميدالية دامبلز",
+    "shortDisc": " ميدالية اثقال مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "اسود", "code": "#000000" }
+    ],
+    "price": 160,
+    "storePrice": 120,
+    "images": ["assets/imgs/Others/Dumbbells.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+   {
+    "id": 305,
+    "name": "ميدالية حووومص",
+    "shortDisc": "ميدالية كلمة حووومص مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "احمر", "code": "#FF0000" }
+    ],
+    "price": 160,
+    "storePrice": 120,
+    "images": ["assets/imgs/Others/Hoooms.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+   {
+    "id": 306,
+    "name": "ميدالية انا بنت قوية",
+    "shortDisc": "ميدالية عبارة 'أنا بنت قوية' مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "زهري", "code": "#FF69B4" }
+    ],
+    "price": 160,
+    "storePrice": 120,
+    "images": ["assets/imgs/Others/i'm_Stroning_Girl.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+   {
+    "id": 307,
+    "name": "ميدالية علم سوريا",
+    "shortDisc": "ميدالية علم سوريا من الجهتين مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "احمر", "code": "#CE1126" }
+    ],
+    "price": 160,
+    "storePrice": 120,
+    "images": ["assets/imgs/Others/SyriaFlag.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+   {
+    "id": 13,
+    "name": "ميدالية الهوية البصرية",
+    "shortDisc": "ميدالية الهوية البصرية السورية من الجهتين مطبوعة بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["أخرى"],
+    "colors": [
+      { "name": "اسود", "code": "#000000" }
+    ],
+    "price": 160,
+    "storePrice": 120,
+    "images": ["assets/imgs/Others/SyriaID.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+  
 //  ------------- Stickers DATA -------------
    {
-    "id":300,
+    "id":400,
     "name": "ستيكر الهوية البصرية",
     "shortDisc": "ستيكر الهوية البصرية لكفر الجوال مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["ستيكرات"],
@@ -241,10 +362,10 @@ const finalBaseProducts = [
     "price": 70,
     "storePrice": 50,
     "images": ["assets/imgs/Stickers/syria_idS.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 0 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
      {
-    "id":301,
+    "id":401,
     "name": "ستيكر الهوية البصرية",
     "shortDisc": "ستيكر الهوية البصرية لكفر الجوال مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["ستيكرات"],
@@ -254,11 +375,11 @@ const finalBaseProducts = [
     "price": 70,
     "storePrice": 50,
     "images": ["assets/imgs/Stickers/syria_idS2.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 0 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
 
-// ------------------------------------------
 ];
+// ------------------------------------------
 
 // STORSE DATA ----------------------------
 const defaultStores = [
