@@ -654,57 +654,21 @@ function sendTelegramOrder() {
   const sendStep = (order) => {
     btn.textContent = `جاري إرسال الرسالة ${order.step}...`;
 
-    // 🛑 تحسين: تقسيم الرسائل الطويلة إلى أجزاء صغيرة إذا لزم الأمر
-    const message = order.message;
-    const MAX_LENGTH = 4000; // Telegram API limit
-
-    if (message.length > MAX_LENGTH) {
-      // تقسيم الرسالة إلى أجزاء
-      const parts = [];
-      for (let i = 0; i < message.length; i += MAX_LENGTH) {
-        parts.push(message.substring(i, i + MAX_LENGTH));
-      }
-
-      // إرسال كل جزء بشكل منفصل
-      let chain = Promise.resolve();
-      parts.forEach((part) => {
-        chain = chain.then(() =>
-          fetch(`${VERCEL_BACKEND_URL}/sendOrder`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json; charset=utf-8" },
-            body: JSON.stringify({
-              chatId: order.chatId,
-              message: part,
-            }),
-          })
-            .then((res) => {
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
-              return res.json();
-            })
-            .then((data) => {
-              if (!data.success) throw new Error(data.error || "فشل الإرسال");
-            }),
-        );
-      });
-      return chain;
-    } else {
-      // الرسالة قصيرة: إرسالها مباشرة
-      return fetch(`${VERCEL_BACKEND_URL}/sendOrder`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({
-          chatId: order.chatId,
-          message: message,
-        }),
+    return fetch(`${VERCEL_BACKEND_URL}/sendOrder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatId: order.chatId,
+        message: order.message,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
       })
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
-        })
-        .then((data) => {
-          if (!data.success) throw new Error(data.error || "فشل الإرسال");
-        });
-    }
+      .then((data) => {
+        if (!data.success) throw new Error(data.error || "فشل الإرسال");
+      });
   };
 
   // إرسال الرسائل بالتتابع
