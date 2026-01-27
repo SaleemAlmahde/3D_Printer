@@ -27,6 +27,7 @@
 //     storePrice: 10,
 //     images: ["assets/imgs/try.jpg"],
 //   }
+
 // ------------- CUSTOM ORDER DATA -------------
 const finalBaseProducts = [
   {
@@ -42,9 +43,13 @@ const finalBaseProducts = [
   },
 // ----------------------------------------------
 
+//=============================================
+//==------------- KEYCHAIN DATA -------------==
+//=============================================
 
-// -------------- KEYCHAIN DATA -------------
+//-------------------------------------------
 // ---------------- CARS DATA ---------------
+//-------------------------------------------
     {
     "id": 1,
     "name": "ميدالية سيارة KIA (الشعار القديم)",
@@ -129,9 +134,9 @@ const finalBaseProducts = [
     "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
     "showColors": 1
   },
-   
-// --------------- JOPS DATA ---------------
-
+//-------------------------------------------
+//---------------- JOPS DATA ----------------
+//-------------------------------------------
    {
     "id": 200,
     "name": "ميدالية مهندس",
@@ -244,7 +249,9 @@ const finalBaseProducts = [
     "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
     "showColors": 1
   }, 
-  //  ------------- OTHERS DATA -------------
+//-------------------------------------------
+//  -------------- OTHERS DATA --------------
+//-------------------------------------------
       {
     "id": 300,
     "name": "ميدالية رائد فضاء",
@@ -371,8 +378,9 @@ const finalBaseProducts = [
     "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
     "showColors": 1
   },
-  
+//-------------------------------------------
 //  ------------- Stickers DATA -------------
+//-------------------------------------------
    {
     "id":400,
     "name": "ستيكر الهوية البصرية",
@@ -399,83 +407,65 @@ const finalBaseProducts = [
     "images": ["assets/imgs/Stickers/syria_idS2.webp"],
     "isVisible": 0 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
-
 ];
-// ------------------------------------------
-
-// STORSE DATA ----------------------------
+//------------ STORES DATA -------------
 const defaultStores = [
   {
     id: 101,
-    name: "متجر الفا للمطبوعات",
-    phone: "ؤسؤسؤسؤ",
-    location: "دمشق",
+    name: "For Evar Store",
+    phone: "0959887780",
+    location: "حمص - الدبلان - شارع المانطيات",
     balance: 0,
-    logo: "assets/imgs/Untitled-11.png",
+    logo: "assets/imgs/ForEvarStore.jpg",
   },
   {
     id: 102,
-    name: "نقطة بيع المهندس",
-    phone: "0998765432",
-    location: "حلب",
+    name: "Tafasel Homs",
+    phone: "0982111220",
+    location: "حمص - الحضارة - شارع العشاق دخلة كافيه حبق 100 متر على اليمين",
     balance: 0,
-    logo: "assets/imgs/Untitled-11.png",
+    logo: "assets/imgs/TafaselHoms.jpg",
   },
   {
     id: 103,
-    name: "مكتبة الإبداع الرقمي",
-    phone: "0995551112",
-    location: "حمص",
+    name: "BonBon Homs",
+    phone: "0940956026",
+    location:"حمص - الحمرا - مقابل دوار البطات",
     balance: 0,
-    logo: "assets/imgs/Untitled-33.png",
+    logo: "assets/imgs/BonBonHoms.jpg",
   },
   {
     id: 104,
-    name: "مكتبة jg الرقمي",
-    phone: "0995551112",
-    location: "حمص",
+    name: "Nafnafi Shop",
+    phone: "0945300048",
+    location: "حمص - الانشاءات - مقابل سنتر الخواجة داخل سنتر ياسمينة",
     balance: 0,
-    logo: "assets/imgs/Untitled-22.png",
+    logo: "assets/imgs/NafnafiShop.jpg",
   },
-  {
+    {
     id: 105,
-    name: "نقطة بيع المهندس",
-    phone: "0998765432",
-    location: "حلب",
+    name: "Flamingo Homs",
+    phone: "0932706721",
+    location: "حمص - الغوطة - شارع الغوطة",
     balance: 0,
-    logo: "assets/imgs/Untitled-11.png",
+    logo: "assets/imgs/FlamingoHoms.jpg",
   },
 ];
-
+//------------ ADS DATA -------------
 const ads = [
   { id: 0, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
   { id: 1, image: "assets/imgs/cars/c5.webp", link: "" },
   { id: 2, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
 ];
-
+//------------ COUPONS DATA -------------
 const coupons = [
   {
     id: 0,
-    code: "ewkjfjewklfjew",
+    code: "Welcome3DP", // كود القسيمة
     discountType: "%", // - a constant value or %
-    discountValue: 5,
-    useLimit: 5, // عدد مرات الاستخدام المتاحة
-    endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
+    discountValue: 35,
+    useLimit: 2, // عدد مرات الاستخدام المتاحة
+    endDate: "2026-03-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
   },
-  {
-    id: 1,
-    code: "ewkjfjewسسيklfjew",
-    discountType: "%", // - a constant value or %
-    discountValue: 5,
-    useLimit: 5, // عدد مرات الاستخدام المتاحة
-    endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
-  },
-  {
-    id: 2,
-    code: "ewkjfؤؤjewسسيklfjew",
-    discountType: "%", // - a constant value or %
-    discountValue: 5,
-    useLimit: 5, // عدد مرات الاستخدام المتاحة
-    endDate: "2026-07-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
-  },
+
 ];
