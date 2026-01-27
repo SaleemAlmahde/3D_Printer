@@ -1853,14 +1853,15 @@ function renderProductsList(searchQuery = "") {
 
   const useStorePrices = document.getElementById("useStorePrices")?.checked;
 
-  // فلترة المنتجات حسب البحث
+  // فلترة المنتجات حسب البحث والخاصية isVisible
   const filteredProducts = finalBaseProducts.filter((product) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      product.name.toLowerCase().includes(searchLower) ||
+      product.isVisible === 1 &&
+      (product.name.toLowerCase().includes(searchLower) ||
       (product.shortDisc &&
         product.shortDisc.toLowerCase().includes(searchLower)) ||
-      product.price.toString().includes(searchLower)
+      product.price.toString().includes(searchLower))
     );
   });
 

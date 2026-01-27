@@ -9,8 +9,8 @@ let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
 function showCat() {
   finalBaseProducts.forEach((product) => {
-    // (تعديل جديد) تجاهل المنتج المخصص عند بناء قوائم التصنيفات
-    if (product.isCustomOrder) return;
+    // (تعديل جديد) تجاهل المنتج المخصص والمنتجات المخفية عند بناء قوائم التصنيفات
+    if (product.isCustomOrder || product.isVisible === 0) return;
 
     const firstCat = product.categories[0];
     if (!importantCats.includes(firstCat) && firstCat != undefined) {
@@ -67,18 +67,18 @@ function filterProducts(category, fromSelect = false) {
 
   if (category === "all" || category === "Other") {
     filteredProducts = finalBaseProducts.filter(
-      (product) => !product.isCustomOrder
+      (product) => !product.isCustomOrder && product.isVisible === 1
     );
   } else {
     filteredProducts = finalBaseProducts.filter(
       (product) =>
-        product.categories.includes(category) && !product.isCustomOrder // نستثني المنتج المخصص من الفلترة حسب التصنيف
+        product.categories.includes(category) && !product.isCustomOrder && product.isVisible === 1 // نستثني المنتج المخصص من الفلترة حسب التصنيف وتصفية المخفية
     );
   }
 
   // 2. (تعديل جديد) إعادة دمج المنتج المخصص في البداية
   // سيتم إضافته دائماً إذا كان موجوداً، بغض النظر عن نتيجة الفلترة
-  if (customProduct) {
+  if (customProduct && customProduct.isVisible === 1) {
     filteredProducts.unshift(customProduct);
   }
 
@@ -645,9 +645,9 @@ function searchProducts() {
   let category = document.getElementById("otherCat").value;
   if (category === "Other") category = "all";
 
-  // 2. (تعديل) بناء القائمة الأساسية: استبعاد المنتج المخصص من البداية
-  // فلترة المنتجات العادية فقط
-  let baseList = finalBaseProducts.filter((p) => !p.isCustomOrder);
+  // 2. (تعديل) بناء القائمة الأساسية: استبعاد المنتج المخصص والمنتجات المخفية من البداية
+  // فلترة المنتجات العادية فقط والمرئية
+  let baseList = finalBaseProducts.filter((p) => !p.isCustomOrder && p.isVisible === 1);
 
   // تطبيق فلترة التصنيف على القائمة الأساسية (بدون المنتج المخصص)
   if (category !== "all") {
@@ -666,8 +666,8 @@ function searchProducts() {
     filteredProducts = baseList;
   }
 
-  // 4. (تعديل جديد) إضافة المنتج المخصص إلى مقدمة النتائج
-  if (customProduct) {
+  // 4. (تعديل جديد) إضافة المنتج المخصص إلى مقدمة النتائج إذا كان مرئياً
+  if (customProduct && customProduct.isVisible === 1) {
     filteredProducts.unshift(customProduct);
   }
 
@@ -685,7 +685,7 @@ function searchProducts() {
 
 // بدء التشغيل
 window.onload = function () {
-  filteredProducts = finalBaseProducts;
+  filteredProducts = finalBaseProducts.filter((p) => p.isVisible === 1);
   showCat();
   loadMoreProducts();
 };

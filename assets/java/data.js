@@ -38,6 +38,7 @@ const finalBaseProducts = [
     price: 0, // السعر يبدأ من صفر حتى يتم تحديد المواصفات
     images: ["assets/imgs/try.jpg"], // صورة توضيحية لطلب مخصص
     isCustomOrder: true, // 🚩 العلامة الرئيسية لتمييزه
+    isVisible: 1, // 1 = مرئي ، 0 = مخفي
   },
     {
     "id": 1,
@@ -49,7 +50,8 @@ const finalBaseProducts = [
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c1.webp"]
+    "images": ["assets/imgs/cars/c1.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
     {
     "id": 2,
@@ -61,7 +63,8 @@ const finalBaseProducts = [
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c2.webp"]
+    "images": ["assets/imgs/cars/c2.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
     {
     "id": 3,
@@ -73,7 +76,8 @@ const finalBaseProducts = [
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c3.webp"]
+    "images": ["assets/imgs/cars/c3.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
       {
     "id": 4,
@@ -85,7 +89,8 @@ const finalBaseProducts = [
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c4.webp"]
+    "images": ["assets/imgs/cars/c4.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
   {
     "id": 5,
@@ -97,7 +102,8 @@ const finalBaseProducts = [
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c5.webp"]
+    "images": ["assets/imgs/cars/c5.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
    {
     "id": 6,
@@ -109,7 +115,8 @@ const finalBaseProducts = [
     ],
     "price": 180,
     "storePrice": 120,
-    "images": ["assets/imgs/cars/c6.webp"]
+    "images": ["assets/imgs/cars/c6.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
 
 
@@ -125,7 +132,8 @@ const finalBaseProducts = [
     ],
     "price": 70,
     "storePrice": 50,
-    "images": ["assets/imgs/Stickers/syria_idS.webp"]
+    "images": ["assets/imgs/Stickers/syria_idS.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
      {
     "id":52,
@@ -137,7 +145,8 @@ const finalBaseProducts = [
     ],
     "price": 70,
     "storePrice": 50,
-    "images": ["assets/imgs/Stickers/syria_idS2.webp"]
+    "images": ["assets/imgs/Stickers/syria_idS2.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
 
 // ------------------------------------------
