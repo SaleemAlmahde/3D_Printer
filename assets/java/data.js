@@ -56,7 +56,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 120,
     "images": ["assets/imgs/cars/c1.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 0
   },
     {
     "id": 2,
@@ -69,7 +70,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 120,
     "images": ["assets/imgs/cars/c2.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
     {
     "id": 3,
@@ -82,7 +84,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 120,
     "images": ["assets/imgs/cars/c3.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
       {
     "id": 4,
@@ -95,7 +98,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 120,
     "images": ["assets/imgs/cars/c4.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
   {
     "id": 5,
@@ -108,7 +112,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 120,
     "images": ["assets/imgs/cars/c5.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 6,
@@ -121,7 +126,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 120,
     "images": ["assets/imgs/cars/c6.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    
 // --------------- JOPS DATA ---------------
@@ -139,7 +145,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/EngH.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
      {
     "id": 201,
@@ -154,7 +161,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/EngM.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },   
   {
     "id": 202,
@@ -169,7 +177,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/BusinessA.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
     {
     "id": 203,
@@ -184,7 +193,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/Dentist.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
       {
     "id": 204,
@@ -199,7 +209,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/Doctor.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
        {
     "id": 205,
@@ -214,7 +225,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/GraphicD.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   }, 
          {
     "id": 206,
@@ -229,7 +241,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Jops/InteriorD.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   }, 
   //  ------------- OTHERS DATA -------------
       {
@@ -243,7 +256,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 140,
     "images": ["assets/imgs/Others/Astronaut.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
         {
     "id": 301,
@@ -256,7 +270,8 @@ const finalBaseProducts = [
     "price": 180,
     "storePrice": 140,
     "images": ["assets/imgs/Others/Avocado.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
 {
     "id": 302,
@@ -269,7 +284,8 @@ const finalBaseProducts = [
     "price": 160,
     "storePrice": 120,
     "images": ["assets/imgs/Others/Barcelona.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 303,
@@ -282,7 +298,8 @@ const finalBaseProducts = [
     "price": 220,
     "storePrice": 160,
     "images": ["assets/imgs/Others/Coffee.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 304,
@@ -295,7 +312,8 @@ const finalBaseProducts = [
     "price": 160,
     "storePrice": 120,
     "images": ["assets/imgs/Others/Dumbbells.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 305,
@@ -308,7 +326,8 @@ const finalBaseProducts = [
     "price": 160,
     "storePrice": 120,
     "images": ["assets/imgs/Others/Hoooms.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 306,
@@ -321,7 +340,8 @@ const finalBaseProducts = [
     "price": 160,
     "storePrice": 120,
     "images": ["assets/imgs/Others/i'm_Stroning_Girl.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 307,
@@ -334,7 +354,8 @@ const finalBaseProducts = [
     "price": 160,
     "storePrice": 120,
     "images": ["assets/imgs/Others/SyriaFlag.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
    {
     "id": 13,
@@ -347,7 +368,8 @@ const finalBaseProducts = [
     "price": 160,
     "storePrice": 120,
     "images": ["assets/imgs/Others/SyriaID.webp"],
-    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "isVisible": 1, // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+    "showColors": 1
   },
   
 //  ------------- Stickers DATA -------------
@@ -427,7 +449,7 @@ const defaultStores = [
 
 const ads = [
   { id: 0, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
-  { id: 1, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
+  { id: 1, image: "assets/imgs/cars/c5.webp", link: "" },
   { id: 2, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
 ];
 

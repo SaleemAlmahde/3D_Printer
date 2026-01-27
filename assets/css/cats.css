@@ -113,7 +113,29 @@ select{
 }
 
 @media (max-width: 480px) {
+  /* اجعل عرض حاوية التصنيفات ثابتًا مثل عرض كارد المنتج على الجوال
+     واجعلها قابلة للتمرير أفقيًا مع منع التفاف الأزرار داخله */
   .cats-container {
-    width: 100%;
+    width: 280px; /* مطابق لحد أقصى عرض كارد المنتج في products.css */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    gap: 12px;
+    padding-right: 65px;
+    padding-left: 0px !important;
+  }
+
+  /* اجعل مجموعة الأزرار تبقى في سطر واحد ولا تلتف */
+  #importantCats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  /* الأزرار تصبح عناصر صفية تمنع التفاف النص داخلها */
+  .cats button {
+    display: inline-block;
+    white-space: nowrap;
   }
 }

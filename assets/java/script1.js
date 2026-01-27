@@ -33,8 +33,8 @@ function showCat() {
   importantCats.forEach((cat) => {
     importantHTML += `
             <button onclick="filterProducts('${cat}')" id="${cat}">${
-      cat === "all" ? "الكل" : cat
-    }</button>
+              cat === "all" ? "الكل" : cat
+            }</button>
             <div class="cats-divider" role="separator" aria-orientation="vertical" ></div>
         `;
   });
@@ -59,7 +59,7 @@ function showCat() {
 function filterProducts(category, fromSelect = false) {
   // 1. (تعديل جديد) استخراج المنتج المخصص
   const customProduct = finalBaseProducts.find(
-    (product) => product.isCustomOrder
+    (product) => product.isCustomOrder,
   );
 
   // إعادة العد عند تغيير التصنيف
@@ -67,12 +67,14 @@ function filterProducts(category, fromSelect = false) {
 
   if (category === "all" || category === "Other") {
     filteredProducts = finalBaseProducts.filter(
-      (product) => !product.isCustomOrder && product.isVisible === 1
+      (product) => !product.isCustomOrder && product.isVisible === 1,
     );
   } else {
     filteredProducts = finalBaseProducts.filter(
       (product) =>
-        product.categories.includes(category) && !product.isCustomOrder && product.isVisible === 1 // نستثني المنتج المخصص من الفلترة حسب التصنيف وتصفية المخفية
+        product.categories.includes(category) &&
+        !product.isCustomOrder &&
+        product.isVisible === 1, // نستثني المنتج المخصص من الفلترة حسب التصنيف وتصفية المخفية
     );
   }
 
@@ -153,7 +155,7 @@ function loadMoreProducts() {
   // جلب المنتجات التالية
   const nextProducts = filteredProducts.slice(
     loadedCount,
-    loadedCount + itemsPerLoad
+    loadedCount + itemsPerLoad,
   );
 
   // لو لا توجد منتجات على الإطلاق
@@ -203,7 +205,7 @@ function loadMoreProducts() {
                     <div class="slide"><img src="${imgSrc}" alt="Image ${
                       index + 1
                     }" loading="lazy"></div>
-                `
+                `,
                   )
                   .join("")}
             </div>
@@ -227,7 +229,7 @@ function loadMoreProducts() {
                         : ""
                     }>
                 </span>
-            `
+            `,
               )
               .join("")}
         </div>
@@ -337,23 +339,27 @@ function showModal(id) {
             </div>
         `;
 
-        isSticker = true;
+    isSticker = true;
   }
   // -----------------------------------------------------
 
-  // عرض الألوان كدوائر
+  // عرض الألوان كدوائر — احترم قيمة `showColors`
   let colorsHTML = "";
-  if (product.colors && product.colors.length > 0) {
-    colorsHTML = `<div class="color-container" id="colorContainer" style="display:${isSticker ? "none" : "flex"}; gap:10px; align-items:center; flex-wrap: wrap;">
+  if (product.showColors !== 0 && product.colors && product.colors.length > 0) {
+    const displayStyle = isSticker ? "none" : "flex";
+    colorsHTML = `<div class="color-container" id="colorContainer" style="display:${displayStyle}; gap:10px; align-items:center; flex-wrap: wrap;">
                 ${product.colors
                   .filter((c) => c.code)
                   .map(
                     (c) => `
                     <div class="color-circle" title="${c.name}" onclick="selectColor(this, '${id}', '${c.name}', '${c.code}', )" style="width:28px; height:28px; border-radius:50%; background:${c.code}; cursor:pointer; box-shadow:0 2px 6px #0001;"></div>
-                `
+                `,
                   )
                   .join("")}
             </div>`;
+  } else {
+    // إذا كانت الألوان مخفية (showColors === 0) أو لا توجد ألوان، نُنشئ حاوية مخفية تحمل اللون الافتراضي (أسود)
+    colorsHTML = `<div id="colorContainer" style="display:none;" data-selected-color='{"name":"اسود","code":"#000000"}'></div>`;
   }
 
   modelContent.innerHTML = `
@@ -404,7 +410,7 @@ function showModal(id) {
     .getElementById("customizationCheckbox")
     .addEventListener("change", function () {
       const customizationSection = document.getElementById(
-        "customizationSection"
+        "customizationSection",
       );
       if (this.checked) {
         customizationSection.style.display = "block";
@@ -498,25 +504,27 @@ function addToCart(productId) {
 
   let selectedColorData;
 
-  if(product.categories &&
+  // 1) إذا كانت الألوان مخفية صراحة عبر الخاصية showColors -> استخدم الأسود افتراضياً
+  if (product.showColors === 0) {
+    selectedColorData = JSON.stringify({ name: "اسود", code: "#000000" });
+  }
+  // 2) إن كانت الفئة هي ستيكرات -> افتراضياً الأسود (سابق السلوك)
+  else if (
+    product.categories &&
     product.categories.length > 0 &&
-    product.categories[0] == "ستيكرات"){
-
-  //     colorContainer.dataset.selectedColor = JSON.stringify({
-  //   name: colorName,
-  //   code: colorCode,
-  // });
-
-       selectedColorData = JSON.stringify({"name":"اسود","code":"#000000"});
-      console.log(selectedColorData);
-    } else {
-       selectedColorData = colorContainer.dataset.selectedColor;
-      console.log(selectedColorData);
-    }
-
-  if (!selectedColorData) {
-    showToast("⚠️ يرجى اختيار لون للمنتج", 3000, "#d32f2f");
-    return;
+    product.categories[0] == "ستيكرات"
+  ) {
+    selectedColorData = JSON.stringify({ name: "اسود", code: "#000000" });
+  }
+  // 3) إن لم تكن الحاوية موجودة أو لم يتم اختيار لون -> افتراضياً الأسود
+  else if (
+    !colorContainer ||
+    !colorContainer.dataset ||
+    !colorContainer.dataset.selectedColor
+  ) {
+    selectedColorData = JSON.stringify({ name: "اسود", code: "#000000" });
+  } else {
+    selectedColorData = colorContainer.dataset.selectedColor;
   }
 
   const quantity = parseInt(qInput.value) || 1;
@@ -524,7 +532,7 @@ function addToCart(productId) {
 
   // التحقق من حالة الـ checkbox
   const customizationCheckbox = document.getElementById(
-    "customizationCheckbox"
+    "customizationCheckbox",
   );
   const isCustomizationEnabled = customizationCheckbox?.checked || false;
 
@@ -541,20 +549,48 @@ function addToCart(productId) {
     }
   }
 
-  // إضافة المنتج مع التخصيص (أو بدونه إذا لم يتم تفعيل الـ checkbox)
-  cartItems.push({
-    id: Date.now(),
-    productId: product.id,
-    quantity: quantity,
-    selectedColor: selectedColor,
-    customization: customizationDesc, // سيكون فارغاً إذا لم يتم تفعيل التخصيص
+  // إضافة المنتج مع التخصيص (أو دمجه مع عنصر موجود إذا كان مطابقاً)
+  // معايير المطابقة: نفس productId + نفس selectedColor (الاسم والرمز) + نفس نص التخصيص
+  const matchIndex = cartItems.findIndex((it) => {
+    // تجنب مطابقة عناصر الطلب المخصص (isCustom === true)
+    if (it.isCustom) return false;
+    if (it.productId != product.id) return false;
+    const itColor = it.selectedColor || {};
+    const selColor = selectedColor || {};
+    if ((itColor.name || "") !== (selColor.name || "")) return false;
+    if ((itColor.code || "") !== (selColor.code || "")) return false;
+    const itCust = it.customization || "";
+    const selCust = customizationDesc || "";
+    return itCust === selCust;
   });
+
+  if (matchIndex !== -1) {
+    // زيادة الكمية على العنصر الموجود
+    cartItems[matchIndex].quantity =
+      (parseInt(cartItems[matchIndex].quantity) || 0) + quantity;
+  } else {
+    // إضافة عنصر جديد
+    cartItems.push({
+      id: Date.now(),
+      productId: product.id,
+      quantity: quantity,
+      selectedColor: selectedColor,
+      customization: customizationDesc, // سيكون فارغاً إذا لم يتم تفعيل التخصيص
+      isCustom: false,
+    });
+  }
 
   // حفظ في localStorage
   localStorage.setItem("cartItems", JSON.stringify(cartItems));
 
   // تنظيف الحقول
-  delete colorContainer.dataset.selectedColor;
+  if (
+    colorContainer &&
+    colorContainer.dataset &&
+    colorContainer.dataset.selectedColor
+  ) {
+    delete colorContainer.dataset.selectedColor;
+  }
   qInput.value = "";
   const customEl = document.getElementById("productCustomDesc");
   if (customEl) customEl.value = "";
@@ -647,7 +683,9 @@ function searchProducts() {
 
   // 2. (تعديل) بناء القائمة الأساسية: استبعاد المنتج المخصص والمنتجات المخفية من البداية
   // فلترة المنتجات العادية فقط والمرئية
-  let baseList = finalBaseProducts.filter((p) => !p.isCustomOrder && p.isVisible === 1);
+  let baseList = finalBaseProducts.filter(
+    (p) => !p.isCustomOrder && p.isVisible === 1,
+  );
 
   // تطبيق فلترة التصنيف على القائمة الأساسية (بدون المنتج المخصص)
   if (category !== "all") {
@@ -660,7 +698,7 @@ function searchProducts() {
       (p) =>
         p.name.toLowerCase().includes(searchQuery) ||
         (p.shortDisc && p.shortDisc.toLowerCase().includes(searchQuery)) ||
-        p.categories.some((cat) => cat.toLowerCase().includes(searchQuery))
+        p.categories.some((cat) => cat.toLowerCase().includes(searchQuery)),
     );
   } else {
     filteredProducts = baseList;

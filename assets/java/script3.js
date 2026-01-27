@@ -133,6 +133,12 @@ function displayCartItems() {
     }
     // ----------------------------------------------------------------------------------
 
+    // حدد ما إذا كان العنصر مخصصًا (إما طلب مخصص قديم أو تخصيص مستخدم على منتج عادي)
+    const isCustomized = !!(
+      item.isCustom ||
+      (item.customization && item.customization.toString().trim() !== "")
+    );
+
     // 💡 المنطق الجديد: التحقق من اللون الأبيض
     const itemColorCode = item.selectedColor.code.toLowerCase().trim();
     let colorStyle = `color:${itemColorCode}; font-weight:bold;`;
@@ -156,7 +162,7 @@ function displayCartItems() {
 
     // determine if this item should show price as 0 and display the "price later" note
     const hasNote = item.note && item.note.toString().trim() !== "";
-    const priceIsZero = hasNote || item.isCustom;
+    const priceIsZero = hasNote || isCustomized;
     const displayPrice = priceIsZero ? 0 : product.price;
     const priceNoteHTML = priceIsZero
       ? `<p style="color:#d35400; font-weight:bold; margin-top:6px;">✳️ السعر يحدد لاحقاً</p>`
@@ -169,11 +175,11 @@ function displayCartItems() {
         <button class="edit-cart-btn" onclick="editCartItem(${item.id})">تعديل</button>
         `;
 
-    if (item.isCustom) {
+    if (isCustomized) {
       detailsForCard = `
           <p>اللون : <span style="color:#dc143c; font-weight:bold;">مخصص</span></p>
           <p>الكمية : ${item.quantity}</p>
-          <p>السعر : <span style="color:#dc143c; font-weight:bold;">يحدد لاحقا</span></p>
+          <p>السعر : <span style="color:#dc143c; font-weight:bold;">يحدد لاحقاً</span></p>
       `;
     } else {
       // تحقق إذا كان المنتج له تخصيص (note)
@@ -183,14 +189,17 @@ function displayCartItems() {
             <p>الكمية : ${item.quantity}</p>
             <p>السعر : <span style="color:#dc143c; font-weight:bold;">يحدد لاحقا</span></p>
         `;
-      } else if(product.categories &&
-    product.categories.length > 0 &&
-    product.categories[0] == "ستيكرات"){
-      detailsForCard = `
+      } else if (
+        (product.categories &&
+          product.categories.length > 0 &&
+          product.categories[0] == "ستيكرات") ||
+        product.showColors == 0
+      ) {
+        detailsForCard = `
             <p>الكمية : ${item.quantity}</p>
             <p>السعر : ${displayPrice} ل.س</p>
         `;
-    } else {
+      } else {
         detailsForCard = `
             <p>اللون : <span style="${colorStyle}">${item.selectedColor.name}</span></p>
             <p>الكمية : ${item.quantity}</p>
@@ -290,7 +299,12 @@ function openEditModal(cartItem) {
 
   // 1. إنشاء دوائر الألوان (فقط للمنتجات القياسية)
   let colorsHTML = "";
-  if (!cartItem.isCustom && product.colors && product.colors.length > 0) {
+  if (
+    !cartItem.isCustom &&
+    product.colors &&
+    product.colors.length > 0 &&
+    product.showColors == 1
+  ) {
     const productId = cartItem.productId;
 
     // نستخدم data-cart-item-id لتخزين معرف السلة هنا (مهم لـ selectColor/saveEdit)
