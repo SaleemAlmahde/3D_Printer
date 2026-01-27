@@ -764,6 +764,11 @@ function handleCheckout() {
       // العثور على المنتج الأصلي من مصفوفة finalBaseProducts
       const product = finalBaseProducts.find((p) => p.id == item.productId);
 
+      // التحقق من وجود المنتج أولاً
+      if (!product) {
+        return; // تخطي هذا العنصر إذا لم يتم العثور على المنتج
+      }
+
       if (product.categories[0] != "ستيكر") {
         totalStickerCount = 100;
       }
