@@ -631,7 +631,7 @@ function updateCartTotals() {
 // 📤 دالة إرسال الطلب لـ Telegram (مُعدَّلة)
 // ======================================================
 function sendTelegramOrder() {
-  const CHAT_ID = "1210190096"; // شات ID للبوت
+  const CHAT_ID = "1769555175"; // شات ID للبوت
   const VERCEL_BACKEND_URL = "https://telegram-backend-eta.vercel.app"; // رابط مشروعك على Vercel
 
   try {
