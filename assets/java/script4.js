@@ -19,7 +19,7 @@ function getStores() {
   userStores.forEach((userStore) => {
     // البحث إذا كان هذا المتجر موجوداً في الافتراضية (بنفس الـ id)
     const index = combinedStores.findIndex(
-      (store) => store.id === userStore.id
+      (store) => store.id === userStore.id,
     );
 
     if (index !== -1) {
@@ -294,7 +294,7 @@ function saveStore() {
     showToast("✅ تم حفظ المتجر بنجاح.", 3000, "green"); // No-op placeholder
   } catch (e) {
     console.error("خطأ أثناء حفظ المتجر:", e);
-    alert("❌ حدث خطأ أثناء الحفظ.");
+    showToast("❌ حدث خطأ أثناء الحفظ.", 4000, "red");
   }
 }
 
@@ -338,7 +338,7 @@ function deleteStoreLogo() {
     showToast(
       "✅ تمت إزالة الصورة محليًا. احفظ المتجر لتطبيق التغييرات.",
       3000,
-      "green"
+      "green",
     );
   } catch (err) {
     console.warn("deleteStoreLogo failed:", err && err.message);
@@ -452,13 +452,11 @@ function renderStores(searchTerm = "") {
                       store.mapUrl
                         ? `<p>
                         <a href="${
-                            store.mapUrl
-                          }" target="_blank" rel="noopener"  class="store-location-link" title="افتح في خرائط Google">
+                          store.mapUrl
+                        }" target="_blank" rel="noopener"  class="store-location-link" title="افتح في خرائط Google">
                           <i class="fa fa-map-marker"></i>
                           <strong style="text-decoration: underline;"> الموقع :
-                          ${
-                            store.location || "غير محدد"
-                          } </strong>
+                          ${store.location || "غير محدد"} </strong>
                           <i class='fa fa-external-link store-location-icon' aria-hidden='true'></i></a></p>`
                         : `<p><strong> <i class="fa fa-map-marker"></i> الموقع :</strong> ${
                             store.location || "غير محدد"
@@ -537,7 +535,7 @@ function editStore(storeId) {
     // دالة openStoreModal تتولى تعبئة الحقول ووضع storeId في dataset.editingId
     openStoreModal(storeToEdit);
   } else {
-    alert("❌ لم يتم العثور على المتجر للتعديل.");
+    showToast("❌ لم يتم العثور على المتجر للتعديل.", 3000, "orange");
   }
 }
 
@@ -602,7 +600,7 @@ function showStoreActions(storeId) {
 
     // إظهار الأوفرلاي المطلوب
     const overlay = document.querySelector(
-      `.store-actions-overlay[data-store-id="${storeId}"]`
+      `.store-actions-overlay[data-store-id="${storeId}"]`,
     );
     if (overlay) {
       overlay.classList.remove("hidden");
@@ -616,7 +614,7 @@ function showStoreActions(storeId) {
  */
 function hideStoreActions(storeId) {
   const overlay = document.querySelector(
-    `.store-actions-overlay[data-store-id="${storeId}"]`
+    `.store-actions-overlay[data-store-id="${storeId}"]`,
   );
   if (overlay) {
     // نستخدم stopPropagation في HTML لمنع النقر على الأوفرلاي من إخفائه

@@ -10,7 +10,11 @@
 
   // التحقق من وجود الفاتورة فوراً
   if (!invoiceId) {
-    alert("تنبيه: فاتورة غير صالحة أو مفقودة.");
+    // استخدم توست بدلاً من alert لعدم حجب واجهة المستخدم
+    try {
+      if (typeof showToast === "function")
+        showToast("تنبيه: فاتورة غير صالحة أو مفقودة.", 4000, "orange");
+    } catch (e) {}
     return;
   }
 
@@ -20,7 +24,14 @@
     const invoice = invoices.find((inv) => inv.id == invoiceId);
 
     if (!invoice) {
-      alert("خطأ: لم يتم العثور على بيانات الفاتورة في المتصفح.");
+      try {
+        if (typeof showToast === "function")
+          showToast(
+            "خطأ: لم يتم العثور على بيانات الفاتورة في المتصفح.",
+            4000,
+            "red",
+          );
+      } catch (e) {}
       return;
     }
 
@@ -229,7 +240,14 @@
       console.log("🚀 بدء التصدير (نسخة التوافق العالي)...");
 
       if (typeof html2pdf === "undefined") {
-        alert("المكتبة غير محملة، يرجى التحقق من الاتصال.");
+        try {
+          if (typeof showToast === "function")
+            showToast(
+              "المكتبة غير محملة، يرجى التحقق من الاتصال.",
+              4000,
+              "red",
+            );
+        } catch (e) {}
         return;
       }
 
@@ -271,9 +289,14 @@
           .then(function (bloburl) {
             const newWindow = window.open(bloburl, "_blank");
             if (!newWindow) {
-              alert(
-                "يرجى السماح بالنوافذ المنبثقة (Pop-ups) لعرض الفاتورة على الآيفون.",
-              );
+              try {
+                if (typeof showToast === "function")
+                  showToast(
+                    "يرجى السماح بالنوافذ المنبثقة (Pop-ups) لعرض الفاتورة.",
+                    6000,
+                    "orange",
+                  );
+              } catch (e) {}
             }
           });
       }

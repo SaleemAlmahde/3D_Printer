@@ -291,7 +291,7 @@ function openEditModal(cartItem) {
   const modalContent = document.getElementById("modalContent");
 
   if (!product) {
-    alert("⚠️ خطأ: المنتج الأصلي غير موجود.");
+    showToast("⚠️ خطأ: المنتج الأصلي غير موجود.", 3000, "red");
     return;
   }
 
@@ -445,7 +445,7 @@ function editCartItem(itemId) {
   const cartItem = cartItems.find((item) => item.id == itemId);
 
   if (!cartItem) {
-    alert("⚠️ خطأ: عنصر السلة غير موجود.");
+    showToast("⚠️ خطأ: عنصر السلة غير موجود.", 3000, "orange");
     return;
   }
 
@@ -462,7 +462,7 @@ function saveEdit(itemId) {
   const colorContainer = document.getElementById("colorContainer");
 
   if (cartItemIndex === -1) {
-    alert("⚠️ خطأ في العثور على عنصر السلة للتعديل.");
+    showToast("⚠️ خطأ في العثور على عنصر السلة للتعديل.", 3000, "orange");
     return;
   }
 
@@ -687,7 +687,7 @@ function sendTelegramOrder() {
       resetCheckoutButton();
     })
     .catch((error) => {
-      alert(`⚠️ خطأ في إرسال الطلب: ${error.message}`);
+      showToast(`⚠️ خطأ في إرسال الطلب: ${error.message}`, 5000, "red");
       console.error("Backend Telegram Error:", error);
       btn.disabled = false;
       btn.textContent = "تأكيد الطلب";
