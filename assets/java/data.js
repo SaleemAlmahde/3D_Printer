@@ -40,6 +40,10 @@ const finalBaseProducts = [
     isCustomOrder: true, // 🚩 العلامة الرئيسية لتمييزه
     isVisible: 1, // 1 = مرئي ، 0 = مخفي
   },
+
+//  ------------- KEYCHAIN DATA -------------
+
+// ------------- CARS DATA -------------
     {
     "id": 1,
     "name": "ميدالية سيارة KIA (الشعار القديم)",
@@ -118,12 +122,116 @@ const finalBaseProducts = [
     "images": ["assets/imgs/cars/c6.webp"],
     "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
+// --------------- JOPS DATA ---------------
 
-
-
+   {
+    "id": 200,
+    "name": "ميدالية مهندس",
+    "shortDisc": "ميدالية عبارة Engineer مع شكل طاقية مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/EngH.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+     {
+    "id": 201,
+    "name": "ميدالية مهندس",
+    "shortDisc": "ميدالية عبارة Engineer مع شكل مسنانات مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/EngM.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },   
+  {
+    "id": 202,
+    "name": "ميدالية ادارة اعمال",
+    "shortDisc": "ميدالية عبارة Business Administration مع شكل حقيبة مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/BusinessA.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+    {
+    "id": 203,
+    "name": "ميدالية طبيب اسنان",
+    "shortDisc": "ميدالية عبارة Dentist مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/Dentist.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+      {
+    "id": 204,
+    "name": "ميدالية دكتور ",
+    "shortDisc": "ميدالية عبارة Doctor مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/Doctor.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  },
+       {
+    "id": 205,
+    "name": "ميدالية جرافيك ديزاينر",
+    "shortDisc": "ميدالية عبارة Graphic Designer مع شكل يرمز مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/GraphicD.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  }, 
+         {
+    "id": 206,
+    "name": "ميدالية انتيرير ديزاينر",
+    "shortDisc": "ميدالية عبارة Interior Designer مع شكل يرمز مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
+    "categories": ["وظائف"],
+    "colors": [
+      { "name": "زهري", "code": "#ed92cd" },
+      { "name": "احمر", "code": "#ba0606" },
+      { "name": "فضي", "code": "#6c8bb9" }
+    ],
+    "price": 220,
+    "storePrice": 160,
+    "images": ["assets/imgs/Jops/InteriorD.webp"],
+    "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
+  }, 
 //  ------------- Stickers DATA -------------
    {
-    "id":51,
+    "id":300,
     "name": "ستيكر الهوية البصرية",
     "shortDisc": "ستيكر الهوية البصرية لكفر الجوال مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["ستيكرات"],
@@ -136,7 +244,7 @@ const finalBaseProducts = [
     "isVisible": 1 // اذا كانت 1 يظهر في المتجر، إذا كانت 0 لا يظهر في المتجر
   },
      {
-    "id":52,
+    "id":301,
     "name": "ستيكر الهوية البصرية",
     "shortDisc": "ستيكر الهوية البصرية لكفر الجوال مطبوع بإستخدام الطباعة ثلاثية الابعاد.",
     "categories": ["ستيكرات"],
