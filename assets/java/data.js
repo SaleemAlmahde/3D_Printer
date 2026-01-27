@@ -453,9 +453,9 @@ const defaultStores = [
 ];
 //------------ ADS DATA -------------
 const ads = [
-  { id: 0, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
-  { id: 1, image: "assets/imgs/cars/c5.webp", link: "" },
-  { id: 2, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
+  { id: 0, image: "assets/imgs/CouponB1.png", link: "" },
+ // { id: 1, image: "assets/imgs/cars/c5.webp", link: "" },
+ // { id: 2, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
 ];
 //------------ COUPONS DATA -------------
 const coupons = [
@@ -463,9 +463,9 @@ const coupons = [
     id: 0,
     code: "Welcome3DP", // كود القسيمة
     discountType: "%", // - a constant value or %
-    discountValue: 35,
-    useLimit: 2, // عدد مرات الاستخدام المتاحة
-    endDate: "2026-03-01", // تاريخ الانتهاء بصيغة YYYY-MM-DD
+    discountValue: 50,
+    useLimit: 1, // عدد مرات الاستخدام المتاحة
+    endDate: "2026-03-15", // تاريخ الانتهاء بصيغة YYYY-MM-DD
   },
 
 ];
