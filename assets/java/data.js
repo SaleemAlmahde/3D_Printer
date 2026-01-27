@@ -33,11 +33,11 @@ const finalBaseProducts = [
   {
     id: "CUSTOM_ORDER", // معرّف فريد وغير رقمي لتجنب التعارض
     name: "🛠️ طلب منتج مخصص", // اسم واضح يظهر للعميل
-    shortDisc: "لم تجد ما تبحث عنه؟ اطلب تصميمًا أو منتجًا خاصًا بك الآن.",
+    shortDisc: "لم تجد ما تبحث عنه ؟ اطلب تصميمًا أو منتجًا خاصًا بك الآن، ضع مخيلتك بين يديك.",
     categories: [], // يمكن وضعه في تصنيف "خدمات"
     colors: [], // لا يوجد ألوان محددة مسبقًا
     price: 0, // السعر يبدأ من صفر حتى يتم تحديد المواصفات
-    images: ["assets/imgs/try.jpg"], // صورة توضيحية لطلب مخصص
+    images: ["assets/imgs/CustomO.jpeg"], // صورة توضيحية لطلب مخصص
     isCustomOrder: true, // 🚩 العلامة الرئيسية لتمييزه
     isVisible: 1, // 1 = مرئي ، 0 = مخفي
   },
@@ -145,7 +145,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
@@ -161,7 +161,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
@@ -177,7 +177,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
@@ -193,7 +193,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
@@ -209,7 +209,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
@@ -225,7 +225,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
@@ -241,7 +241,7 @@ const finalBaseProducts = [
     "colors": [
       { "name": "زهري", "code": "#ed92cd" },
       { "name": "احمر", "code": "#ba0606" },
-      { "name": "فضي", "code": "#6c8bb9" }
+      { "name": "فضي", "code": "#516686" }
     ],
     "price": 220,
     "storePrice": 160,
