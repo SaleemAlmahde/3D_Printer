@@ -453,7 +453,7 @@ const defaultStores = [
 ];
 //------------ ADS DATA -------------
 const ads = [
-  { id: 0, image: "assets/imgs/CouponB1.png", link: "" },
+  { id: 0, image: "assets/imgs/CouponB1.jpeg", link: "" },
  // { id: 1, image: "assets/imgs/cars/c5.webp", link: "" },
  // { id: 2, image: "assets/imgs/Stickers/syria_idS2.webp", link: "" },
 ];
