@@ -101,12 +101,27 @@ nav .container {
   }
 }
 
-@media (max-width:480px) {
+@media (max-width: 480px) {
       .nav-menu {
         gap: 5px;
     }
 
     #logo{
         width: 120px;
+    }
+}
+
+@media (max-width: 360px) {
+    .nav-menu {
+        gap: 2px;
+    }
+
+    .nav-menu li {
+        padding: 8px 0;
+        font-size: small;
+    }
+
+    #logo {
+        width: 100px;
     }
 }
