@@ -331,8 +331,27 @@
   }
 
   .footer-social-icons {
-    flex-wrap: nowrap;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .footer-social-icons a {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .footer-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-contact-section {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-social-icons {
+    gap: 10px;
   }
 }
 

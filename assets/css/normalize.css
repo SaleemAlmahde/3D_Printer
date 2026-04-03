@@ -12,6 +12,8 @@
     --main-color: #07ae91;
     --secondary-color: #1F2A3D;
     --text-color: #000000;
+    --section-background: #ffffff;
+    --page-background: #f4f6f8;
 }
 
 * {
@@ -22,7 +24,8 @@
 body {
     padding: 0;
     margin: 0;
-     font-family: "Bahij", Poppins, Arial, sans-serif;
+    font-family: "Bahij", Poppins, Arial, sans-serif;
+    background-color: var(--page-background);
 }
 
 a, button {
